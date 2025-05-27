@@ -1,0 +1,96 @@
+body {
+  background-color: #f0f4f7; /* Mismo fondo que el login */
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.container-fluid {
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
+.page-card {
+  border-radius: 35px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  border: none;
+  margin-top: 20px;
+}
+
+.page-card-header {
+  background-color: #ffffff;
+  color: black;
+  padding: 20px 25px;
+}
+
+.page-card-header h2 {
+  font-weight: 600;
+  font-size: 1.75rem;
+}
+
+.btn-add-user {
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table thead th {
+  background-color: #e9ecef;
+  color: #495057;
+  font-weight: 600;
+  border-bottom-width: 2px;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+}
+
+.table tbody tr:hover {
+  background-color: #fbfcfd;
+}
+
+.table td,
+.table th {
+  vertical-align: middle;
+}
+
+.badge {
+  font-size: 0.8em;
+  padding: 0.5em 0.75em;
+}
+
+.modal-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.modal-title {
+  color: #007bff;
+  font-weight: 600;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #495057;
+}
+
+.btn-outline-primary:hover i,
+.btn-outline-danger:hover i {
+  color: white; /* Para que el icono cambie de color con el fondo del botón en hover */
+}
+
+/* Ajustes para responsividad si son necesarios */
+@media (max-width: 768px) {
+  .page-card-header h2 {
+    font-size: 1.4rem;
+  }
+  .btn-add-user {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+  }
+  .table {
+    font-size: 0.9rem;
+  }
+}

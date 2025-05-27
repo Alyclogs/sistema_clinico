@@ -1,0 +1,92 @@
+body {
+  background-color: #f0f4f7;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background-color: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  border: none;
+}
+
+.login-card-header {
+  background-color: #007bff;
+  /* Azul primario de Bootstrap, o un verde azulado médico como #4DB6AC */
+  color: white;
+  padding: 25px;
+  text-align: center;
+  border-bottom: 5px solid #0056b3;
+  /* Un tono más oscuro para profundidad */
+}
+
+.login-card-header .icon {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.login-card-header h2 {
+  margin-bottom: 0;
+  font-weight: 600;
+}
+
+.login-card-body {
+  padding: 30px;
+}
+
+.form-floating > .form-control,
+.form-floating > .form-select {
+  height: calc(3.5rem + 2px);
+  line-height: 1.25;
+}
+
+.form-floating > label {
+  padding: 1rem 0.75rem;
+}
+
+.btn-login {
+  background-color: #007bff;
+  /* Azul primario */
+  border-color: #007bff;
+  color: white;
+  padding: 0.75rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.btn-login:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+.input-group-text {
+  background-color: #e9ecef;
+  border-right: none;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.form-control {
+  border-left: none;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.form-control:focus {
+  box-shadow: none;
+  border-color: #007bff;
+}
+
+.alert-custom {
+  border-radius: 8px;
+  font-size: 0.9rem;
+}

@@ -1,17 +1,11 @@
 <?php
 require_once __DIR__ . '/../../../models/Users/UserModel.php';
-/*
 session_start();
 
 if (!isset($_SESSION['usuario']) || !isset($_SESSION['rol'])) {
     header("Location: http://localhost/SistemaClinico/views/login.php");
     exit();
 }
-if ($_SESSION['rol'] !== 'Administrador' && $_SESSION['rol'] !== 'Recepcionista') {
-    header("Location: http://localhost/SistemaClinico/views/login.php");
-    exit();
-}
-    */
 $userModel = new UsuarioModel();
 $roles = $userModel->obtenerRoles();
 $estados = $userModel->obtenerEstados();

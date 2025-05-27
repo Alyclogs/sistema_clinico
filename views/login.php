@@ -20,12 +20,19 @@
         <div class="login-card-body">
             <h3 class="text-center mb-4" style="color: #333; font-weight: 500;">Iniciar Sesión</h3>
 
+            <?php
+            $error = '';
+            if (isset($_GET['error']) && $_GET['error'] == 1) {
+                $error = 'Usuario o contraseña incorrectos.';
+            }
+            ?>
+
             <?php if (!empty($error)): ?>
                 <div class="alert alert-danger alert-custom" role="alert">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i><?php echo htmlspecialchars($error); ?>
                 </div>
             <?php endif; ?>
-            <form method="POST" action="http://localhost/SistemaClinico/controllers/Users/procesarIngresarLogin.php">
+            <form id="loginForm" method="POST" action="http://localhost/SistemaClinico/controllers/Users/procesarIngresarLogin.php">
                 <div class="mb-3">
                     <label for="usuario" class="form-label visually-hidden">Usuario:</label>
                     <div class="input-group">
@@ -41,7 +48,7 @@
                         <input type="password" class="form-control" id="password" name="password" placeholder="Contraseña" required>
                     </div>
                 </div>
-
+                <div id="loginError" class="alert alert-danger d-none" role="alert"></div>
                 <button type="submit" class="btn btn-login w-100">Entrar</button>
             </form>
         </div>
@@ -51,6 +58,31 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(function() {
+            $('#loginForm').on('submit', function(e) {
+                e.preventDefault();
+                $('#loginError').addClass('d-none').text('');
+                $.ajax({
+                    type: 'POST',
+                    url: $(this).attr('action'),
+                    data: $(this).serialize(),
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            window.location.href = 'http://localhost/SistemaClinico/views/Clinica/index.php';
+                        } else {
+                            $('#loginError').removeClass('d-none').text(response.message);
+                        }
+                    },
+                    error: function() {
+                        $('#loginError').removeClass('d-none').text('Error de conexión.');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

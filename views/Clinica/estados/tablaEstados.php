@@ -1,5 +1,11 @@
 <?php
 require_once __DIR__ . '/../../../models/Estados/EstadoModel.php';
+session_start();
+
+if (!isset($_SESSION['usuario']) || !isset($_SESSION['rol'])) {
+    header("Location: http://localhost/SistemaClinico/views/login.php");
+    exit();
+}
 $estadoModel = new EstadoModel();
 $estados = $estadoModel->obtenerEstados();
 ?>

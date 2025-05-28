@@ -1,45 +1,48 @@
 const baseurl = "http://localhost/SistemaClinico/";
 
+function stringToColor(str) {
+    // Simple hash to color
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const color = `hsl(${hash % 360}, 70%, 60%)`;
+    return color;
+}
+
+function getInitials(nombre, apellido) {
+    let n = nombre ? nombre.trim()[0] : '';
+    let a = apellido ? apellido.trim()[0] : '';
+    return (n + a).toUpperCase();
+}
+
 function fetchUsers() {
     $.get(baseurl + "controllers/Users/UserController.php?action=read", function (data) {
         let html = '';
         data.forEach(function (usuario) {
-            let clase_badge_rol = 'bg-info';
-            if (usuario.nombre_rol === 'SuperUsuario') {
-                clase_badge_rol = 'bg-success';
-            } else if (usuario.nombre_rol === 'C.General') {
-                clase_badge_rol = 'bg-warning';
-            } else if (usuario.nombre_rol === 'Especialista') {
-                clase_badge_rol = 'bg-info';
-            }
-
-            let clase_badge_estado = 'bg-success';
-            if (usuario.nombre_estado === 'Activo') {
-                clase_badge_estado = 'bg-success';
-            } else if (usuario.nombre_estado === 'Inactivo') {
-                clase_badge_estado = 'bg-danger';
-            }
+            const color = stringToColor(usuario.nombres + usuario.apellidos);
+            const initials = getInitials(usuario.nombres, usuario.apellidos);
             html += `<tr>
-                        <td>${usuario.idusuario}</td>
-                        <td>${usuario.nombres}</td>
-                        <td>${usuario.apellidos}</td>
+                        <td style="display:flex;align-items:center;gap:8px;">
+                            <span class="avatar-iniciales" style="background:${color};">${initials}</span>
+                            <b>${usuario.nombres} ${usuario.apellidos}</b>
+                        </td>
                         <td>${usuario.dni}</td>
                         <td>${usuario.telefono}</td>
-                        <td>${usuario.correo}</td>
-                        <td>${usuario.usuario}</td>
-                        <td><span data-id="${usuario.idrol}" class="badge ${clase_badge_rol}">${usuario.nombre_rol}</span></td>
-                        <td><span data-id="${usuario.idestado}" class="badge ${clase_badge_estado}">${usuario.nombre_estado}</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary btn-edit" data-id="${usuario.idusuario}" title="Editar">
-                                <i class="bi bi-pencil-square"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger btn-delete" data-id="${usuario.idusuario}" title="Eliminar">
-                                <i class="bi bi-trash3-fill"></i>
-                            </button>
-                        </td>
+                        <td><div class="table-correo">${usuario.correo}</td>
+                        <td>${usuario.nombre_rol}</td>
+                        <td class="td-botones" data-id="${usuario.idusuario}"></td>
                     </tr>`;
         });
         $("#tablaUsuariosBody").html(html);
+
+        $(".td-botones").each(function () {
+            var id = $(this).data('id');
+            $.get(baseurl + 'assets/js/botonesUsuario.html', function (btnHtml) {
+                btnHtml = btnHtml.replace(/\$\{IDUSUARIO\}/g, id);
+                $(this).html(btnHtml);
+            }.bind(this));
+        });
     }, 'json');
 }
 

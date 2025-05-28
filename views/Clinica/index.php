@@ -39,6 +39,7 @@ $rolUsuario = $_SESSION['rol'];
         </div>
         <a href="http://localhost/SistemaClinico/controllers/Users/procesarIngresarLogin.php?logout=true" class="btn-logout">Cerrar Sesión</a>
     </div>
+    <img src="assets/img/Recurso 38.png" alt="Decoración" class="body-bg-img" />
 </body>
 
 </html>

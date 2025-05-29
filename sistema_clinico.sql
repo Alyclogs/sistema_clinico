@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Servidor: localhost:3306
--- Tiempo de generación: 26-05-2025 a las 04:48:00
--- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.0.30
+-- Servidor: 127.0.0.1
+-- Tiempo de generación: 29-05-2025 a las 19:03:21
+-- Versión del servidor: 10.4.28-MariaDB
+-- Versión de PHP: 8.0.28
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -43,6 +43,40 @@ INSERT INTO `areas` (`idarea`, `area`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `disponibilidad`
+--
+
+CREATE TABLE `disponibilidad` (
+  `id` int(11) NOT NULL,
+  `idespecialista` int(11) NOT NULL,
+  `fecha` varchar(10) NOT NULL,
+  `horainicio` time NOT NULL,
+  `horafin` time NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish2_ci;
+
+--
+-- Volcado de datos para la tabla `disponibilidad`
+--
+
+INSERT INTO `disponibilidad` (`id`, `idespecialista`, `fecha`, `horainicio`, `horafin`) VALUES
+(1, 2, 'lunes', '09:00:00', '13:00:00'),
+(3, 2, 'martes', '09:30:00', '13:30:00'),
+(4, 2, 'miércoles', '09:00:00', '13:00:00'),
+(5, 2, 'jueves', '10:00:00', '14:00:00'),
+(6, 2, 'viernes', '09:00:00', '13:00:00'),
+(7, 2, 'sábado', '10:00:00', '14:00:00'),
+(8, 2, 'domingo', '09:00:00', '13:00:00'),
+(9, 4, 'lunes', '13:00:00', '17:00:00'),
+(10, 4, 'martes', '11:00:00', '15:00:00'),
+(11, 4, 'miércoles', '11:00:00', '15:00:00'),
+(12, 4, 'jueves', '12:00:00', '16:00:00'),
+(13, 4, 'viernes', '13:00:00', '17:00:00'),
+(14, 4, 'sábado', '09:00:00', '13:00:00'),
+(15, 4, 'domingo', '10:00:00', '14:00:00');
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `especialistas`
 --
 
@@ -58,7 +92,10 @@ CREATE TABLE `especialistas` (
 --
 
 INSERT INTO `especialistas` (`idespecialista`, `idusuario`, `idarea`, `idsubarea`) VALUES
-(1, 4, 2, 1);
+(1, 1, 2, 1),
+(2, 3, 1, 2),
+(3, 4, 1, 2),
+(4, 6, 2, 3);
 
 -- --------------------------------------------------------
 
@@ -76,7 +113,8 @@ CREATE TABLE `estados` (
 --
 
 INSERT INTO `estados` (`idestado`, `estado`) VALUES
-(1, 'Activo');
+(1, 'Activo'),
+(2, 'Inactivo');
 
 -- --------------------------------------------------------
 
@@ -115,7 +153,10 @@ CREATE TABLE `subareas` (
 --
 
 INSERT INTO `subareas` (`idsubarea`, `subarea`, `idarea`) VALUES
-(1, 'conductual', 2);
+(1, 'conductual', 2),
+(2, 'fisica-1', 1),
+(3, 'psicologica-1', 2),
+(4, 'psicologica-1', 2);
 
 -- --------------------------------------------------------
 
@@ -143,7 +184,8 @@ CREATE TABLE `usuarios` (
 INSERT INTO `usuarios` (`idusuario`, `nombres`, `apellidos`, `dni`, `telefono`, `correo`, `idestado`, `idrol`, `usuario`, `password`) VALUES
 (1, 'Miguel Angel', 'Cáceres Cubas ', '73256481', '922157739', 'contacto@corazonguerrero.org.pe', 1, 1, 'gftunquet14', '$2y$10$N8cWJdoccVWLJNfyuc98AuMXpG/yMi/eVFwgIeWebSuf3kd0Cqhk.'),
 (3, 'Vanessa', '22', '12345678', '922157739', 'contacto@corazonguerrero.org.pe2', 1, 2, 'vanessa', '$2y$10$z5Wg/.HcCgoKdQEsBqkwOeNDdWPHXHU1Ya9Mrg4Q5yuvZbYSie9py'),
-(4, 'Andy', 'orellana', '12121212', '123456789', 'andy@gmail.com', 1, 3, 'andy', '$2y$10$z5Wg/.HcCgoKdQEsBqkwOeNDdWPHXHU1Ya9Mrg4Q5yuvZbYSie9py');
+(4, 'Andy', 'orellana', '12121212', '123456789', 'andy@gmail.com', 1, 3, 'andy', '$2y$10$z5Wg/.HcCgoKdQEsBqkwOeNDdWPHXHU1Ya9Mrg4Q5yuvZbYSie9py'),
+(6, 'Alyson', 'Quiroz Aguilar', '77777777', '989538532', 'alysonical2003@gmail.com', 1, 3, 'alyta12345', '$2y$10$vWzZSAt64qxvnC9WSsckxe912nQD0idN/GzM7wNIsmbXA0Nq8XYTW');
 
 --
 -- Índices para tablas volcadas
@@ -154,6 +196,13 @@ INSERT INTO `usuarios` (`idusuario`, `nombres`, `apellidos`, `dni`, `telefono`, 
 --
 ALTER TABLE `areas`
   ADD PRIMARY KEY (`idarea`);
+
+--
+-- Indices de la tabla `disponibilidad`
+--
+ALTER TABLE `disponibilidad`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idespecialista` (`idespecialista`);
 
 --
 -- Indices de la tabla `especialistas`
@@ -204,16 +253,22 @@ ALTER TABLE `areas`
   MODIFY `idarea` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT de la tabla `disponibilidad`
+--
+ALTER TABLE `disponibilidad`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
 -- AUTO_INCREMENT de la tabla `especialistas`
 --
 ALTER TABLE `especialistas`
-  MODIFY `idespecialista` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `idespecialista` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `estados`
 --
 ALTER TABLE `estados`
-  MODIFY `idestado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `idestado` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `roles`
@@ -225,17 +280,23 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT de la tabla `subareas`
 --
 ALTER TABLE `subareas`
-  MODIFY `idsubarea` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `idsubarea` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `idusuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `idusuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- Restricciones para tablas volcadas
 --
+
+--
+-- Filtros para la tabla `disponibilidad`
+--
+ALTER TABLE `disponibilidad`
+  ADD CONSTRAINT `disponibilidad_ibfk_1` FOREIGN KEY (`idespecialista`) REFERENCES `especialistas` (`idespecialista`);
 
 --
 -- Filtros para la tabla `especialistas`

@@ -1,0 +1,307 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap");
+
+:root {
+  --border-color: #76869e55;
+}
+
+body {
+  background-color: rgb(249, 251, 252);
+  font-family: "Nunito", sans-serif;
+  color: rgb(93, 109, 132);
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.filtro {
+  width: 140px;
+}
+
+.filtros {
+  display: flex;
+  gap: 20px;
+}
+
+.filtro-title {
+  font-weight: bold;
+  color: #76869e;
+}
+
+.form-select {
+  border: none;
+  background-color: #76869e10;
+}
+
+.btn-add-cita {
+  background-color: rgb(240, 126, 11);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 25px;
+}
+.sidebar {
+  width: 320px;
+  background: transparent;
+  padding: 1rem;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.calendar-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+.filtros select {
+  width: 150px;
+}
+
+#calendar {
+  max-height: 520px;
+  flex-grow: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+#mini-calendar .fc-daygrid-day {
+  border: none !important;
+  font-size: 14px;
+}
+
+#mini-calendar table {
+  border: none !important;
+}
+#mini-calendar td,
+#mini-calendar th {
+  border: none !important;
+}
+
+.fc-scroller-harness .fc-scroller {
+  overflow: hidden !important;
+  display: block;
+}
+
+.fc .fc-scroller-liquid-absolute {
+  overflow: hidden scroll !important;
+}
+
+.fc .fc-col-header-cell-cushion {
+  background-color: transparent;
+  height: 40px;
+  align-items: center;
+  display: grid;
+}
+
+.fc .fc-daygrid-day-number {
+  color: #76869e;
+  text-decoration: none;
+}
+
+.fc .fc-timegrid .fc-daygrid-body {
+  display: none;
+}
+
+.fc .fc-button-primary {
+  background-color: transparent;
+}
+
+#calendar .fc-theme-standard td,
+.fc-theme-standard th {
+  border: 1px solid var(--border-color);
+}
+
+a.fc-col-header-cell-cushion {
+  text-decoration: none;
+  color: #76869e;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.calendar-container {
+  display: flex;
+  height: calc(100vh - 80px);
+}
+
+.fc-timegrid-slot.fc-timegrid-slot-lane.bg-blocked.fc-slot-blocked {
+  background-color: #e5252f40 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+}
+
+.fc-timegrid-divider {
+  display: none;
+}
+
+.fc .fc-day-today {
+  background-color: inherit !important;
+}
+
+.fc .fc-timegrid-slot-label {
+  font-size: 0.75rem;
+  height: 30px;
+}
+
+.fc .fc-toolbar-title {
+  font-weight: bold;
+}
+
+#mini-calendar .fc-header-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+#mini-calendar .fc-header-toolbar .fc-button {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #76869e49;
+  padding: 0 0.5rem;
+}
+
+#mini-calendar .fc-header-toolbar .fc-button:hover {
+  color: #76869e;
+}
+
+#mini-calendar .fc-header-toolbar .fc-toolbar-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.appointment-box {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  background-color: #f9f9f9;
+  font-size: 0.85rem;
+}
+
+.calendar-header-range {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.calendar-header-nav i {
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.modal-cita-custom {
+  position: absolute;
+  z-index: 1050;
+  min-width: 350px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  padding: 1.5rem;
+  top: 120px;
+  right: 40px;
+  display: none;
+  transition: box-shadow 0.2s;
+}
+
+.modal-cita-custom.show {
+  display: block;
+}
+
+.modal-cita-header {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.horario-chip {
+  display: flex;
+  align-items: center;
+  background: #f7f7fa;
+  border-radius: 20px;
+  padding: 0.4rem 1rem 0.4rem 0.8rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.horario-chip .btn {
+  border-radius: 50%;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.9rem;
+}
+
+.btn-pagar-cita {
+  right: 1.5rem;
+  bottom: 1rem;
+  background: #f07e0b;
+  color: #fff;
+  border-radius: 30px;
+  font-weight: 600;
+  padding: 0.7rem 2rem;
+  box-shadow: 0 2px 8px rgba(240, 126, 11, 0.08);
+  border: none;
+}
+
+.btn-pagar-cita:hover {
+  background: #e67606;
+}
+
+.add-horario-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.modal-cita-custom input[type="text"] {
+  border-radius: 8px;
+  border: 1px solid #ced4da;
+  padding: 0.4rem 0.7rem;
+  font-size: 1rem;
+  margin-right: 0.5rem;
+}
+
+.modal-cita-custom .btn-add-paciente {
+  background: #f07e0b;
+  color: #fff;
+  border-radius: 50%;
+  border: none;
+  padding: 0.2rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.5rem;
+}
+
+.modal-cita-custom .btn-add-paciente:hover {
+  background-color: #e67606;
+}
+
+tr.bg-blocked {
+  background-color: #ffdddd !important;
+  pointer-events: none;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.mensaje-flotante {
+  position: fixed;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #e74c3c;
+  color: #fff;
+  padding: 12px 28px;
+  border-radius: 8px;
+  z-index: 9999;
+  font-weight: bold;
+  font-size: 1.1em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}

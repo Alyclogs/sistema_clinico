@@ -5,16 +5,6 @@ $modelo = new UsuarioModel();
 $mensaje = '';
 $action = $_GET['action'];
 
-/*
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'];
-} elseif ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action'])) {
-    $action = $_GET['action'];
-} else {
-    $mensaje = 'Error: No se recibió una solicitud POST.';
-}
-    */
-
 if ($action === "read") {
     $usuarios = $modelo->obtenerUsuarios();
     echo json_encode($usuarios);

@@ -149,8 +149,12 @@ body {
   font-weight: bold;
   letter-spacing: 0.05em;
   padding-top: 25px;
-  padding-bottom: 25px;
-  border-bottom: 1px solid #76869e;
+  padding-bottom: 35px;
+}
+
+.table thead th.table-title {
+  text-decoration: underline #76869e;
+  text-underline-offset: 10px;
 }
 
 .table tbody {
@@ -203,21 +207,19 @@ body {
   border: 0.5px solid rgb(93, 109, 132);
 }
 
-.table-button:hover .st05,
-.st006,
-.st007 {
+.table-button:hover .st007 {
   fill: rgb(93, 109, 132) !important;
 }
 
-.table-button.btn-add {
+.table-button.btn-edit {
   border: 0.5px solid rgb(240, 126, 11);
 }
 
-.table-button.btn-add:hover {
+.table-button.btn-edit:hover {
   border: 0.5px solid rgb(230, 118, 6);
 }
 
-.table-button:hover .st004 {
+.table-button:hover .st05 {
   fill: rgb(230, 118, 6);
 }
 

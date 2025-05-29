@@ -413,11 +413,11 @@ $estados = $userModel->obtenerEstados();
                                 <table class="table align-middle">
                                     <thead>
                                         <tr>
-                                            <th>Nombres y Apellidos</th>
-                                            <th>DNI</th>
-                                            <th>Celular</th>
-                                            <th>Correo</th>
-                                            <th>Rol</th>
+                                            <th class="table-title">Nombres y Apellidos</th>
+                                            <th class="table-title">DNI</th>
+                                            <th class="table-title">Celular</th>
+                                            <th class="table-title">Correo</th>
+                                            <th class="table-title">Rol</th>
                                         </tr>
                                     </thead>
                                     <tbody id="tablaUsuariosBody"></tbody>

@@ -159,37 +159,67 @@ document.addEventListener('DOMContentLoaded', function () {
             mostrarMensajeFlotante('Debe seleccionar un especialista primero');
             return false;
         }
-
         if (disponibilidadActual && disponibilidadActual.length > 0) {
-            console.log("Evaluando disponibilidad para el rango:", selectInfo.start, "a", selectInfo.end);
             let allow = true;
             let current = new Date(selectInfo.start);
+            const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
             while (current < selectInfo.end) {
-                const dateStr = current.toISOString().slice(0, 10);
-                const timeStr = current.toTimeString().slice(0, 5);
-                const col = $(`.fc-timegrid-col[data-date='${dateStr}']`);
-                const slot = col.find(`.fc-timegrid-slot.fc-timegrid-slot-lane[data-time='${timeStr}']`);
-                if (slot.hasClass('bg-blocked') || slot.hasClass('fc-slot-blocked')) {
+                const hora = current.toTimeString().slice(0, 5);
+                const nombreDia = dias[current.getDay()];
+                const disp = disponibilidadActual.find(d => d.fecha === nombreDia);
+                if (disp) {
+                    // Normaliza los formatos de hora a 5 caracteres (ej: 09:00)
+                    const horaSel = hora.padStart(5, '0');
+                    const horaIni = disp.horainicio.padStart(5, '0');
+                    const horaFin = disp.horafin.padStart(5, '0');
+                    if (!(horaSel >= horaIni && horaSel < horaFin)) {
+                        allow = false;
+                        break;
+                    }
+                } else {
                     allow = false;
                     break;
                 }
                 current.setMinutes(current.getMinutes() + 30);
             }
+            if (!allow) mostrarMensajeFlotante('Horario fuera de disponibilidad');
             return allow;
         }
         return true;
     });
 
     let horariosSeleccionados = [];
+    let horarioSeleccionadoActual = '';
     let lastButtonRect = null;
 
     // Selección múltiple de celdas en el calendario
     calendar.setOption('selectable', true);
     calendar.setOption('select', function (info) {
-        // Guardar el rango seleccionado
+        horarioSeleccionadoActual = info.startStr;
+        const fecha = info.startStr.split('T')[0];
+        const hora = info.startStr.split('T')[1].substring(0, 5);
+        const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+        const nombreDia = dias[info.start.getDay()];
+        const disp = disponibilidadActual.find(d => d.fecha === nombreDia);
+        let disponible = false;
+        if (disp) {
+            // Normaliza los formatos de hora a 5 caracteres (ej: 09:00)
+            const horaSel = hora.padStart(5, '0');
+            const horaIni = disp.horainicio.padStart(5, '0');
+            const horaFin = disp.horafin.padStart(5, '0');
+            console.log('[DEBUG] horaSel:', horaSel, 'horaIni:', horaIni, 'horaFin:', horaFin, 'disp:', disp);
+            disponible = (horaSel >= horaIni && horaSel < horaFin);
+            console.log('[DEBUG] disponible:', disponible);
+        } else {
+            console.log('[DEBUG] No hay disponibilidad para el día:', nombreDia, 'en', disponibilidadActual);
+        }
+        if (!disponible) {
+            mostrarMensajeFlotante('Horario fuera de disponibilidad');
+            return;
+        }
         horariosSeleccionados.push({
-            fecha: info.startStr.split('T')[0],
-            hora: info.startStr.split('T')[1].substring(0, 5)
+            fecha,
+            hora
         });
         renderHorariosSeleccionados();
     });
@@ -258,11 +288,39 @@ document.addEventListener('DOMContentLoaded', function () {
         return $.get(baseurl + `controllers/Disponibilidad/DisponibilidadController.php?action=read&idespecialista=${idespecialista}`);
     }
 
+    //Cambio de horario segun la disponibilidad del especialista
     $("#filtro-especialista").change(function () {
         selectedespecialista = $(this).val();
         if (selectedespecialista) {
             obtenerDisponibilidadEspecialista(selectedespecialista).then(function (data) {
                 aplicarDisponibilidadAlCalendario(data);
+                console.log(disponibilidadActual);
+                // Vuelve a establecer selectAllow para asegurar el bloqueo correcto
+                calendar.setOption('selectAllow', function (selectInfo) {
+                    if (!selectedespecialista) {
+                        mostrarMensajeFlotante('Debe seleccionar un especialista primero');
+                        return false;
+                    }
+                    if (disponibilidadActual && disponibilidadActual.length > 0) {
+                        // Solo permite seleccionar si TODOS los slots del rango están dentro de la disponibilidad
+                        let allow = true;
+                        let current = new Date(selectInfo.start);
+                        const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+                        while (current < selectInfo.end) {
+                            const fecha = current.toISOString().slice(0, 10);
+                            const hora = current.toTimeString().slice(0, 5);
+                            const nombreDia = dias[current.getDay()];
+                            const disp = disponibilidadActual.find(d => d.fecha === nombreDia);
+                            if (!(disp && hora >= disp.horainicio && hora < disp.horafin)) {
+                                allow = false;
+                                break;
+                            }
+                            current.setMinutes(current.getMinutes() + 30);
+                        }
+                        return allow;
+                    }
+                    return true;
+                });
             });
         } else {
             mostrarMensajeFlotante('Debe seleccionar un especialista primero');
@@ -342,32 +400,6 @@ document.addEventListener('DOMContentLoaded', function () {
             div.remove();
         }, 2200);
     }
-
-    // Si el usuario intenta seleccionar en el calendario sin especialista, mostrar mensaje
-    calendar.setOption('selectAllow', function (selectInfo) {
-        if (!selectedespecialista) {
-            mostrarMensajeFlotante('Debe seleccionar un especialista primero');
-            return false;
-        }
-        // Si hay disponibilidad, se evalúa el bloqueo normal
-        if (disponibilidadActual && disponibilidadActual.length > 0) {
-            let allow = true;
-            let current = new Date(selectInfo.start);
-            while (current < selectInfo.end) {
-                const dateStr = current.toISOString().slice(0, 10);
-                const timeStr = current.toTimeString().slice(0, 5);
-                const col = $(`.fc-timegrid-col[data-date='${dateStr}']`);
-                const slot = col.find(`.fc-timegrid-slot.fc-timegrid-slot-lane[data-time='${timeStr}']`);
-                if (slot.hasClass('bg-blocked') || slot.hasClass('fc-slot-blocked')) {
-                    allow = false;
-                    break;
-                }
-                current.setMinutes(current.getMinutes() + 30);
-            }
-            return allow;
-        }
-        return true;
-    });
 
     // CSS para mensaje flotante
     (function () {

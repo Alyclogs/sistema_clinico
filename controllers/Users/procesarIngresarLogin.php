@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../models/Users/UserModel.php';
 session_start();
+$base_url = 'http://localhost/SistemaClinico/';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $usuario = $_POST['usuario'] ?? '';
@@ -15,20 +16,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['usuario']     = $datosUsuario['usuario'];
     $_SESSION['nombre']      = $datosUsuario['nombres'] . ' ' . $datosUsuario['apellidos'];
     $_SESSION['rol']         = $datosUsuario['nombre_rol'];
-    echo json_encode(['success' => true]);
+
+
+    header("Location: " . $base_url . "views/Clinica/usuarios/index.php");
+
     exit;
   } else {
-    echo json_encode(['success' => false, 'message' => 'Usuario o contraseña incorrectos.']);
+    // Error de login
+    $_SESSION['error_login'] = 'Usuario o contraseña incorrectos.';
+    header("Location: " . $base_url . "views/login.php");
     exit;
   }
-} elseif (isset($_GET['logout']) && $_GET['logout'] === 'true') {
-  // Cerrar sesión
-  session_unset();
-  session_destroy();
-  echo json_encode(['success' => true, 'message' => 'Sesión cerrada correctamente.']);
-  header("Location: http://localhost/SistemaClinico/views/login.php");
-  exit;
 } else {
-  echo json_encode(['success' => false, 'message' => 'Acceso no permitido.']);
+  // Si acceden directamente sin POST
+  header("Location: " . $base_url . "views/login.php");
   exit;
 }

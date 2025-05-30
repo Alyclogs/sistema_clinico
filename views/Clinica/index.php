@@ -33,7 +33,7 @@ $rolUsuario = $_SESSION['rol'];
         <p>Desde aquí podrás gestionar las diferentes secciones del sistema.</p>
 
         <div class="nav-links">
-            <a href="usuarios/tablaUsuarios.php">Gestionar Usuarios</a>
+            <a href="usuarios/index.php">Gestionar Usuarios</a>
             <a href="roles/tablaRoles.php">Gestionar Roles</a>
             <a href="estados/tablaEstados.php">Gestionar Estados</a>
         </div>

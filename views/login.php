@@ -1,88 +1,67 @@
+<?php
+
+$base_url = 'http://localhost/SistemaClinico/';
+
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso - Sistema Clínico</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/login.css">
+    <title>ONG Corazón Guerrero</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-VvmVRVZyJc4DqOJdYfN1UjtsWqW4cpCPSYmAZxE6BL9GnQJ19XQdGeCkN8dQjvX3" crossorigin="anonymous">
+    <link rel="stylesheet" href="<?php echo $base_url ?>assets/css/login.css">
+    <!-- Bootstrap 5 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76A08EQmXpFZz5Jr/gkG6fsbCkJbEpHvvP4Ilc9e+OGP1zFjE0tQt4ZsPi6jizo" crossorigin="anonymous"></script>
 
 </head>
 
 <body>
-    <div class="login-card">
-        <div class="login-card-header">
-            <div class="icon"><i class="bi bi-heart-pulse-fill"></i></div> <!-- Icono médico -->
-            <h2>Sistema Clínico</h2>
+
+
+
+
+
+
+
+    <div class="div-login">
+
+        <div class="izquierdo-login">
+            <div class="container-imagen">
+                <img src="<?php echo $base_url ?>assets/img/logo.png">
+            </div>
         </div>
-        <div class="login-card-body">
-            <h3 class="text-center mb-4" style="color: #333; font-weight: 500;">Iniciar Sesión</h3>
 
-            <?php
-            $error = '';
-            if (isset($_GET['error']) && $_GET['error'] == 1) {
-                $error = 'Usuario o contraseña incorrectos.';
-            }
-            ?>
 
-            <?php if (!empty($error)): ?>
-                <div class="alert alert-danger alert-custom" role="alert">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i><?php echo htmlspecialchars($error); ?>
-                </div>
-            <?php endif; ?>
-            <form id="loginForm" method="POST" action="http://localhost/SistemaClinico/controllers/Users/procesarIngresarLogin.php">
+        <div class="derecho-login">
+            <h2>¡Bienvenido(a)</h2>
+            <?php if (!empty($error)) echo "<p style='color:red;'>$error</p>"; ?>
+            <form method="POST" action="http://localhost/SistemaClinico/controllers/Users/procesarIngresarLogin.php">
                 <div class="mb-3">
-                    <label for="usuario" class="form-label visually-hidden">Usuario:</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
-                        <input type="text" class="form-control" id="usuario" name="usuario" placeholder="Nombre de usuario" required>
-                    </div>
+                    <label for="usuario" class="form-label">Usuario:</label>
+                    <input type="text" placeholder="Ingrese su usuario" name="usuario" id="usuario" class="form-control" required>
                 </div>
 
-                <div class="mb-4">
-                    <label for="password" class="form-label visually-hidden">Contraseña:</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Contraseña" required>
-                    </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Contraseña:</label>
+                    <input type="password" placeholder="Ingrese su contraseña" name="password" id="password" class="form-control" required>
                 </div>
-                <div id="loginError" class="alert alert-danger d-none" role="alert"></div>
-                <button type="submit" class="btn btn-login w-100">Entrar</button>
+
+                <button type="submit" class="btn btn-primary btn-ingresar">Iniciar Sesión</button>
             </form>
-        </div>
-        <div class="card-footer text-center py-3" style="background-color: #f8f9fa; border-top: 1px solid #dee2e6;">
-            <small class="text-muted">&copy; <?php echo date("Y"); ?> Sistema Clínico. Todos los derechos reservados.</small>
+
+            <p> ¿Olvidaste tu contraseña? <a href="">Recupérala aquí </a></p>
+
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(function() {
-            $('#loginForm').on('submit', function(e) {
-                e.preventDefault();
-                $('#loginError').addClass('d-none').text('');
-                $.ajax({
-                    type: 'POST',
-                    url: $(this).attr('action'),
-                    data: $(this).serialize(),
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.success) {
-                            window.location.href = 'http://localhost/SistemaClinico/views/Clinica/index.php';
-                        } else {
-                            $('#loginError').removeClass('d-none').text(response.message);
-                        }
-                    },
-                    error: function() {
-                        $('#loginError').removeClass('d-none').text('Error de conexión.');
-                    }
-                });
-            });
-        });
-    </script>
+
+
+
 </body>
 
 </html>

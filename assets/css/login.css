@@ -1,92 +1,106 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap");
+
 body {
-  background-color: #f0f4f7;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #fff;
+  font-family: "Nunito", sans-serif;
+
+  background-image: url("http://localhost/SistemaClinico/assets/img/nube-arriba.png"),
+    url("http://locallhost/SistemaClinico/assets/img/nube-abajo.png");
+  background-position: top left, bottom right;
+  background-repeat: no-repeat, no-repeat;
+  background-size: 567px, 567px;
 }
 
-.login-card {
-  width: 100%;
-  max-width: 420px;
-  background-color: #ffffff;
+.div-login {
+  display: flex;
+  background: #fff;
   border-radius: 15px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  width: 900px;
+  align-items: center;
+  justify-content: space-evenly;
 }
 
-.login-card-header {
-  background-color: #007bff;
-  /* Azul primario de Bootstrap, o un verde azulado médico como #4DB6AC */
-  color: white;
-  padding: 25px;
+.container-imagen {
+  width: 238px;
+}
+
+.container-imagen img {
+  width: 100%;
+}
+.derecho-login form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Espacio vertical entre elementos */
+}
+
+.derecho-login h2 {
+  font-size: 30px;
+  font-weight: 700;
+  color: #f07e0b;
   text-align: center;
-  border-bottom: 5px solid #0056b3;
-  /* Un tono más oscuro para profundidad */
 }
 
-.login-card-header .icon {
-  font-size: 3rem;
-  margin-bottom: 10px;
+.derecho-login label {
+  color: #76869e;
+  font-size: 16.73px;
+  font-weight: 700;
 }
 
-.login-card-header h2 {
-  margin-bottom: 0;
-  font-weight: 600;
+.derecho-login input {
+  border: 0.8px solid #76869e;
+  font-size: 16.73px;
+  font-weight: 400;
+  border-radius: 15px;
+  color: #76869e;
+  outline: none;
+  height: 50px;
+
+  padding: 0 20px;
+}
+.derecho-login input::placeholder {
+  color: #76869e;
+  font-size: 16.73px;
+  font-weight: 400;
 }
 
-.login-card-body {
-  padding: 30px;
+.derecho-login .mb-3 {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.form-floating > .form-control,
-.form-floating > .form-select {
-  height: calc(3.5rem + 2px);
-  line-height: 1.25;
+.derecho-login .btn-ingresar {
+  background: #f07e0b;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  outline: none;
+  border-radius: 5px;
+  height: 50px;
+  width: 395px;
+  padding: 0 20px;
+  border-radius: 30px;
+  cursor: pointer;
 }
 
-.form-floating > label {
-  padding: 1rem 0.75rem;
+.derecho-login p {
+  text-align: center;
+  color: #76869e;
+  font-weight: 400;
+  font-size: 16px;
 }
-
-.btn-login {
-  background-color: #007bff;
-  /* Azul primario */
-  border-color: #007bff;
-  color: white;
-  padding: 0.75rem;
-  font-size: 1.1rem;
-  font-weight: 500;
-  border-radius: 8px;
-  transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-
-.btn-login:hover {
-  background-color: #0056b3;
-  border-color: #0056b3;
-}
-
-.input-group-text {
-  background-color: #e9ecef;
-  border-right: none;
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
-}
-
-.form-control {
-  border-left: none;
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
-}
-
-.form-control:focus {
-  box-shadow: none;
-  border-color: #007bff;
-}
-
-.alert-custom {
-  border-radius: 8px;
-  font-size: 0.9rem;
+.derecho-login p a {
+  text-align: center;
+  color: #0176fe;
+  font-weight: 400;
+  font-size: 16px;
 }

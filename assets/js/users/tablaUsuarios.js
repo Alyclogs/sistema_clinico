@@ -38,7 +38,7 @@ function fetchUsers() {
 
         $(".td-botones").each(function () {
             var id = $(this).data('id');
-            $.get(baseurl + 'assets/js/botonesUsuario.html', function (btnHtml) {
+            $.get(baseurl + 'assets/js/users/botonesUsuario.html', function (btnHtml) {
                 btnHtml = btnHtml.replace(/\$\{IDUSUARIO\}/g, id);
                 $(this).html(btnHtml);
             }.bind(this));

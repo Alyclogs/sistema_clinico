@@ -81,7 +81,7 @@ $areas = $areamodel->obtenerareas();
                             </button>
                         </div>
 
-                        <button class="btn-add-cita">+ Nueva cita</button>
+                        <!-- <button class="btn-add-cita">+ Nueva cita</button> -->
                     </div>
                 </div>
             </div>
@@ -89,66 +89,51 @@ $areas = $areamodel->obtenerareas();
                 <div id="calendar" class="flex-grow-1 h-100 overflow-auto"></div>
 
                 <!-- Sidebar -->
-                <div class="calendar-sidebar p-3" style="width: 300px;">
-                    <div id="mini-calendar"></div>
-
-                    <div class="mt-4">
-                        <h6 class="fw-bold">Citas seleccionadas</h6>
-                        <div class="appointment-box">
-                            <small class="text-muted">LUN 12</small>
-                            <div class="fw-semibold">Lic. Carlos Medina</div>
-                            <div>Área: Psicológico</div>
-                            <div>Horario: 8:30am - 9:00am</div>
+                <div class="calendar-sidebar p-3">
+                    <div id="modalCita" class="modal-cita-custom">
+                        <div class="modal-cita-header">
+                            <h2>Nueva Cita</h2>
                         </div>
-                        <!-- Repite esta estructura por cada cita -->
+                        <div class="busqueda-paciente">
+                            <div class="input-icon">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="dniPaciente" placeholder="Buscar paciente" />
+                            </div>
+                            <button class="btn-icon" title="Agregar nuevo paciente">
+                                <i class="fas fa-user-plus"></i>
+                            </button>
+                        </div>
+                        <div class="subtitulo">CITAS SELECCIONADAS</div>
+                        <div class="no-horarios-selected">Por favor, seleccione al menos un horario</div>
+                        <div class="modal-cita-body">
+                            <div id="horariosSeleccionados" class="citas-lista"></div>
+                            <div class="agregar-horario">
+                                <div class="calendario">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <input type="date" id="nuevoHorarioFecha" />
+                                </div>
+                                <div class="reloj">
+                                    <i class="fas fa-clock"></i>
+                                    <input type="time" id="nuevoHorarioHora" />
+                                </div>
+                                <button id="btnAgregarHorario" class="btn-icon">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+
+                            <div class="agregar-mas">
+                                <a href="#">+ Agregar más</a>
+                            </div>
+
+                            <div class="footer-modal">
+                                <a href="#" class="cancelar-link">Cancelar</a>
+                                <button class="btn-pagar">Pagar</button>
+                            </div>
+                        </div>
                     </div>
+                    <div id="mini-calendar"></div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div id="modalCita" class="modal-cita-custom">
-        <div class="modal-cita-header">
-            <h2>Nueva Cita</h2>
-        </div>
-
-        <div class="busqueda-paciente">
-            <div class="input-icon">
-                <i class="fas fa-search"></i>
-                <input type="text" id="dniPaciente" placeholder="Buscar paciente" />
-            </div>
-            <button class="btn-icon" title="Agregar nuevo paciente">
-                <i class="fas fa-user-plus"></i>
-            </button>
-        </div>
-
-        <div class="subtitulo">CITAS SELECCIONADAS</div>
-
-        <div id="horariosSeleccionados" class="citas-lista">
-            <!-- Chips renderizados aquí -->
-        </div>
-
-        <div class="agregar-horario">
-            <div class="calendario">
-                <i class="fas fa-calendar-alt"></i>
-                <input type="date" id="nuevoHorarioFecha" />
-            </div>
-            <div class="reloj">
-                <i class="fas fa-clock"></i>
-                <input type="time" id="nuevoHorarioHora" />
-            </div>
-            <button id="btnAgregarHorario" class="btn-icon">
-                <i class="fas fa-plus"></i>
-            </button>
-        </div>
-
-        <div class="agregar-mas">
-            <a href="#">+ Agregar más</a>
-        </div>
-
-        <div class="footer-modal">
-            <a href="#" class="cancelar-link">Cancelar</a>
-            <button class="btn-pagar">Pagar</button>
         </div>
     </div>
 

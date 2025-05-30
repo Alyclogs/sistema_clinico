@@ -127,12 +127,6 @@ a.fc-col-header-cell-cushion {
   height: calc(100vh - 80px);
 }
 
-.fc-timegrid-slot.fc-timegrid-slot-lane.bg-blocked.fc-slot-blocked {
-  background-color: #e5252f40 !important;
-  cursor: not-allowed !important;
-  pointer-events: none !important;
-}
-
 .fc-timegrid-divider {
   display: none;
 }
@@ -194,101 +188,228 @@ a.fc-col-header-cell-cushion {
 }
 
 .modal-cita-custom {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  margin: auto;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  display: none;
   position: absolute;
   z-index: 1050;
-  min-width: 350px;
   background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
-  padding: 1.5rem;
-  top: 120px;
-  right: 40px;
-  display: none;
-  transition: box-shadow 0.2s;
 }
 
 .modal-cita-custom.show {
   display: block;
 }
-
-.modal-cita-header {
-  font-weight: bold;
-  font-size: 1.1rem;
-  margin-bottom: 1rem;
+.modal-cita-header h2 {
+  font-weight: 700;
+  font-size: 20px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 8px;
 }
 
-.horario-chip {
+.busqueda-paciente {
   display: flex;
   align-items: center;
-  background: #f7f7fa;
-  border-radius: 20px;
-  padding: 0.4rem 1rem 0.4rem 0.8rem;
-  margin-bottom: 0.5rem;
-  font-size: 0.95rem;
-  justify-content: space-between;
-  gap: 0.5rem;
+  gap: 8px;
+  margin-bottom: 20px;
 }
 
-.horario-chip .btn {
-  border-radius: 50%;
-  padding: 0.2rem 0.4rem;
-  font-size: 0.9rem;
+.input-icon {
+  flex: 1;
+  position: relative;
 }
 
-.btn-pagar-cita {
-  right: 1.5rem;
-  bottom: 1rem;
-  background: #f07e0b;
-  color: #fff;
-  border-radius: 30px;
-  font-weight: 600;
-  padding: 0.7rem 2rem;
-  box-shadow: 0 2px 8px rgba(240, 126, 11, 0.08);
+.input-icon i {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #999;
+}
+
+.input-icon input {
+  width: 100%;
+  padding: 10px 12px 10px 36px;
+  border-radius: 10px;
   border: none;
+  background-color: #76869e10;
 }
 
-.btn-pagar-cita:hover {
-  background: #e67606;
-}
-
-.add-horario-row {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.modal-cita-custom input[type="text"] {
-  border-radius: 8px;
-  border: 1px solid #ced4da;
-  padding: 0.4rem 0.7rem;
-  font-size: 1rem;
-  margin-right: 0.5rem;
-}
-
-.modal-cita-custom .btn-add-paciente {
-  background: #f07e0b;
-  color: #fff;
-  border-radius: 50%;
+.btn-icon {
+  background: #ff7e00;
   border: none;
-  padding: 0.2rem;
-  width: 32px;
-  height: 32px;
+  padding: 10px;
+  border-radius: 10px;
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 0.5rem;
+  width: 42px;
+  height: 42px;
+  cursor: pointer;
 }
 
-.modal-cita-custom .btn-add-paciente:hover {
-  background-color: #e67606;
+.btn-icon i {
+  font-size: 16px;
 }
 
-tr.bg-blocked {
-  background-color: #ffdddd !important;
-  pointer-events: none;
-  cursor: not-allowed;
-  opacity: 0.7;
+.subtitulo {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4a4a4a;
+  margin-bottom: 8px;
+}
+
+.citas-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.cita-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #fff;
+  padding: 12px 16px;
+  font-size: 14px;
+  gap: 12px;
+}
+
+.cita-chip-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.cita-chip-dia {
+  background-color: transparent;
+  color: #76869e;
+  border-radius: 8px;
+  padding: 12px 8px;
+  font-weight: 600;
+  font-size: 13px;
+  border: 1px solid #76869e;
+  text-align: center;
+  min-width: 50px;
+}
+
+.cita-chip-detalle {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.4;
+}
+
+.cita-chip-detalle strong {
+  font-weight: 600;
+  color: #333;
+}
+
+.cita-chip-detalle span {
+  color: #555;
+}
+
+.cita-chip-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.cita-chip-buttons button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background-color: #f4f6f8;
+  color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cita-chip-buttons button:hover {
+  background-color: #e0e0e0;
+}
+
+.agregar-horario {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.agregar-horario i {
+  color: #4a4a4a;
+  margin-right: 6px;
+}
+
+.calendario,
+.reloj {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: white;
+}
+
+.calendario input,
+.reloj input {
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.agregar-mas a {
+  color: #4a90e2;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.footer-modal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.cancelar-link {
+  color: #6f6f6f;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.btn-pagar {
+  background-color: #ff7e00;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.fc .fc-non-business {
+  background-color: #ff2b3216 !important;
+}
+
+.fc-blocked-almuerzo {
+  background-color: #f3d6d7 !important;
+}
+
+.fc-timegrid-col-bg .fc-highlight {
+  background-color: #25afe516 !important;
 }
 
 .mensaje-flotante {

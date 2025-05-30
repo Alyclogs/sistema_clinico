@@ -108,21 +108,50 @@ $areas = $areamodel->obtenerareas();
     </div>
 
     <div id="modalCita" class="modal-cita-custom">
-        <div class="modal-cita-header">Nueva cita</div>
-        <div class="d-flex align-items-center mb-3">
-            <input type="text" id="dniPaciente" class="form-control" placeholder="DNI del paciente" style="max-width: 220px;">
-            <button class="btn-add-paciente ms-2" title="Agregar nuevo paciente"><i class="fas fa-user-plus"></i></button>
+        <div class="modal-cita-header">
+            <h2>Nueva Cita</h2>
         </div>
-        <div id="horariosSeleccionados" class="mb-3"></div>
-        <div class="add-horario-row mb-4">
-            <input type="date" id="nuevoHorarioFecha" class="form-control" style="max-width: 160px;">
-            <input type="time" id="nuevoHorarioHora" class="form-control" style="max-width: 160px;">
-            <button id="btnAgregarHorario" class="btn btn-success"><i class="fas fa-plus"></i></button>
+
+        <div class="busqueda-paciente">
+            <div class="input-icon">
+                <i class="fas fa-search"></i>
+                <input type="text" id="dniPaciente" placeholder="Buscar paciente" />
+            </div>
+            <button class="btn-icon" title="Agregar nuevo paciente">
+                <i class="fas fa-user-plus"></i>
+            </button>
         </div>
-        <div class="modal-cita-footer text-end w-100">
-            <button class="btn-pagar-cita">Pagar</button>
+
+        <div class="subtitulo">CITAS SELECCIONADAS</div>
+
+        <div id="horariosSeleccionados" class="citas-lista">
+            <!-- Chips renderizados aquí -->
+        </div>
+
+        <div class="agregar-horario">
+            <div class="calendario">
+                <i class="fas fa-calendar-alt"></i>
+                <input type="date" id="nuevoHorarioFecha" />
+            </div>
+            <div class="reloj">
+                <i class="fas fa-clock"></i>
+                <input type="time" id="nuevoHorarioHora" />
+            </div>
+            <button id="btnAgregarHorario" class="btn-icon">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+
+        <div class="agregar-mas">
+            <a href="#">+ Agregar más</a>
+        </div>
+
+        <div class="footer-modal">
+            <a href="#" class="cancelar-link">Cancelar</a>
+            <button class="btn-pagar">Pagar</button>
         </div>
     </div>
+
 </body>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>

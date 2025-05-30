@@ -159,20 +159,21 @@ document.addEventListener('DOMContentLoaded', function () {
             mostrarMensajeFlotante('Debe seleccionar un especialista primero');
             return false;
         }
+        /*
         if (disponibilidadActual && disponibilidadActual.length > 0) {
             let allow = true;
             let current = new Date(selectInfo.start);
             const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
             while (current < selectInfo.end) {
                 const hora = current.toTimeString().slice(0, 5);
+                const horaSel = (hora.length === 5 ? hora + ':00' : hora);
                 const nombreDia = dias[current.getDay()];
                 const disp = disponibilidadActual.find(d => d.fecha === nombreDia);
                 if (disp) {
-                    // Normaliza los formatos de hora a 5 caracteres (ej: 09:00)
-                    const horaSel = hora.padStart(5, '0');
-                    const horaIni = disp.horainicio.padStart(5, '0');
-                    const horaFin = disp.horafin.padStart(5, '0');
-                    if (!(horaSel >= horaIni && horaSel < horaFin)) {
+                    const horaIni = disp.horainicio;
+                    const horaFin = disp.horafin;
+                    // Permite seleccionar la hora de fin exacta (slot igual a horafin)
+                    if (!(horaSel >= horaIni && horaSel <= horaFin)) {
                         allow = false;
                         break;
                     }
@@ -185,17 +186,18 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!allow) mostrarMensajeFlotante('Horario fuera de disponibilidad');
             return allow;
         }
+            */
         return true;
     });
 
     let horariosSeleccionados = [];
     let horarioSeleccionadoActual = '';
+    let especialistaSeleccionado = '';
     let lastButtonRect = null;
 
     // Selección múltiple de celdas en el calendario
     calendar.setOption('selectable', true);
     calendar.setOption('select', function (info) {
-        horarioSeleccionadoActual = info.startStr;
         const fecha = info.startStr.split('T')[0];
         const hora = info.startStr.split('T')[1].substring(0, 5);
         const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
@@ -203,24 +205,20 @@ document.addEventListener('DOMContentLoaded', function () {
         const disp = disponibilidadActual.find(d => d.fecha === nombreDia);
         let disponible = false;
         if (disp) {
-            // Normaliza los formatos de hora a 5 caracteres (ej: 09:00)
-            const horaSel = hora.padStart(5, '0');
-            const horaIni = disp.horainicio.padStart(5, '0');
-            const horaFin = disp.horafin.padStart(5, '0');
-            console.log('[DEBUG] horaSel:', horaSel, 'horaIni:', horaIni, 'horaFin:', horaFin, 'disp:', disp);
-            disponible = (horaSel >= horaIni && horaSel < horaFin);
-            console.log('[DEBUG] disponible:', disponible);
-        } else {
-            console.log('[DEBUG] No hay disponibilidad para el día:', nombreDia, 'en', disponibilidadActual);
+            const horaSel = (hora.length === 5 ? hora + ':00' : hora);
+            const horaIni = disp.horainicio;
+            const horaFin = disp.horafin;
+            if (hora >= '13:00' && hora < '14:00') {
+                mostrarMensajeFlotante('Horario fuera de disponibilidad');
+                return;
+            }
+            disponible = (horaSel >= horaIni && horaSel <= horaFin);
         }
         if (!disponible) {
             mostrarMensajeFlotante('Horario fuera de disponibilidad');
             return;
         }
-        horariosSeleccionados.push({
-            fecha,
-            hora
-        });
+        horariosSeleccionados.push({ fecha, hora });
         renderHorariosSeleccionados();
     });
 
@@ -257,10 +255,22 @@ document.addEventListener('DOMContentLoaded', function () {
         const cont = document.getElementById('horariosSeleccionados');
         cont.innerHTML = '';
         horariosSeleccionados.forEach((h, idx) => {
+            date = new Date(2000, 0, 1, parseInt(h.hora.split(':')[0]), parseInt(h.hora.split(':')[1]));
             const chip = document.createElement('div');
             chip.className = 'horario-chip';
-            chip.innerHTML = `${h.fecha} ${h.hora}
-                <button class='btn btn-danger btn-sm ms-2' title='Eliminar' onclick='eliminarHorario(${idx})'><i class="fas fa-trash"></i></button>`;
+            chip.innerHTML = `<div class="cita-chip">
+  <div class="cita-chip-info">
+    <div class="cita-chip-dia">LUN 12</div>
+    <div class="cita-chip-detalle">
+      <strong>${especialistaSeleccionado}</strong>
+      <span>Horario: ${h.hora} - ${h.hora.split(':')[0]}:${date.getMinutes() + 30}</span>
+    </div>
+  </div>
+  <div class="cita-chip-buttons">
+    <button><i class="fas fa-pen"></i></button>
+    <button><i class="fas fa-trash" title='Eliminar' onclick='eliminarHorario(${idx})'></i></button>
+  </div>
+</div>`
             cont.appendChild(chip);
         });
     }
@@ -291,91 +301,73 @@ document.addEventListener('DOMContentLoaded', function () {
     //Cambio de horario segun la disponibilidad del especialista
     $("#filtro-especialista").change(function () {
         selectedespecialista = $(this).val();
+        especialistaSeleccionado = $(this).find('option:selected').text();
+        horariosSeleccionados = [];
         if (selectedespecialista) {
             obtenerDisponibilidadEspecialista(selectedespecialista).then(function (data) {
-                aplicarDisponibilidadAlCalendario(data);
-                console.log(disponibilidadActual);
-                // Vuelve a establecer selectAllow para asegurar el bloqueo correcto
-                calendar.setOption('selectAllow', function (selectInfo) {
-                    if (!selectedespecialista) {
-                        mostrarMensajeFlotante('Debe seleccionar un especialista primero');
-                        return false;
-                    }
-                    if (disponibilidadActual && disponibilidadActual.length > 0) {
-                        // Solo permite seleccionar si TODOS los slots del rango están dentro de la disponibilidad
-                        let allow = true;
-                        let current = new Date(selectInfo.start);
-                        const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-                        while (current < selectInfo.end) {
-                            const fecha = current.toISOString().slice(0, 10);
-                            const hora = current.toTimeString().slice(0, 5);
-                            const nombreDia = dias[current.getDay()];
-                            const disp = disponibilidadActual.find(d => d.fecha === nombreDia);
-                            if (!(disp && hora >= disp.horainicio && hora < disp.horafin)) {
-                                allow = false;
-                                break;
-                            }
-                            current.setMinutes(current.getMinutes() + 30);
-                        }
-                        return allow;
-                    }
-                    return true;
-                });
+                disponibilidadActual = data;
+                actualizarBusinessHours();
             });
         } else {
             mostrarMensajeFlotante('Debe seleccionar un especialista primero');
+            calendar.setOption('businessHours', []);
         }
     });
+
+    function actualizarBusinessHours() {
+        if (!disponibilidadActual || disponibilidadActual.length === 0) {
+            calendar.setOption('businessHours', [{
+                daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+                startTime: '00:00',
+                endTime: '00:00'
+            }]);
+            resaltarBloqueoAlmuerzo();
+            return;
+        }
+        const diasMap = {
+            'domingo': 0,
+            'lunes': 1,
+            'martes': 2,
+            'miércoles': 3,
+            'jueves': 4,
+            'viernes': 5,
+            'sábado': 6
+        };
+        const bh = disponibilidadActual.map(d => {
+            const start = d.horainicio.slice(0, 5);
+            // Suma 30 minutos a la hora de fin para que el sombreado NO incluya la hora de fin
+            let [h, m] = d.horafin.slice(0, 5).split(':');
+            let date = new Date(2000, 0, 1, parseInt(h), parseInt(m));
+            date.setMinutes(date.getMinutes() + 30);
+            const end = date.toTimeString().slice(0, 5);
+            return {
+                daysOfWeek: [diasMap[d.fecha]],
+                startTime: start,
+                endTime: end
+            };
+        });
+        calendar.setOption('businessHours', bh);
+        resaltarBloqueoAlmuerzo();
+    }
+
+    function resaltarBloqueoAlmuerzo() {
+        // Espera a que el DOM esté listo
+        setTimeout(() => {
+            document.querySelectorAll(`.fc-timegrid-slot.fc-timegrid-slot-lane[data-time="13:00:00"],
+                .fc-timegrid-slot.fc-timegrid-slot-lane[data-time="13:30:00"],
+                .fc-timegrid-slot.fc-timegrid-slot-lane[data-time="14:00:00"]`)
+                .forEach(slot => {
+                    if (!slot.classList.contains('fc-non-business')) {
+                        slot.classList.add('fc-blocked-almuerzo');
+                    }
+                });
+        }, 10);
+    }
+
+    // Llama a la función cada vez que se renderiza el calendario
+    calendar.on('datesSet', resaltarBloqueoAlmuerzo);
 
     let disponibilidadActual = [];
-
-    function aplicarDisponibilidadAlCalendario(disponibilidad) {
-        disponibilidadActual = disponibilidad;
-
-        // Limpia lo anterior
-        $(".fc-timegrid-slot-lane").removeClass("bg-blocked fc-slot-blocked").css("pointer-events", "");
-
-        const columnas = $(".fc-col-header-cell.fc-day"); // cada columna tiene fecha en data-date
-        const filas = $(".fc-timegrid-slot"); // cada fila tiene hora en data-time
-
-        filas.each(function () {
-            const $fila = $(this);
-            const time = $fila.data("time").substring(0, 5); // "09:00"
-
-            columnas.each(function (colIndex) {
-                const $columna = $(this);
-                const fechaColumna = $columna.data("date");
-                const nombreDia = new Date(fechaColumna).toLocaleDateString("es-ES", { weekday: "long" }).toLowerCase();
-
-                const disponibilidadDia = disponibilidad.find(d => d.fecha === nombreDia);
-                const celda = $fila.closest("tr").find(".fc-timegrid-slot-lane").eq(colIndex);
-
-                if (
-                    !disponibilidadDia ||
-                    time < disponibilidadDia.horainicio ||
-                    time >= disponibilidadDia.horafin
-                ) {
-                    $(celda).addClass("bg-blocked fc-slot-blocked").css("pointer-events", "none").attr("title", "Horario no disponible");
-                }
-            });
-        });
-    }
-
-    // Permite forzar el refresco visual de los slots bloqueados
-    function refrescarBloqueoSlots() {
-        if (disponibilidadActual && disponibilidadActual.length > 0) {
-            aplicarDisponibilidadAlCalendario(disponibilidadActual);
-        }
-    }
-    window.refrescarBloqueoSlots = refrescarBloqueoSlots;
-
-    calendar.on('datesSet', function () {
-        updateCalendarDateRange(calendar);
-        if (disponibilidadActual && disponibilidadActual.length > 0) {
-            aplicarDisponibilidadAlCalendario(disponibilidadActual);
-        }
-    });
-
     // Mensaje flotante si no hay especialista seleccionado
     function mostrarMensajeFlotante(msg) {
         let div = document.createElement('div');

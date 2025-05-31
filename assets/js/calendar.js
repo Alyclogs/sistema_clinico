@@ -15,8 +15,25 @@ const calendar = new FullCalendar.Calendar(calendarEl, {
     editable: true,
     locale: 'es',
     headerToolbar: false,
-    eventDidMount: function (info) {
-        // Personaliza los eventos si es necesario
+    hiddenDays: [0],
+    slotLabelFormat: {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false // usa true si quieres formato AM/PM
+    },
+
+    hiddenDays: [0],
+    slotLabelFormat: {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false // usa true si quieres formato AM/PM
+    },
+    dayHeaderFormat: {
+        weekday: 'long',
+        day: '2-digit',
+        eventDidMount: function (info) {
+            // Personaliza los eventos si es necesario
+        }
     },
 
     viewDidMount: function () {
@@ -201,11 +218,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     let horariosSeleccionados = [];
-    let horarioSeleccionadoActual = '';
     let especialistaSeleccionado = '';
-    let horarioComponents = [];
-    let horarioComponentEvents = [];
-    let lastButtonRect = null;
 
     // Selección de una sola celda a la vez (NO permite rangos)
     calendar.setOption('selectable', true);
@@ -312,15 +325,33 @@ document.addEventListener('DOMContentLoaded', function () {
 </div>`;
             cont.appendChild(chip);
         });
+        // Mostrar/ocultar mensaje y body según cantidad de horarios
+        const noHorarios = document.querySelector('.no-horarios-selected');
+        const subtitulo = document.querySelector('.subtitulo');
+        const modalCitaBody = document.querySelector('.modal-cita-body');
+        const agregarMas = document.querySelector('.agregar-mas');
+        const horariosSeleccionadosDiv = document.getElementById('horariosSeleccionados');
+        const agregarHorarioDiv = document.querySelector('.agregar-horario');
+        const footerModal = document.querySelector('.footer-modal');
         if (horariosSeleccionados.length === 0) {
-            $(".no-horarios-selected").show();
-            $(".modal-cita-body").hide();
+            if (subtitulo) subtitulo.style.display = 'none';
+            if (noHorarios) noHorarios.style.display = 'flex';
+            if (modalCitaBody) modalCitaBody.style.display = 'none';
+            if (agregarMas) agregarMas.style.display = 'block';
+            if (horariosSeleccionadosDiv) horariosSeleccionadosDiv.style.display = 'none';
+            if (agregarHorarioDiv) agregarHorarioDiv.style.display = 'none';
+            if (footerModal) footerModal.style.display = 'none'; // <-- fuerza ocultar footer
         } else {
-            $(".no-horarios-selected").hide();
-            $(".modal-cita-body").show();
+            if (subtitulo) subtitulo.style.display = 'block';
+            if (noHorarios) noHorarios.style.display = 'none';
+            if (modalCitaBody) modalCitaBody.style.display = 'block';
+            if (agregarMas) agregarMas.style.display = 'block';
+            if (horariosSeleccionadosDiv) horariosSeleccionadosDiv.style.display = 'block';
+            //if (agregarHorarioDiv) agregarHorarioDiv.style.display = 'flex';
+            if (footerModal) footerModal.style.display = 'flex'; // <-- fuerza mostrar footer
         }
         actualizarEventosVisuales();
-        document.querySelector('.agregar-horario').style.display = 'none';
+        //document.querySelector('.agregar-horario').style.display = 'flex';
     }
 
     document.addEventListener('click', function (e) {
@@ -351,7 +382,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const h = horariosSeleccionados[idx];
             document.getElementById('nuevoHorarioFecha').value = h.fecha;
             document.getElementById('nuevoHorarioHora').value = h.hora;
-            document.querySelector('.agregar-horario').style.display = '';
+            document.querySelector('.agregar-horario').style.display = 'flex';
             document.getElementById('btnAgregarHorario').style.display = 'none';
             let btnActualizar = document.getElementById('btnActualizarHorario');
             if (!btnActualizar) {
@@ -360,7 +391,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 btnActualizar.className = 'btn-pagar';
                 btnActualizar.style.backgroundColor = '#ff7e00';
                 btnActualizar.textContent = 'Actualizar';
-                document.querySelector('.agregar-horario').appendChild(btnActualizar);
+                const agregarHorarioDiv = document.querySelector('.agregar-horario');
+                agregarHorarioDiv.appendChild(btnActualizar);
+                //agregarHorarioDiv.style.display = 'flex';
             } else {
                 btnActualizar.style.display = '';
             }
@@ -368,13 +401,113 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         if (e.target.closest('.agregar-mas a')) {
             e.preventDefault();
+            if (especialistaSeleccionado === '') {
+                mostrarMensajeFlotante('Debe seleccionar un especialista primero');
+                return;
+            }
             idxEditando = null;
-            document.querySelector('.agregar-horario').style.display = '';
+            document.querySelector('.agregar-horario').style.display = 'flex';
             document.getElementById('btnAgregarHorario').style.display = '';
             let btnActualizar = document.getElementById('btnActualizarHorario');
             if (btnActualizar) btnActualizar.style.display = 'none';
         }
+        if (e.target.closest(".paciente-item")) {
+            const paciente = e.target.closest(".paciente-item");
+            const idPaciente = paciente.dataset.id;
+            const nombreCompleto = paciente.querySelector('.paciente-nombre strong').textContent;
+            const dni = paciente.querySelector('.dni').textContent.replace('DNI: ', '').replace('|', '').trim();
+            const fechaNac = paciente.querySelector('.fecha-nac').textContent.replace('F. Nac: ', '');
+            const edad = calcularEdad(fechaNac);
+
+            $('.avatar-iniciales').text(getInitials(nombreCompleto.split(' ')[0], nombreCompleto.split(' ')[1]));
+            $('.avatar-iniciales').css('background-color', stringToColor(nombreCompleto));
+            $('.paciente-cita').attr('data-id', idPaciente);
+            $('.paciente-nombre').text(nombreCompleto);
+            $('.pacientesel-dni').text(`DNI: ${dni}`);
+            $('.pacientesel-edad').text(`Edad: ${edad} años`);
+            $('.paciente-detalles').css('justify-content', 'between');
+            $('.paciente-detalles span').css('color', '#76869E');
+
+            $('#pacienteSeleccionado').show();
+            $('#resultadoPacientes').css('display', 'none').empty();
+        }
+        if (e.target.closest('.btn-pagar')) {
+            if (!selectedespecialista) {
+                mostrarMensajeFlotante('Debe seleccionar un especialista primero');
+                return;
+            }
+            if (horariosSeleccionados.length === 0) {
+                mostrarMensajeFlotante('Debe seleccionar al menos un horario');
+                return;
+            }
+            const idUsuario = document.getElementById('idUsuario').value;
+            const idPaciente = document.getElementById('pacienteCita')?.dataset.id;
+
+            if (!idPaciente) {
+                mostrarMensajeFlotante('Debe seleccionar un paciente primero');
+                return;
+            }
+
+            horariosSeleccionados.forEach(h => {
+                const horaInicio = h.hora;
+                const horaFin = sumar30Minutos(horaInicio);
+                const fecha = h.fecha;
+
+                const data = {
+                    idusuario: idUsuario,
+                    idpaciente: idPaciente,
+                    idespecialista: selectedespecialista,
+                    hora_inicio: horaInicio,
+                    hora_fin: horaFin,
+                    fecha: fecha
+                };
+                console.log('Datos de la cita:', data); //Correcto
+                $.post(baseurl + 'controllers/Citas/CitasController.php?action=create', { data: JSON.stringify(data) }, function (response) {
+                    if (response.success) {
+                        console.log('Cita agendada correctamente');
+                        $('#modalCita').modal('hide');
+                        horariosSeleccionados = [];
+                        renderHorariosSeleccionados();
+                        refrescarCitasEspecialista(selectedespecialista);
+                    } else {
+                        mostrarMensajeFlotante('Error al agendar la cita: ' + response.error + '\n' + response.message);
+                    }
+                }, 'json');
+            });
+        }
     });
+
+    function getInitials(nombre, apellido) {
+        let n = nombre ? nombre.trim()[0] : '';
+        let a = apellido ? apellido.trim()[0] : '';
+        return (n + a).toUpperCase();
+    }
+
+    function stringToColor(str) {
+        // Simple hash to color
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const color = `hsl(${hash % 360}, 70%, 60%)`;
+        return color;
+    }
+
+    function calcularEdad(fechaNacStr) {
+        const hoy = new Date();
+        const partes = fechaNacStr.split('-');
+        if (partes.length !== 3) return '';
+        const anio = parseInt(partes[0], 10);
+        const mes = parseInt(partes[1], 10) - 1;
+        const dia = parseInt(partes[2], 10);
+        const fechaNac = new Date(anio, mes, dia);
+        let edad = hoy.getFullYear() - fechaNac.getFullYear();
+        const m = hoy.getMonth() - fechaNac.getMonth();
+        if (m < 0 || (m === 0 && hoy.getDate() < fechaNac.getDate())) {
+            edad--;
+        }
+        return edad;
+    }
 
     // Oculta el botón agregar cuando se está editando
     const observer = new MutationObserver(() => {
@@ -411,8 +544,27 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('nuevoHorarioHora').value = '';
             document.getElementById('btnAgregarHorario').style.display = '';
             document.getElementById('btnActualizarHorario').style.display = 'none';
+            document.querySelector('.agregar-horario').style.display = '';
         }
     };
+
+    // Botón agregar horario
+    if (document.getElementById('btnAgregarHorario')) {
+        document.getElementById('btnAgregarHorario').onclick = function () {
+            const fecha = document.getElementById('nuevoHorarioFecha').value;
+            const hora = document.getElementById('nuevoHorarioHora').value;
+            if (!fecha || !hora) return;
+            // Evita duplicados
+            if (horariosSeleccionados.some(h => h.fecha === fecha && h.hora === hora)) return;
+            let horaIni = formatearHora12h(hora);
+            let horaFin = formatearHora12h(sumar30Minutos(hora));
+            horariosSeleccionados.push({ fecha, horaIni, horaFin, hora });
+            renderHorariosSeleccionados();
+            actualizarEventosVisuales();
+            document.getElementById('nuevoHorarioFecha').value = '';
+            document.getElementById('nuevoHorarioHora').value = '';
+        };
+    }
 
     window.eliminarHorario = function (idx) {
         horariosSeleccionados.splice(idx, 1);
@@ -434,6 +586,58 @@ document.addEventListener('DOMContentLoaded', function () {
         return $.get(baseurl + `controllers/Disponibilidad/DisponibilidadController.php?action=read&idespecialista=${idespecialista}`);
     }
 
+    function obtenerCitasEspecialista(idespecialista) {
+        return $.get(baseurl + `controllers/Citas/CitasController.php?action=read&idespecialista=${idespecialista}`);
+    }
+
+    // Refresca visualmente las citas agendadas del especialista
+    function refrescarCitasEspecialista(idespecialista) {
+        obtenerCitasEspecialista(idespecialista).then(function (citas) {
+            console.log("📅 Citas del especialista:", citas);
+
+            // Elimina eventos de citas anteriores
+            calendar.getEvents().forEach(ev => {
+                if (ev.extendedProps && ev.extendedProps.tipo === 'cita-existente') ev.remove();
+            });
+
+            // Agrega visualmente cada cita
+            citas.forEach(cita => {
+                const horaIni = formatearHora12h(cita.hora_inicio.slice(0, 5));
+                const horaFin = formatearHora12h(cita.hora_fin.slice(0, 5));
+                const nombreCompleto = `${cita.paciente_nombres} ${cita.paciente_apellidos}`;
+
+                calendar.addEvent({
+                    title: `
+    <div class="evento-contenedor">
+      <div class="nombre-arriba"><strong>${nombreCompleto}</strong></div>
+      <div class="check-horario">
+        <span class='mi-check-clase'>
+          <svg xmlns="http://www.w3.org/2000/svg" width="17.56px" height="17.56px" viewBox="0 0 17.56 17.56">
+            <style>.mi-st10{fill:#48B02C;} .mi-st11{fill:#FFFFFF;}</style>
+            <g>
+              <path class='mi-st10' d='M8.78,0c4.85,0,8.78,3.93,8.78,8.78s-3.93,8.78-8.78,8.78C3.93,17.56,0,13.63,0,8.78S3.93,0,8.78,0'/>
+              <path class='mi-st11' d='M6,13.06L2.81,9.65c-0.35-0.37-0.45-0.93-0.2-1.37C3.02,7.54,3.97,7.47,4.5,8.03l2.48,2.65l3.92-3.66
+                c0.04-0.03,0.07-0.06,0.11-0.09l1.82-1.7c0.37-0.35,0.93-0.45,1.37-0.2c0.74,0.41,0.81,1.37,0.25,1.89l-5.63,5.26l-0.01-0.01
+                l-1.95,1.82L6,13.06z'/>
+            </g>
+          </svg>
+        </span>
+        <span class="horario-agendado">Horario: ${horaIni} - ${horaFin}</span>
+      </div>
+    </div>
+  `,
+                    start: `${cita.fecha}T${cita.hora_inicio}`,
+                    end: `${cita.fecha}T${cita.hora_fin}`,
+                    display: 'background',
+                    classNames: ['fc-slot-custom-content', 'cita-agendada-evento'],
+                    extendedProps: {
+                        tipo: 'cita-existente'
+                    }
+                });
+            });
+        });
+    }
+
     //Cambio de horario segun la disponibilidad del especialista
     $("#filtro-especialista").change(function () {
         selectedespecialista = $(this).val();
@@ -444,6 +648,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 disponibilidadActual = data;
                 actualizarBusinessHours();
             });
+            refrescarCitasEspecialista(selectedespecialista);
         } else {
             mostrarMensajeFlotante('Debe seleccionar un especialista primero');
             calendar.setOption('businessHours', []);
@@ -499,13 +704,44 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
         }, 10);
     }
-
-    /*
-    // Llama a la función cada vez que se renderiza el calendario
-    calendar.on('datesSet', resaltarBloqueoAlmuerzo);
-    */
-
     let disponibilidadActual = [];
+
+    //Busqueda de pacientes
+    $('#searchPaciente').on('keyup', function () {
+        const query = $(this).val().trim();
+        if (query.length < 2) {
+            $('#resultadoPacientes').css('display', 'none').empty();
+            return;
+        }
+        buscarPacientes(query);
+    });
+
+    function buscarPacientes(query) {
+        $.get(baseurl + `controllers/Pacientes/PacienteController.php?action=buscar&filtro=${encodeURIComponent(query)}`, function (data) {
+            const pacientes = Array.isArray(data) ? data : JSON.parse(data);
+            let html = '';
+
+            if (pacientes.length > 0) {
+                pacientes.forEach(p => {
+                    html += `<div class="paciente-item" data-id="${p.idpaciente}">
+            <div class="paciente-nombre">
+                <strong>${p.nombres} ${p.apellidos}</strong>
+            </div>
+            <div class="paciente-detalles">
+                <span class="fecha-nac">${p.fecha_nacimiento}</span>
+                <span class="dni">DNI: ${p.dni}</span> 
+            </div>
+        </div>`;
+
+                });
+            } else {
+                html = '<div class="paciente-item">No se encontraron pacientes</div>';
+            }
+
+            $('#resultadoPacientes').html(html).css('display', 'flex');
+        });
+    }
+
     // Mensaje flotante si no hay especialista seleccionado
     function mostrarMensajeFlotante(msg) {
         let div = document.createElement('div');

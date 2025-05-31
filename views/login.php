@@ -1,10 +1,6 @@
 <?php
-
 $base_url = 'http://localhost/SistemaClinico/';
-
-
 ?>
-
 
 <!DOCTYPE html>
 <html lang="es">
@@ -17,19 +13,10 @@ $base_url = 'http://localhost/SistemaClinico/';
     <link rel="stylesheet" href="<?php echo $base_url ?>assets/css/login.css">
     <!-- Bootstrap 5 JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76A08EQmXpFZz5Jr/gkG6fsbCkJbEpHvvP4Ilc9e+OGP1zFjE0tQt4ZsPi6jizo" crossorigin="anonymous"></script>
-
 </head>
 
 <body>
-
-
-
-
-
-
-
     <div class="div-login">
-
         <div class="izquierdo-login">
             <div class="container-imagen">
                 <img src="<?php echo $base_url ?>assets/img/logo.png">

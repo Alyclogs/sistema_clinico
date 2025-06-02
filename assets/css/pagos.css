@@ -1,0 +1,82 @@
+.pagos-tablas{
+    width:80%;
+}
+
+.previsualizacion-ticket{
+    width:20%;
+}
+
+.info-paciente{
+  width: max-content;
+    background: #f07e0b;
+    padding: 5px 15px;
+    border-radius: 10px;
+   
+    
+}
+
+.info-paciente span{
+     color:#fff;
+    font-weight:400;
+    font-size:14px;
+}
+
+.table-pagos th{
+      color:#f07e0b;
+    font-weight:700;
+    font-size:14px;
+    
+}
+
+.table-pagos th span{
+    border-bottom:1px solid #f07e0b !important;
+}
+
+.table-pagos tbody tr{
+    background: transparent !important;
+}
+
+.table-pagos tbody td{
+    
+    font-size:14px;
+    color:#76869e;
+     font-weight:500;
+}
+
+.estado-pendiente{
+    color:#c42d35 !important;
+  
+}
+
+.estado-pendiente svg{
+    width:14px;
+}
+
+.estado-cancelado{
+    color:#48b02c !important;
+  
+}
+
+.estado-cancelado svg{
+    width:14px;
+}
+
+.circulo-check{
+    border: 0.5px solid #76869e;
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    
+
+}
+
+.circulo-check.active{
+    padding:20px;
+    background:#76869e;
+}
+
+
+
+
+
+

@@ -1,0 +1,663 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap");
+
+:root {
+  --border-color: #76869e55;
+}
+
+body {
+  background-color: rgb(249, 251, 252);
+  font-family: "Nunito", sans-serif;
+  font-size: 14px;
+  color: rgb(93, 109, 132);
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.filtro {
+  width: 140px;
+}
+
+.filtros {
+  display: flex;
+  gap: 20px;
+}
+
+.filtro-title {
+  font-weight: bold;
+  color: #76869e;
+}
+
+.filtro {
+  border: none;
+  background-color: #76869e10;
+  font-weight: 700;
+  color: #76869e6b;
+  font-size: 14px;
+}
+
+.btn-editar-horario.btn-editando {
+  background-color: rgb(240, 126, 11);
+}
+
+.btn-editar-horario.btn-editando .st05 {
+  fill: #fff;
+}
+
+.btn-editar-horario.btn-editando:hover .st05 {
+  fill: #e77707;
+}
+
+.btn-eliminar:hover .st007 {
+  fill: #566781;
+}
+
+.btn-add-cita {
+  background-color: rgb(240, 126, 11);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 25px;
+}
+.sidebar {
+  background: transparent;
+  padding: 1rem;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  position: fixed;
+}
+
+.calendar-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  width: 420px;
+}
+
+.calendar-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+.filtros select {
+  width: 150px;
+}
+
+#calendar {
+  max-height: calc(100vh - 200px);
+  flex-grow: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+#mini-calendar .fc-daygrid-day {
+  border: none !important;
+  font-size: 14px;
+}
+
+#mini-calendar table {
+  border: none !important;
+}
+#mini-calendar td,
+#mini-calendar th {
+  border: none !important;
+}
+
+.fc-scroller-harness .fc-scroller {
+  overflow: hidden !important;
+  display: block;
+}
+
+.fc .fc-scroller-liquid-absolute {
+  overflow: hidden scroll !important;
+}
+
+.fc .fc-col-header-cell-cushion {
+  background-color: transparent;
+  height: 53px;
+  align-items: center;
+  display: grid;
+}
+
+.fc .fc-daygrid-day-number {
+  color: #76869e;
+  text-decoration: none;
+}
+
+.fc .fc-timegrid .fc-daygrid-body {
+  display: none;
+}
+
+.fc .fc-button-primary {
+  background-color: transparent;
+}
+
+.fc-timegrid-event {
+  border: none;
+  border-radius: 0;
+  background: rgb(96 191 233 / 24%);
+  border-left: 10px solid #60bfe9;
+  padding: 0px 10px;
+}
+
+#calendar .fc-theme-standard td,
+.fc-theme-standard th {
+  border: 1px solid var(--border-color);
+}
+
+a.fc-col-header-cell-cushion {
+  text-decoration: none;
+  color: #76869e;
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.calendar-container {
+  display: flex;
+  height: calc(100vh - 20px);
+}
+
+.fc-timegrid-divider {
+  display: none;
+}
+
+.fc .fc-day-today {
+  background-color: inherit !important;
+}
+
+.fc .fc-timegrid-slot-label {
+  font-size: 0.75rem;
+  height: 40px;
+}
+
+.fc .fc-toolbar-title {
+  font-weight: bold;
+}
+
+#mini-calendar .fc-header-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+#mini-calendar .fc-header-toolbar .fc-button {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #76869e49;
+  padding: 0 0.5rem;
+}
+
+#mini-calendar .fc-header-toolbar .fc-button:hover {
+  color: #76869e;
+}
+
+#mini-calendar .fc-header-toolbar .fc-toolbar-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.appointment-box {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  background-color: #f9f9f9;
+  font-size: 0.85rem;
+}
+
+.calendar-header-range {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.calendar-header-nav i {
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.modal-cita-custom {
+  padding: 12px;
+
+  width: 100%;
+}
+
+.no-horarios-selected {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #76869e;
+  padding: 20px 12px;
+}
+
+.modal-cita-body {
+  display: none;
+}
+
+.modal-cita-header h2 {
+  font-weight: 700;
+  font-size: 20px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #76869e;
+  padding-bottom: 8px;
+  width: max-content;
+}
+
+.busqueda-paciente {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.input-icon {
+  flex: 1;
+  position: relative;
+}
+
+.input-icon i {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #76869e;
+}
+
+.input-icon input {
+  width: 100%;
+  padding: 10px 12px 10px 36px;
+  border-radius: 10px;
+  border: none;
+  background-color: #76869e10;
+  color: #76869e;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.input-icon input::placeholder {
+  color: #76869e;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.btn-icon {
+  background: #ff7e00;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  cursor: pointer;
+}
+
+.btn-icon i {
+  font-size: 16px;
+}
+
+.subtitulo {
+  font-size: 14px;
+  font-weight: 800;
+  color: #59636d;
+  margin-bottom: 8px;
+}
+
+.citas-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.cita-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0px;
+  font-size: 14px;
+  gap: 12px;
+}
+
+.cita-chip-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.cita-chip-dia {
+  background-color: transparent;
+  color: #76869e;
+  border-radius: 8px;
+  padding: 12px 8px;
+  font-weight: 600;
+  font-size: 13px;
+  border: 1px solid #76869e;
+  text-align: center;
+  min-width: 50px;
+}
+
+.cita-chip-detalle {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.4;
+}
+
+.cita-chip-detalle strong {
+  font-weight: 400;
+  color: #76869e;
+  font-size: 14px;
+}
+
+.cita-chip-detalle span {
+  font-weight: 400;
+  color: #76869e;
+  font-size: 14px;
+}
+
+.cita-chip-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.cita-chip-buttons button {
+  background-color: transparent;
+  border: 0.5px solid #f07e0b;
+  height: 30px;
+  width: 30px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 50%;
+}
+
+.cita-chip-buttons .btn-eliminar {
+  border: 0.5px solid #76869e;
+}
+
+.cita-chip-buttons button svg {
+  display: block;
+  margin: 0 auto;
+  padding: 0;
+  height: 15px;
+  width: 15px;
+}
+
+.cita-chip-buttons .btn-editar-horario:hover {
+  fill: #e77707;
+  border-color: #e77707;
+}
+
+.cita-chip-buttons .btn-eliminar:hover {
+  fill: #566781;
+  border-color: #566781;
+}
+
+.agregar-horario {
+  display: none;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.agregar-horario i {
+  color: #4a4a4a;
+  margin-right: 6px;
+}
+
+.calendario,
+.reloj {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-bottom: 1px solid #76869e;
+  background: transparent;
+}
+
+.calendario input,
+.reloj input {
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  background-color: transparent;
+}
+
+.agregar-mas a {
+  color: #76869e;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.footer-modal {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 24px;
+  gap: 12px;
+}
+
+.cancelar-link {
+  color: #6f6f6f;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.btn-pagar {
+  background-color: #ff7e00;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn-reservar {
+  background-color: #76869e;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.fc .fc-non-business {
+  background-color: #ff2b3216 !important;
+}
+
+.fc-blocked-almuerzo {
+  background-color: #ff2b3216 !important;
+}
+
+.fc-timegrid-col-bg .fc-highlight {
+  background-color: transparent !important;
+  position: absolute !important;
+}
+
+.mensaje-flotante {
+  position: fixed;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #e74c3c;
+  color: #fff;
+  padding: 12px 28px;
+  border-radius: 8px;
+  z-index: 9999;
+  font-weight: bold;
+  font-size: 1.1em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.fc .fc-bg-event {
+  opacity: 1 !important;
+}
+
+.fc-slot-custom-content {
+  background-color: #60bfe9 !important;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+}
+.fc-slot-check {
+  color: #27ae60;
+  font-size: 1.2em;
+  margin-right: 4px;
+  display: flex;
+  align-items: center;
+}
+.fc-slot-horario {
+  font-size: 0.95em;
+  font-weight: 600;
+  color: #fff;
+  padding: 1px 6px;
+}
+
+.fc-cita-ocupada {
+  background-color: #f8d7da !important;
+  color: #721c24 !important;
+  cursor: not-allowed;
+}
+
+.fc-direction-ltr .fc-timegrid-col-events {
+  margin: 0;
+}
+
+.fc-timegrid-event {
+  border: none;
+  border-radius: 0;
+  background: rgb(96 191 233 / 24%);
+  border-left: 10px solid #60bfe9;
+  padding: 0px 10px;
+}
+
+.fc-event-nombre {
+  color: #76869e;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.fc-event-hora {
+  color: #76869e;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.fc-event-hora svg {
+  width: 10px;
+}
+
+.fc .fc-timegrid-axis-cushion,
+.fc .fc-timegrid-slot-label-cushion {
+  color: #76869e;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.cita-agendada-evento {
+  background: #60bfe93d;
+  border-left: 5px solid #60bfe9;
+}
+
+.cita-agendada-evento.cita-por-pagar.fc-bg-event {
+  background: #e9d0603d !important;
+  border-left: 5px solid #e9c960;
+}
+
+.cita-agendada-horario {
+  color: #76869e;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.nombre-arriba strong {
+  color: #76869e;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.horario-agendado {
+  color: #76869e;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.resultado-pacientes {
+  display: none; /* Oculto por defecto */
+  flex-direction: column; /* Para que los hijos se apilen verticalmente */
+  background: #fff;
+  height: 156px;
+  overflow: auto;
+  border: 1px solid #76869e;
+  position: absolute;
+  width: 100%;
+  z-index: 1000;
+  border-radius: 10px;
+  top: 3rem;
+}
+
+.paciente-item {
+  border-bottom: 1px solid #76869e;
+  padding: 15px;
+  cursor: pointer;
+}
+
+.paciente-nombre strong {
+  color: #f07e0b;
+  font-size: 14px;
+  font-weight: 700;
+}
+.paciente-detalles span {
+  color: #f07e0b;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.paciente-seleccionado {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+}
+
+.paciente-seleccionado .avatar-iniciales {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: bold;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
+  margin-right: 2px;
+  letter-spacing: 1px;
+}

@@ -1,0 +1,106 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap");
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  font-family: "Nunito", sans-serif;
+
+  background-image: url("http://localhost/SistemaClinico/assets/img/nube-arriba.png"),
+    url("http://localhost/SistemaClinico/assets/img/nube-abajo.png");
+  background-position: top left, bottom right;
+  background-repeat: no-repeat, no-repeat;
+  background-size: 567px, 567px;
+}
+
+.div-login {
+  display: flex;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  width: 900px;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.container-imagen {
+  width: 238px;
+}
+
+.container-imagen img {
+  width: 100%;
+}
+.derecho-login form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Espacio vertical entre elementos */
+}
+
+.derecho-login h2 {
+  font-size: 30px;
+  font-weight: 700;
+  color: #f07e0b;
+  text-align: center;
+}
+
+.derecho-login label {
+  color: #76869e;
+  font-size: 16.73px;
+  font-weight: 700;
+}
+
+.derecho-login input {
+  border: 0.8px solid #76869e;
+  font-size: 16.73px;
+  font-weight: 400;
+  border-radius: 15px;
+  color: #76869e;
+  outline: none;
+  height: 50px;
+
+  padding: 0 20px;
+}
+.derecho-login input::placeholder {
+  color: #76869e;
+  font-size: 16.73px;
+  font-weight: 400;
+}
+
+.derecho-login .mb-3 {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.derecho-login .btn-ingresar {
+  background: #f07e0b;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  outline: none;
+  border-radius: 5px;
+  height: 50px;
+  width: 395px;
+  padding: 0 20px;
+  border-radius: 30px;
+  cursor: pointer;
+}
+
+.derecho-login p {
+  text-align: center;
+  color: #76869e;
+  font-weight: 400;
+  font-size: 16px;
+}
+.derecho-login p a {
+  text-align: center;
+  color: #0176fe;
+  font-weight: 400;
+  font-size: 16px;
+}

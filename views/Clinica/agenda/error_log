@@ -1,0 +1,1 @@
+[31-May-2025 18:42:35 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/neuroeduca/public_html/SistemaClinico/views/Clinica/agenda/calendario.php:1) in /home/neuroeduca/public_html/SistemaClinico/views/Clinica/agenda/calendario.php on line 14

@@ -1,0 +1,12 @@
+[31-May-2025 18:49:06 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method CitasModel::crearCita() in /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php:24
+Stack trace:
+#0 {main}
+  thrown in /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php on line 24
+[31-May-2025 18:49:06 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method CitasModel::crearCita() in /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php:24
+Stack trace:
+#0 {main}
+  thrown in /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php on line 24
+[31-May-2025 18:49:06 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method CitasModel::crearCita() in /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php:24
+Stack trace:
+#0 {main}
+  thrown in /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php on line 24

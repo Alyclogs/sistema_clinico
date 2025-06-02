@@ -1,0 +1,112 @@
+
+.menu-izquierdo {
+     background: #fff;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+    min-height: 100vh;
+    display: flex
+;
+    
+ 
+    flex-direction: column;
+   
+    justify-content: space-between;
+    gap: 20px;
+}
+
+
+.svg-menu{
+    width:25px;
+}
+
+.svg-menu svg{
+    width:100%;
+}
+
+.menu-iconos{
+    display: flex
+;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.arriba-flex{
+     padding: 20px 0px 0px 0px;
+    display: flex
+;
+    flex-direction: column;
+   
+    gap: 50px;
+    
+}
+
+.abajo-flex{
+    padding:0px 0px 20px 0px;
+}
+
+.caja-menu{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-left:4px solid #fff;
+    padding:10px 0px;
+}
+
+.caja-menu:hover{
+    border-left:4px solid #F07E0B;
+    cursor:pointer;
+}
+
+
+.caja-menu:hover .cls-menu{
+  fill:#F07E0B;
+}
+
+.caja-menu:hover .cls-usuarios{
+  stroke:#F07E0B;
+}
+
+.caja-menu:hover .cls-especialistas{
+   stroke:#F07E0B;
+}
+
+.caja-menu:hover .cls-calendario{
+  fill:#F07E0B;
+}
+
+.caja-menu:hover .cls-pagos{
+   stroke:#F07E0B;
+}
+
+.caja-menu:hover .cls-ajustes{
+    stroke:#F07E0B;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.caja-menu.active{
+    border-left:4px solid #F07E0B;
+    cursor:pointer;
+}
+
+.logo-naranja{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+        border-left: 4px solid #fff;
+}
+

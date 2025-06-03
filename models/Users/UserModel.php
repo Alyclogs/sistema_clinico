@@ -1,37 +1,38 @@
 <?php
 // Importa la clase PDO
-require_once __DIR__ . '/../../config/database.php'; 
-class UsuarioModel {
-public function verificarUsuario($usuario, $password) {
-    try {
-        $pdo = connectDatabase();
+require_once __DIR__ . '/../../config/database.php';
+class UsuarioModel
+{
+    public function verificarUsuario($usuario, $password)
+    {
+        try {
+            $pdo = connectDatabase();
 
-        $stmt = $pdo->prepare("
+            $stmt = $pdo->prepare("
             SELECT u.*, r.rol AS nombre_rol 
             FROM usuarios u
             INNER JOIN roles r ON u.idrol = r.idRol
             WHERE u.usuario = :usuario
             LIMIT 1
         ");
-        $stmt->execute([
-            'usuario' => $usuario
-        ]);
+            $stmt->execute([
+                'usuario' => $usuario
+            ]);
 
-        $usuarioData = $stmt->fetch(PDO::FETCH_ASSOC);
-        closeDatabase($pdo);
+            $usuarioData = $stmt->fetch(PDO::FETCH_ASSOC);
+            closeDatabase($pdo);
 
-        // Verificación de contraseña
-        if ($usuarioData && password_verify($password, $usuarioData['password'])) {
-            return $usuarioData; // Login correcto, incluye nombre_rol
-        } else {
-            return false; // Usuario o password incorrecto
+            // Verificación de contraseña
+            if ($usuarioData && password_verify($password, $usuarioData['password'])) {
+                return $usuarioData; // Login correcto, incluye nombre_rol
+            } else {
+                return false; // Usuario o password incorrecto
+            }
+        } catch (PDOException $e) {
+            die("Error al verificar usuario: " . $e->getMessage());
         }
-
-    } catch (PDOException $e) {
-        die("Error al verificar usuario: " . $e->getMessage());
     }
-}
- public function existeUsuario($nombreusuario)
+    public function existeUsuario($nombreusuario)
     {
         try {
             $pdo = connectDatabase();
@@ -47,7 +48,7 @@ public function verificarUsuario($usuario, $password) {
         }
     }
 
-  public function obtenerUsuarioPorId($id)
+    public function obtenerUsuarioPorId($id)
     {
         try {
             $pdo = connectDatabase();
@@ -97,13 +98,13 @@ ORDER BY u.idUsuario DESC;
             die("Error al obtener usuarios: " . $e->getMessage());
         }
     }
-    
-    public function buscarUsuarios($filtro = '')
-{
-    try {
-        $pdo = connectDatabase();
 
-        $sql = "
+    public function buscarUsuarios($filtro = '')
+    {
+        try {
+            $pdo = connectDatabase();
+
+            $sql = "
             SELECT 
                 u.*, 
                 r.idrol, 
@@ -116,33 +117,33 @@ ORDER BY u.idUsuario DESC;
             WHERE r.rol != 'Especialista'
         ";
 
-        // Si hay filtro, se agrega la condición
-        if (!empty($filtro)) {
-            $sql .= " AND (
+            // Si hay filtro, se agrega la condición
+            if (!empty($filtro)) {
+                $sql .= " AND (
                 u.nombres LIKE :filtro 
                 OR u.apellidos LIKE :filtro 
                 OR u.dni LIKE :filtro
             )";
+            }
+
+            $sql .= " ORDER BY u.idusuario DESC";
+
+            $stmt = $pdo->prepare($sql);
+
+            if (!empty($filtro)) {
+                $filtro = '%' . $filtro . '%';
+                $stmt->bindParam(':filtro', $filtro, PDO::PARAM_STR);
+            }
+
+            $stmt->execute();
+            $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            closeDatabase($pdo);
+
+            return $usuarios;
+        } catch (PDOException $e) {
+            die("Error al buscar usuarios: " . $e->getMessage());
         }
-
-        $sql .= " ORDER BY u.idusuario DESC";
-
-        $stmt = $pdo->prepare($sql);
-
-        if (!empty($filtro)) {
-            $filtro = '%' . $filtro . '%';
-            $stmt->bindParam(':filtro', $filtro, PDO::PARAM_STR);
-        }
-
-        $stmt->execute();
-        $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        closeDatabase($pdo);
-
-        return $usuarios;
-    } catch (PDOException $e) {
-        die("Error al buscar usuarios: " . $e->getMessage());
     }
-}
 
 
     public function obtenerRoles()
@@ -177,37 +178,39 @@ ORDER BY u.idUsuario DESC;
         }
     }
 
-public function guardarUsuario($nombres, $apellidos, $dni, $telefono, $correo, $idestado, $idrol, $usuario, $passwordHash)
-{
-    $pdo = connectDatabase();
+    public function guardarUsuario($nombres, $apellidos, $dni, $telefono, $correo, $idestado, $idrol, $usuario, $passwordHash)
+    {
+        $pdo = connectDatabase();
 
-    try {
-        $stmt = $pdo->prepare("
+        try {
+            $stmt = $pdo->prepare("
             INSERT INTO usuarios (nombres, apellidos, dni, telefono, correo, idestado, idrol, usuario, password)
             VALUES (:nombres, :apellidos, :dni, :telefono, :correo, :idestado, :idrol, :usuario, :password)
         ");
 
-        $stmt->execute([
-            'nombres' => $nombres,
-            'apellidos' => $apellidos,
-            'dni' => $dni,
-            'telefono' => $telefono,
-            'correo' => $correo,
-            'idestado' => $idestado,
-            'idrol' => $idrol,
-            'usuario' => $usuario,
-            'password' => $passwordHash
-        ]);
+            $executed = $stmt->execute([
+                'nombres' => $nombres,
+                'apellidos' => $apellidos,
+                'dni' => $dni,
+                'telefono' => $telefono,
+                'correo' => $correo,
+                'idestado' => $idestado,
+                'idrol' => $idrol,
+                'usuario' => $usuario,
+                'password' => $passwordHash
+            ]);
 
-        return true;
-
-    } catch (PDOException $e) {
-        // Relanza la excepci��n para que el controlador la maneje
-        throw $e;
-    } finally {
-        closeDatabase($pdo);
+            if ($executed) {
+                return $pdo->lastInsertId(); // Retornar el ID del usuario insertado
+            } else {
+                throw new Exception("Error al insertar el usuario en la base de datos: " . $executed);
+            }
+        } catch (PDOException $e) {
+            throw $e;
+        } finally {
+            closeDatabase($pdo);
+        }
     }
-}
 
 
     public function actualizarUsuario($id, $nombres, $apellidos, $dni, $telefono, $correo, $idestado, $idrol, $usuario, $password)

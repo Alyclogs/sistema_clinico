@@ -19,25 +19,20 @@ try {
             exit;
 
         case 'delete':
-    $id = $_POST['idUsuario']; // <-- cambio aquí
-    if (!is_numeric($id)) {
-        throw new Exception('Error: ID inválido.');
-    }
-    $success = $modelo->eliminarUsuario($id);
-    $mensaje = $success ? 'Usuario eliminado correctamente.' : 'Error al eliminar el usuario.';
-    break;
-    
-    case 'buscar':
-         $filtro = $_GET['filtro'] ?? '';
-    $usuarios = $modelo->buscarUsuarios($filtro);
-    echo json_encode($usuarios);
-    exit;
-        break;
-        
-        
-        
-        
+            $id = $_POST['idUsuario']; // <-- cambio aquí
+            if (!is_numeric($id)) {
+                throw new Exception('Error: ID inválido.');
+            }
+            $success = $modelo->eliminarUsuario($id);
+            $mensaje = $success ? 'Usuario eliminado correctamente.' : 'Error al eliminar el usuario.';
+            break;
 
+        case 'buscar':
+            $filtro = $_GET['filtro'] ?? '';
+            $usuarios = $modelo->buscarUsuarios($filtro);
+            echo json_encode($usuarios);
+            exit;
+            break;
 
         case 'update':
             $id = $_POST['idUsuario'];
@@ -87,7 +82,6 @@ try {
         default:
             throw new Exception('Error: Acción no válida.');
     }
-
 } catch (Exception $e) {
     $mensaje = $e->getMessage();
     $success = false;

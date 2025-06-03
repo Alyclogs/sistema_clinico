@@ -23,6 +23,7 @@ $idusuario = $_SESSION['idusuario'];
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="../../../assets/css/calendar.css">
+    <link rel="stylesheet" href="../../../assets/css/general.css">
     <link rel="stylesheet" href="<?php echo $base_url ?>assets/css/general.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js'></script>
@@ -115,7 +116,7 @@ $idusuario = $_SESSION['idusuario'];
                                         <input type="text" id="searchPaciente" placeholder="Buscar paciente" />
                                         <div id="resultadoPacientes" class="resultado-pacientes"></div>
                                     </div>
-                                    <button class="btn-icon" title="Agregar nuevo paciente">
+                                    <button id="btnAddPaciente" class="btn-icon" title="Agregar nuevo paciente" data-bs-toggle="modal" data-bs-target="#usuarioModal">
 
                                         <svg id="" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 17.75 17.75">
                                             <defs>
@@ -149,15 +150,33 @@ $idusuario = $_SESSION['idusuario'];
                                     </div>
                                 </div>
                                 <input type="hidden" id="idUsuario" value=<?php echo $idusuario ?> />
-                                <div class="subtitulo">CITAS SELECCIONADAS</div>
+                                <div class="subtitulo" style="display: none;">CITAS SELECCIONADAS</div>
                                 <div class="no-horarios-selected">No se han seleccionado citas.
                                     Seleccione sus citas en la agenda</div>
                                 <div class="modal-cita-body">
                                     <div id="horariosSeleccionados" class="citas-lista"></div>
 
+                                    <div class="agregar-horario">
+                                        <div class="calendario">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            <input type="date" id="nuevoHorarioFecha" />
+                                        </div>
+                                        <div class="reloj">
+                                            <i class="fas fa-clock"></i>
+                                            <input type="time" id="nuevoHorarioHora" />
+                                        </div>
+                                        <button id="btnAgregarHorario" class="btn-icon">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+
+                                    <div class="agregar-mas">
+                                        <a href="#">+ Agregar más</a>
+                                    </div>
+
                                     <div class="footer-modal">
-                                        <button id="btnReservar" class="btn-reservar">Reservar</button>
-                                        <button id="btnPagar" class="btn-pagar">Pagar</button>
+
+                                        <button class="btn-pagar">Pagar</button>
                                     </div>
                                 </div>
                             </div>
@@ -168,8 +187,29 @@ $idusuario = $_SESSION['idusuario'];
             </div>
         </div>
     </div>
+    <div class="modal fade" id="usuarioModal" tabindex="-1"
+        aria-labelledby="usuarioModalLabel" aria-hidden="true"
+        data-bs-backdrop="static" data-bs-keyboard="false">
 
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-body" id="usuarioModalBody">
+                </div>
+                <div class="modal-footer justify-content-left">
+                    <div id="botonesModal">
+                        <button type="button" class="btn btn-secondary btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary btn-guardar" id="btnGuardarPaciente">Guardar Cambios</button>
+                    </div>
+
+                </div>
+
+                <div id="mensaje" class="my-3"></div>
+
+            </div>
+        </div>
+    </div>
 </body>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../../../assets/js/calendar.js"></script>

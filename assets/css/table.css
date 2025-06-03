@@ -272,16 +272,6 @@ body {
   padding: 0.5em 0.75em;
 }
 
-.modal-content {
-  padding: 30px;
-}
-
-.modal-footer {
-  background-color: transparent;
-  border: none;
-  padding: 0;
-}
-
 .avatar-iniciales {
   display: inline-flex;
   align-items: center;

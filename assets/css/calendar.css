@@ -33,20 +33,43 @@ body {
   border: none;
   background-color: #76869e10;
   font-weight: 700;
-  color: #76869e6b;
+  color: #76869e;
   font-size: 14px;
 }
 
-.btn-editar-horario.btn-editando {
-  background-color: rgb(240, 126, 11);
+.btn-calendario {
+  background-color: transparent;
+  border: none;
+  color: #76869e;
 }
 
-.btn-editar-horario.btn-editando .st05 {
-  fill: #fff;
+.minicalendar-modal {
+  flex-direction: column;
+  background: #fff;
+  width: 400px;
+  height: 340px;
+  overflow: hidden;
+  position: absolute;
+  padding: 18px;
+  z-index: 1000;
+  border-radius: 6px;
+  box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);
+  right: 50rem;
+  top: 10.9rem;
+}
+
+.btn-calendario .btn-editar-horario.btn-editando .st05 {
+  fill: #f07e0b;
+  border-color: #f07e0b !important;
 }
 
 .btn-editar-horario.btn-editando:hover .st05 {
   fill: #e77707;
+  border-color: #e77707 !important;
+}
+
+.btn-editar-horario:hover .st05 {
+  fill: #566781;
 }
 
 .btn-eliminar:hover .st007 {
@@ -373,7 +396,7 @@ a.fc-col-header-cell-cushion {
 
 .cita-chip-buttons button {
   background-color: transparent;
-  border: 0.5px solid #f07e0b;
+  border: 0.5px solid #76869e;
   height: 30px;
   width: 30px;
   padding: 0;
@@ -397,8 +420,8 @@ a.fc-col-header-cell-cushion {
 }
 
 .cita-chip-buttons .btn-editar-horario:hover {
-  fill: #e77707;
-  border-color: #e77707;
+  fill: #566781;
+  border-color: #566781;
 }
 
 .cita-chip-buttons .btn-eliminar:hover {
@@ -423,17 +446,19 @@ a.fc-col-header-cell-cushion {
   display: flex;
   align-items: center;
   padding: 6px 10px;
-  border-bottom: 1px solid #76869e;
   background: transparent;
+  gap: 6px;
 }
 
 .calendario input,
 .reloj input {
+  color: #76869e;
   border: none;
   outline: none;
   font-family: inherit;
   font-size: 14px;
   background-color: transparent;
+  border-bottom: 1px solid #76869e;
 }
 
 .agregar-mas a {
@@ -584,9 +609,19 @@ a.fc-col-header-cell-cushion {
   border-left: 5px solid #60bfe9;
 }
 
-.cita-agendada-evento.cita-por-pagar.fc-bg-event {
-  background: #e9d0603d !important;
-  border-left: 5px solid #e9c960;
+.cita-agendada-evento.cita-pendiente.fc-bg-event {
+  background: #f07e0b12 !important;
+  border-left: 5px solid #f07e0b;
+}
+
+.cita-agendada-evento.cita-cancelado.fc-bg-event {
+  background: #48b02c10 !important;
+  border-left: 5px solid #48b02c;
+}
+
+.cita-agendada-evento.cita-anulado.fc-bg-event {
+  background: #e5252a12 !important;
+  border-left: 5px solid #e5252a;
 }
 
 .cita-agendada-horario {
@@ -608,23 +643,27 @@ a.fc-col-header-cell-cushion {
 }
 
 .resultado-pacientes {
-  display: none; /* Oculto por defecto */
-  flex-direction: column; /* Para que los hijos se apilen verticalmente */
+  display: none;
+  flex-direction: column;
   background: #fff;
-  height: 156px;
   overflow: auto;
-  border: 1px solid #76869e;
   position: absolute;
   width: 100%;
   z-index: 1000;
-  border-radius: 10px;
+  border-radius: 6px;
+  box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);
   top: 3rem;
 }
 
 .paciente-item {
-  border-bottom: 1px solid #76869e;
+  border-bottom: 0.5px solid #76869e55;
   padding: 15px;
   cursor: pointer;
+}
+
+.paciente-detalles {
+  gap: 20px;
+  display: flex;
 }
 
 .paciente-nombre strong {
@@ -632,6 +671,7 @@ a.fc-col-header-cell-cushion {
   font-size: 14px;
   font-weight: 700;
 }
+
 .paciente-detalles span {
   color: #f07e0b;
   font-size: 12px;
@@ -655,7 +695,7 @@ a.fc-col-header-cell-cushion {
   border-radius: 50%;
   color: #fff;
   font-weight: bold;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
   margin-right: 2px;

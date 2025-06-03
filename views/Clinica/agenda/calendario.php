@@ -66,6 +66,12 @@ $idusuario = $_SESSION['idusuario'];
                                         </select>
                                     </div>
                                     <div class="calendar-actions" style="display: flex; gap: 1rem; align-items: center;">
+                                        <div class="minicalendar-button">
+                                            <button id="btnAbrirCalendario" class="btn btn-sm btn-light btn-calendario"><i class="bi bi-calendar"></i></button>
+                                            <div class="minicalendar-modal" style="display: none;">
+                                                <div id="mini-calendar"></div>
+                                            </div>
+                                        </div>
                                         <div class="calendar-nav d-flex align-items-center gap-2">
                                             <button id="prev-week" class="btn btn-light btn-sm"><!-- Generator: Adobe Illustrator 25.2.3, SVG Export Plug-In  -->
                                                 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="6.66px"
@@ -170,17 +176,12 @@ $idusuario = $_SESSION['idusuario'];
                                         </button>
                                     </div>
 
-                                    <div class="agregar-mas">
-                                        <a href="#">+ Agregar más</a>
-                                    </div>
-
                                     <div class="footer-modal">
-
-                                        <button class="btn-pagar">Pagar</button>
+                                        <button id="btnReservar" class="btn-reservar">Reservar</button>
+                                        <button id="btnPagar" class="btn-pagar">Pagar</button>
                                     </div>
                                 </div>
                             </div>
-                            <div id="mini-calendar"></div>
                         </div>
                     </div>
                 </div>

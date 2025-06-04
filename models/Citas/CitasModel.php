@@ -9,6 +9,25 @@ class CitasModel
         $this->db = connectDatabase();
     }
 
+    public function obtenerCitas()
+    {
+        $sql = "SELECT 
+                c.*, 
+                p.nombres AS paciente_nombres, 
+                p.apellidos AS paciente_apellidos, 
+                p.dni AS paciente_dni, 
+                p.fecha_nacimiento AS paciente_fecha_nacimiento,
+                u.nombres AS especialista_nombre,
+                u.apellidos AS especialista_apellidos
+            FROM citas c
+            INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
+            INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
+            INNER JOIN usuarios u ON e.idusuario = u.idusuario";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function obtenerCitasPorEspecialista($idespecialista)
     {
         $sql = "SELECT 
@@ -17,8 +36,12 @@ class CitasModel
                 p.apellidos AS paciente_apellidos, 
                 p.dni AS paciente_dni, 
                 p.fecha_nacimiento AS paciente_fecha_nacimiento
+                u.nombres AS especialista_nombre,
+                u.apellidos AS especialista_apellidos
             FROM citas c
             INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
+            INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
+            INNER JOIN usuarios u ON e.idusuario = u.idusuario
             WHERE c.idespecialista = :idespecialista";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':idespecialista', $idespecialista, PDO::PARAM_INT);

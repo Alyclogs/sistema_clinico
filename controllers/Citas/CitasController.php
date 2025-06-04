@@ -13,11 +13,12 @@ switch ($action) {
             $result = $model->obtenerCitasPorEspecialista($idespecialista);
             echo json_encode($result);
         } else {
-            echo json_encode([]);
+            $result = $model->obtenerCitas();
+            echo json_encode($result);
         }
         break;
-        
-          case 'create':
+
+    case 'create':
         if (isset($_POST['data'])) {
             $data = json_decode($_POST['data'], true);
             $mensaje = $data;
@@ -27,8 +28,8 @@ switch ($action) {
             echo json_encode(['error' => 'Datos no proporcionados']);
         }
         break;
-        
-        
+
+
     default:
         echo json_encode(['error' => 'Acción no válida']);
         break;

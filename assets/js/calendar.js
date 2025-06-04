@@ -7,6 +7,106 @@ let lastEspecialista = null;
 let horariosPorEspecialista = {};
 let estadosCita = { '3': 'pendiente', '4': 'cancelado', '5': 'anulado' }
 
+function calcularEdad(fechaNacStr) {
+    const hoy = new Date();
+    const partes = fechaNacStr.split('-');
+    if (partes.length !== 3) return '';
+    const anio = parseInt(partes[0], 10);
+    const mes = parseInt(partes[1], 10) - 1;
+    const dia = parseInt(partes[2], 10);
+    const fechaNac = new Date(anio, mes, dia);
+    let edad = hoy.getFullYear() - fechaNac.getFullYear();
+    const m = hoy.getMonth() - fechaNac.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < fechaNac.getDate())) {
+        edad--;
+    }
+    return edad;
+}
+
+function getInitials(nombre, apellido) {
+    let n = nombre ? nombre.trim()[0] : '';
+    let a = apellido ? apellido.trim()[0] : '';
+    return (n + a).toUpperCase();
+}
+
+function stringToColor(str) {
+    // Simple hash to color
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const color = `hsl(${hash % 360}, 70%, 60%)`;
+    return color;
+}
+
+function ocultarTooltip() {
+    document.querySelectorAll('.custom-tooltip-cita').forEach(el => el.remove());
+}
+
+function mostrarTooltipCita(cita, targetElement) {
+    ocultarTooltip();
+
+    const pacienteNombre = `${cita.paciente_nombres} ${cita.paciente_apellidos}`;
+    const fechaNacimiento = cita.paciente_fecha_nacimiento;
+    const edad = calcularEdad(fechaNacimiento);
+    const especialista = `${cita.especialista_nombre} ${cita.especialista_apellidos ?? ''}`;
+    const horario = `${formatearHora12h(cita.hora_inicio)} - ${formatearHora12h(cita.hora_fin)}`;
+    const color = stringToColor(pacienteNombre);
+    const iniciales = getInitials(cita.paciente_nombres, cita.paciente_apellidos);
+
+    const tooltip = document.createElement('div');
+    tooltip.className = 'custom-tooltip-cita';
+    tooltip.innerHTML = `
+    <div class="mytooltip">
+    <div class="tooltip-content">
+        <div class="tooltip-header">
+            <span class="avatar-iniciales" style="background-color:${color}">${iniciales}</span>
+            <div class="datos-paciente">
+                <strong>${pacienteNombre}</strong>
+                <div class="paciente-detalles">${fechaNacimiento} - ${edad} años</div>
+                <div>DNI: ${cita.paciente_dni}</div>
+            </div>
+        </div>
+        <div class="tooltip-footer">
+            <div class="especialista"><strong>${especialista}</strong></div>
+            <div class="horario">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="11.15px"
+	 height="11.15px" viewBox="0 0 11.15 11.15" style="overflow:visible;enable-background:new 0 0 11.15 11.15;"
+	 xml:space="preserve">
+<style type="text/css">
+	.st012{fill-rule:evenodd;clip-rule:evenodd;fill:#F07E0B;}
+	.st13{fill:#FFFFFF;}
+</style>
+<defs>
+</defs>
+<g>
+	<g>
+		<path class="st012" d="M5.57,0c3.08,0,5.57,2.5,5.57,5.57s-2.5,5.57-5.57,5.57C2.5,11.15,0,8.65,0,5.57S2.5,0,5.57,0"/>
+	</g>
+	<path class="st13" d="M7.82,8.34c-0.11,0-0.22-0.04-0.3-0.12L5.17,5.88C5.09,5.8,5.05,5.69,5.05,5.57V2.16
+		c0-0.24,0.19-0.43,0.43-0.43c0.24,0,0.43,0.19,0.43,0.43V5.4l2.22,2.22c0.17,0.17,0.17,0.44,0,0.6c0,0,0,0,0,0
+		C8.04,8.3,7.93,8.35,7.82,8.34z"/>
+</g>
+</svg>
+${horario}</div>
+        </div>
+        </div>
+        <button class="btn-ver-cita" onclick="verCita(${cita.idcita})">Ver cita</button>
+        </div>`;
+
+    document.body.appendChild(tooltip);
+
+    const rect = targetElement.getBoundingClientRect();
+    tooltip.style.top = `${rect.top + window.scrollY - tooltip.offsetHeight - 10}px`;
+    tooltip.style.left = `${rect.left + window.scrollX}px`;
+
+    targetElement._tooltip = tooltip;
+
+    tooltip.addEventListener('mouseleave', function () {
+        ocultarTooltip();
+    })
+}
+
 const calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: 'timeGridWeek',
     slotDuration: '00:30:00',
@@ -38,45 +138,46 @@ const calendar = new FullCalendar.Calendar(calendarEl, {
             // Personaliza los eventos si es necesario
         }
     },
-
-    viewDidMount: function () {
-        // Colorea los slots bloqueados
-        /*
-        const times = document.querySelectorAll('.fc-timegrid-slot');
-        times.forEach(slot => {
-            const time = slot.getAttribute('data-time');
-            if (
-                time < '09:30:00' || time >= '17:30:00' || ['10:00:00', '10:30:00', '11:00:00'].includes(time)
-            ) {
-                slot.classList.add('bg-blocked');
-            }
-        });
-        */
-    },
-    /*
-    select: function(info) {
-        const title = prompt('Título del evento:');
-        if (title) {
-            calendar.addEvent({
-                title: title,
-                start: info.start,
-                end: info.end,
-                allDay: info.allDay
-            });
+    eventClick: function (info) {
+        // Si es evento múltiple, no hacer nada (los cuadrados manejan sus propios clicks)
+        if (info.event.extendedProps.multiple) {
+            return false; // Prevenir comportamiento por defecto
         }
-        calendar.unselect();
-    }
-        */
-    /*
- events: [
-     {
-         start: '2025-05-30T10:00:00',
-         end: '2025-05-30T11:00:00',
-         display: 'background'
-     }
- ]
-     */
 
+        // Para eventos individuales, puedes agregar tu lógica aquí
+        console.log('Evento individual clickeado:', info.event);
+    },
+    eventMouseEnter: function (info) {
+        const event = info.event;
+
+        if (event.extendedProps.multiple && event.extendedProps.citas) {
+            const cuadrados = info.el.querySelectorAll('.cita-cuadrado');
+
+            cuadrados.forEach(cuadrado => {
+                cuadrado.addEventListener('mouseenter', function () {
+                    const citaId = this.dataset.citaId;
+                    const cita = event.extendedProps.citas.find(c => c.idcita == citaId);
+                    if (cita) {
+                        mostrarTooltipCita(cita, this);
+                    }
+                });
+
+                /*
+                cuadrado.addEventListener('mouseleave', function () {
+                    ocultarTooltip();
+                });
+                */
+            });
+        } else if (event.extendedProps.cita && event.classNames.includes('cita-agendada-evento')) {
+            mostrarTooltipCita(event.extendedProps.cita, info.el);
+        }
+    },
+    eventMouseLeave: function (info) {
+        /*
+        setTimeout(() => {
+            ocultarTooltip();
+        }, 1000)}*/
+    }
 });
 
 function updateCalendarDateRange(calendar) {
@@ -112,9 +213,12 @@ const miniCalendar = new FullCalendar.Calendar(miniCalendarEl, {
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    calendar.render();
+    refrescarCitas();
+    //actualizarEventosVisuales(false);
+
     updateCalendarDateRange(calendar);
     resaltarBloqueoAlmuerzo();
+    calendar.render();
 
     calendar.on('datesSet', function () {
         updateCalendarDateRange(calendar);
@@ -183,45 +287,10 @@ document.addEventListener('DOMContentLoaded', function () {
         updateCalendarDateRange(calendar);
     });
 
-    calendar.setOption('selectAllow', function (selectInfo) {
-        if (!selectedespecialista) {
-            mostrarMensajeFlotante('Debe seleccionar un especialista primero');
-            return false;
-        }
-        /*
-        if (disponibilidadActual && disponibilidadActual.length > 0) {
-            let allow = true;
-            let current = new Date(selectInfo.start);
-            const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-            while (current < selectInfo.end) {
-                const hora = current.toTimeString().slice(0, 5);
-                const horaSel = (hora.length === 5 ? hora + ':00' : hora);
-                const nombreDia = dias[current.getDay()];
-                const disp = disponibilidadActual.find(d => d.fecha === nombreDia);
-                if (disp) {
-                    const horaIni = disp.horainicio;
-                    const horaFin = disp.horafin;
-                    // Permite seleccionar la hora de fin exacta (slot igual a horafin)
-                    if (!(horaSel >= horaIni && horaSel <= horaFin)) {
-                        allow = false;
-                        break;
-                    }
-                } else {
-                    allow = false;
-                    break;
-                }
-                current.setMinutes(current.getMinutes() + 30);
-            }
-            if (!allow) mostrarMensajeFlotante('Horario fuera de disponibilidad');
-            return allow;
-        }
-            */
-        return true;
-    });
-
     let horariosSeleccionados = [];
     let especialistaSeleccionado = '';
-    let seleccionActual = {};
+    let disponibilidadEspecialista = [];
+    let citasGlobales = [];
 
     // Selección de una sola celda a la vez (NO permite rangos)
     calendar.setOption('selectable', true);
@@ -239,40 +308,46 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         const fecha = info.startStr.split('T')[0];
         const hora = info.startStr.split('T')[1].substring(0, 5);
-
-        // Si ya existe ese horario, lo removemos
-        if (horariosSeleccionados.some(h => h.fecha === fecha && h.hora === hora)) {
-            let horarioActual = horariosSeleccionados.find(h => h.hora === hora && h.fecha === fecha);
-            horariosSeleccionados.splice(horariosSeleccionados.indexOf(horarioActual), 1);
-            renderHorariosSeleccionados();
-            actualizarEventosVisuales();
-            return;
-        }
-        seleccionActual = info.startStr;
-        let horaIni = formatearHora12h(hora);
-        let horaFin = formatearHora12h(sumar30Minutos(hora));
-        const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-        const nombreDia = dias[info.start.getDay()];
-        const disp = disponibilidadActual.find(d => d.fecha === nombreDia);
-        let disponible = false;
-        if (disp) {
-            const horaSel = (hora.length === 5 ? hora + ':00' : hora);
-            if (hora >= '13:00' && hora < '14:00') {
+        //Si no es una cita, seleccionar horario
+        if (!citasGlobales.find(d => d.fecha === fecha && d.hora_inicio === info.startStr.split('T')[1].substring(0, 8))) {
+            if (!selectedespecialista) {
+                mostrarMensajeFlotante('Debe seleccionar un especialista primero');
+                return;
+            }
+            // Si ya existe ese horario, lo removemos
+            if (horariosSeleccionados.some(h => h.fecha === fecha && h.hora === hora)) {
+                let horarioActual = horariosSeleccionados.find(h => h.hora === hora && h.fecha === fecha);
+                horariosSeleccionados.splice(horariosSeleccionados.indexOf(horarioActual), 1);
+                renderHorariosSeleccionados();
+                actualizarEventosVisuales();
+                return;
+            }
+            seleccionActual = info.startStr;
+            let horaIni = formatearHora12h(hora);
+            let horaFin = formatearHora12h(sumar30Minutos(hora));
+            const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+            const nombreDia = dias[info.start.getDay()];
+            const disp = disponibilidadEspecialista.find(d => d.fecha === nombreDia);
+            let disponible = false;
+            if (disp) {
+                const horaSel = (hora.length === 5 ? hora + ':00' : hora);
+                if (hora >= '13:00' && hora < '14:00' && hora < '9:00' && hora > '17:00') {
+                    mostrarMensajeFlotante('Horario fuera de disponibilidad');
+                    return;
+                }
+                disponible = (horaSel >= disp.horainicio && horaSel <= disp.horafin);
+            }
+            if (!disponible) {
                 mostrarMensajeFlotante('Horario fuera de disponibilidad');
                 return;
             }
-            disponible = (horaSel >= disp.horainicio && horaSel <= disp.horafin);
+            horariosSeleccionados.push({ fecha, horaIni, horaFin, hora, idespecialista: selectedespecialista, especialistaSeleccionado: especialistaSeleccionado });
+            renderHorariosSeleccionados();
+            actualizarEventosVisuales();
         }
-        if (!disponible) {
-            mostrarMensajeFlotante('Horario fuera de disponibilidad');
-            return;
-        }
-        horariosSeleccionados.push({ fecha, horaIni, horaFin, hora, idespecialista: selectedespecialista, especialistaSeleccionado: especialistaSeleccionado });
-        renderHorariosSeleccionados();
-        actualizarEventosVisuales();
     });
 
-    function actualizarEventosVisuales(render = true) {
+    function actualizarEventosVisuales(render = true, global = true) {
         // Limpia todos los eventos visuales previos
         calendar.getEvents().forEach(ev => {
             if (ev.extendedProps && ev.extendedProps.tipo === 'seleccionado') ev.remove();
@@ -284,7 +359,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 title: `<span class='fc-slot-horario'>${h.horaIni} - ${h.horaFin}</span>`,
                 start: h.fecha + 'T' + h.hora + ':00',
                 end: h.fecha + 'T' + sumar30Minutos(h.hora) + ':00',
-                display: 'background',
+                //display: 'background',
                 classNames: ['fc-slot-custom-content'],
                 extendedProps: { tipo: 'seleccionado' }
             });
@@ -393,121 +468,162 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.addEventListener('click', function (e) {
         if (e.target.closest('.btn-editar-horario')) {
-            const idx = parseInt(e.target.closest('.btn-editar-horario').dataset.idx);
-            // Si ya está editando este mismo, al hacer clic de nuevo, actualiza
-            if (idxEditando === idx) {
-                let fecha = document.getElementById('nuevoHorarioFecha').value;
-                let hora = document.getElementById('nuevoHorarioHora').value;
-                const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-                if (fecha && hora) {
-                    let horaIni = formatearHora12h(hora);
-                    let horaFin = formatearHora12h(sumar30Minutos(hora));
-                    horariosSeleccionados[idxEditando].fecha = fecha;
-                    horariosSeleccionados[idxEditando].horaIni = horaIni;
-                    horariosSeleccionados[idxEditando].horaFin = horaFin;
-                    horariosSeleccionados[idxEditando].hora = hora;
-                    let fechaSel = new Date(horariosSeleccionados[idxEditando].fecha);
-                    const nombreDia = dias[fechaSel.getDay()];
-                    let disponible = false;
-                    obtenerDisponibilidadEspecialista(horariosSeleccionados[idxEditando].idespecialista).then(function (data) {
-                        const disp = data.find(d => d.fecha === nombreDia);
-                        if (disp) {
-                            const horaSel = (hora.length === 5 ? hora + ':00' : hora);
-                            console.log(horaSel, disp.horainicio);
-                            if (hora >= '13:00' && hora < '14:00') {
-                                mostrarMensajeFlotante('Horario fuera de disponibilidad');
-                                return;
-                            }
-                            disponible = (horaSel >= disp.horainicio && horaSel <= disp.horafin);
-                        }
-                        if (disponible) {
-                            idxEditando = null;
-                            renderHorariosSeleccionados();
-                            actualizarEventosVisuales();
-                            document.querySelector(`.horario-chip[data-idx="${idxEditando}"]`)?.removeChild('.agregar-horario');
-                            return;
-                        } else {
+            if (e.target.closest('.btn-editar-horario')) {
+                const idx = parseInt(e.target.closest('.btn-editar-horario').dataset.idx);
+
+                // Si ya está editando este mismo, al hacer clic de nuevo, actualiza
+                if (idxEditando === idx) {
+                    let fecha = document.getElementById('nuevoHorarioFecha').value;
+                    let hora = document.getElementById('nuevoHorarioHora').value;
+                    const dias = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+
+                    if (fecha && hora) {
+                        if (hora >= '13:00' && hora < '14:00') {
+                            console.log('Hora de almuerzo seleccionada (X)');
                             mostrarMensajeFlotante('Horario fuera de disponibilidad');
                             return;
                         }
-                    });
+
+                        let horaIni = formatearHora12h(hora);
+                        let horaFin = formatearHora12h(sumar30Minutos(hora));
+
+                        // Verificar disponibilidad primero, luego citas
+                        obtenerDisponibilidadEspecialista(horariosSeleccionados[idxEditando].idespecialista)
+                            .then(function (disponibilidadEspecialista) {
+                                let fechaSel = new Date(horariosSeleccionados[idxEditando].fecha);
+                                const nombreDia = dias[fechaSel.getDay()];
+                                let disponible = false;
+                                console.log(disponibilidadEspecialista);
+
+                                const disp = disponibilidadEspecialista.find(d => d.fecha === nombreDia);
+                                if (disp) {
+                                    const horaSel = (hora.length === 5 ? hora + ':00' : hora);
+                                    disponible = (horaSel >= disp.horainicio && horaSel <= disp.horafin);
+                                    console.log(`HoraSel: ${horaSel}, disponibilidad.horaInicio: ${disp.horainicio}, disp.horaFin: ${disp.horafin}, disponible? ${disponible}`)
+                                }
+
+                                if (!disponible) {
+                                    mostrarMensajeFlotante('Horario fuera de disponibilidad');
+                                    return Promise.reject('No disponible');
+                                }
+
+                                // Si está disponible, verificar citas
+                                return obtenerCitasEspecialista(horariosSeleccionados[idxEditando].idespecialista);
+                            })
+                            .then(function (citasEspecialista) {
+                                console.log(citasEspecialista);
+                                const cit = citasEspecialista.find(d => d.fecha === fecha && d.hora_inicio === hora);
+                                console.log(fecha, hora);
+
+                                if (cit) {
+                                    console.log('horario no disponible');
+                                    mostrarMensajeFlotante('Horario fuera de disponibilidad');
+                                    return;
+                                }
+
+                                // Actualizar horario si todo está bien
+                                const idxActual = idxEditando; // Guardar antes de establecer a null
+                                horariosSeleccionados[idxActual].fecha = fecha;
+                                horariosSeleccionados[idxActual].horaIni = horaIni;
+                                horariosSeleccionados[idxActual].horaFin = horaFin;
+                                horariosSeleccionados[idxActual].hora = hora;
+
+                                idxEditando = null;
+                                renderHorariosSeleccionados();
+                                actualizarEventosVisuales();
+
+                                // Remover elemento de edición correctamente
+                                const elementoEdicion = document.querySelector(`.horario-chip[data-idx="${idxActual}"] .agregar-horario`);
+                                if (elementoEdicion) {
+                                    elementoEdicion.remove();
+                                }
+                            })
+                            .catch(function (error) {
+                                console.log('Error en verificación:', error);
+                            });
+                    } else {
+                        mostrarMensajeFlotante('Ingrese una fecha y una hora válidos');
+                        return;
+                    }
                 } else {
-                    mostrarMensajeFlotante('Ingrese una fecha y una hora válidos');
-                    return;
-                }
-            }
-            // Si es otro, inicia edición
-            idxEditando = idx;
-            renderHorariosSeleccionados();
-            const h = horariosSeleccionados[idx];
-            let agregarHorario = document.querySelector('.agregar-horario');
-            if (!agregarHorario) {
-                agregarHorario = document.createElement('div');
-                agregarHorario.className = 'agregar-horario';
-                agregarHorario.innerHTML = `<div class="calendario">
+                    // Si es otro, inicia edición
+                    console.log('EDITANDO NUEVO HORARIO CON ID ', idx);
+                    idxEditando = idx;
+                    renderHorariosSeleccionados();
+                    const h = horariosSeleccionados[idx];
+                    let agregarHorario = document.querySelector('.agregar-horario');
+                    console.log('Agregar horario existe? ', agregarHorario != null);
+
+                    if (!agregarHorario) {
+                        agregarHorario = document.createElement('div');
+                        agregarHorario.className = 'agregar-horario';
+                        agregarHorario.innerHTML = `<div class="calendario">
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="12.34px"
-	 height="12.34px" viewBox="0 0 12.34 12.34" style="overflow:visible;enable-background:new 0 0 12.34 12.34;"
-	 xml:space="preserve">
+     height="12.34px" viewBox="0 0 12.34 12.34" style="overflow:visible;enable-background:new 0 0 12.34 12.34;"
+     xml:space="preserve">
 <style type="text/css">
-	.st008{fill:#76869E;}
+    .st008{fill:#76869E;}
 </style>
 <defs>
 </defs>
 <g>
-	<g>
-		<g>
-			<g>
-				<rect x="5.69" y="5.54" class="st008" width="0.96" height="0.96"/>
-				<path class="st008" d="M10.9,0.96h-0.58V0H9.35v0.96H2.99V0H2.03v0.96H1.45C0.65,0.96,0,1.61,0,2.41v8.49
-					c0,0.8,0.65,1.45,1.45,1.45h3.21h0.07h1.68c-0.33-0.28-0.62-0.6-0.86-0.96H4.73H4.65H1.45c-0.27,0-0.48-0.22-0.48-0.48V4.53
-					h10.41V5.5v0.05v0c0.36,0.24,0.69,0.53,0.96,0.86V5.54V5.5V2.41C12.34,1.61,11.7,0.96,10.9,0.96z M11.38,3.57H0.96V2.41
-					c0-0.27,0.22-0.48,0.48-0.48h0.58v0.96h0.96V1.93h6.36v0.96h0.96V1.93h0.58c0.27,0,0.48,0.22,0.48,0.48V3.57z"/>
-				<path class="st008" d="M9.08,5.84c-1.79,0-3.25,1.46-3.25,3.25s1.46,3.25,3.25,3.25s3.25-1.46,3.25-3.25S10.88,5.84,9.08,5.84z
-					 M9.08,11.38c-1.26,0-2.29-1.03-2.29-2.29S7.82,6.8,9.08,6.8s2.29,1.03,2.29,2.29S10.34,11.38,9.08,11.38z"/>
-				<polygon class="st008" points="9.55,7.47 8.58,7.47 8.58,9.57 10.37,9.57 10.37,8.61 9.55,8.61 				"/>
-				<rect x="3.76" y="7.47" class="st008" width="0.96" height="0.96"/>
-				<rect x="1.83" y="7.47" class="st008" width="0.96" height="0.96"/>
-				<rect x="1.83" y="5.54" class="st008" width="0.96" height="0.96"/>
-				<rect x="1.83" y="9.4" class="st008" width="0.96" height="0.96"/>
-				<rect x="3.76" y="5.54" class="st008" width="0.96" height="0.96"/>
-				<rect x="3.76" y="9.4" class="st008" width="0.96" height="0.96"/>
-			</g>
-		</g>
-	</g>
+    <g>
+        <g>
+            <g>
+                <rect x="5.69" y="5.54" class="st008" width="0.96" height="0.96"/>
+                <path class="st008" d="M10.9,0.96h-0.58V0H9.35v0.96H2.99V0H2.03v0.96H1.45C0.65,0.96,0,1.61,0,2.41v8.49
+                    c0,0.8,0.65,1.45,1.45,1.45h3.21h0.07h1.68c-0.33-0.28-0.62-0.6-0.86-0.96H4.73H4.65H1.45c-0.27,0-0.48-0.22-0.48-0.48V4.53
+                    h10.41V5.5v0.05v0c0.36,0.24,0.69,0.53,0.96,0.86V5.54V5.5V2.41C12.34,1.61,11.7,0.96,10.9,0.96z M11.38,3.57H0.96V2.41
+                    c0-0.27,0.22-0.48,0.48-0.48h0.58v0.96h0.96V1.93h6.36v0.96h0.96V1.93h0.58c0.27,0,0.48,0.22,0.48,0.48V3.57z"/>
+                <path class="st008" d="M9.08,5.84c-1.79,0-3.25,1.46-3.25,3.25s1.46,3.25,3.25,3.25s3.25-1.46,3.25-3.25S10.88,5.84,9.08,5.84z
+                     M9.08,11.38c-1.26,0-2.29-1.03-2.29-2.29S7.82,6.8,9.08,6.8s2.29,1.03,2.29,2.29S10.34,11.38,9.08,11.38z"/>
+                <polygon class="st008" points="9.55,7.47 8.58,7.47 8.58,9.57 10.37,9.57 10.37,8.61 9.55,8.61 				"/>
+                <rect x="3.76" y="7.47" class="st008" width="0.96" height="0.96"/>
+                <rect x="1.83" y="7.47" class="st008" width="0.96" height="0.96"/>
+                <rect x="1.83" y="5.54" class="st008" width="0.96" height="0.96"/>
+                <rect x="1.83" y="9.4" class="st008" width="0.96" height="0.96"/>
+                <rect x="3.76" y="5.54" class="st008" width="0.96" height="0.96"/>
+                <rect x="3.76" y="9.4" class="st008" width="0.96" height="0.96"/>
+            </g>
+        </g>
+    </g>
 </g>
 </svg>
-                                            <input type="date" id="nuevoHorarioFecha" />
-                                        </div>
-                                        <div class="reloj">
+                    <input type="date" id="nuevoHorarioFecha" />
+                </div>
+                <div class="reloj">
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="12.07px"
-	 height="12.07px" viewBox="0 0 12.07 12.07" style="overflow:visible;enable-background:new 0 0 12.07 12.07;"
-	 xml:space="preserve">
+     height="12.07px" viewBox="0 0 12.07 12.07" style="overflow:visible;enable-background:new 0 0 12.07 12.07;"
+     xml:space="preserve">
 <style type="text/css">
-	.st009{fill:#76869E;}
+    .st009{fill:#76869E;}
 </style>
 <defs>
 </defs>
 <g id="Layer_2_1_">
-	<path class="st009" d="M6.04,12.07C2.7,12.07,0,9.37,0,6.04S2.7,0,6.04,0s6.04,2.7,6.04,6.04S9.37,12.07,6.04,12.07z M6.04,0.93
-		c-2.82,0-5.11,2.29-5.11,5.11s2.29,5.11,5.11,5.11s5.11-2.29,5.11-5.11S8.86,0.93,6.04,0.93z"/>
-	<path class="st009" d="M8.48,9.06c-0.12,0-0.24-0.05-0.33-0.13L5.6,6.37C5.51,6.28,5.46,6.16,5.46,6.04V2.32
-		c0-0.26,0.21-0.46,0.46-0.46c0.26,0,0.46,0.21,0.46,0.46v3.52l2.42,2.41c0.18,0.18,0.18,0.47,0,0.66c0,0,0,0,0,0
-		C8.72,9.01,8.61,9.06,8.48,9.06z"/>
+    <path class="st009" d="M6.04,12.07C2.7,12.07,0,9.37,0,6.04S2.7,0,6.04,0s6.04,2.7,6.04,6.04S9.37,12.07,6.04,12.07z M6.04,0.93
+        c-2.82,0-5.11,2.29-5.11,5.11s2.29,5.11,5.11,5.11s5.11-2.29,5.11-5.11S8.86,0.93,6.04,0.93z"/>
+    <path class="st009" d="M8.48,9.06c-0.12,0-0.24-0.05-0.33-0.13L5.6,6.37C5.51,6.28,5.46,6.16,5.46,6.04V2.32
+        c0-0.26,0.21-0.46,0.46-0.46c0.26,0,0.46,0.21,0.46,0.46v3.52l2.42,2.41c0.18,0.18,0.18,0.47,0,0.66c0,0,0,0,0,0
+        C8.72,9.01,8.61,9.06,8.48,9.06z"/>
 </g>
 </svg>
-                                            <input type="time" id="nuevoHorarioHora" />
-                                        </div>
-                                        <button id="btnAgregarHorario" class="btn-icon">
-                                            <i class="fas fa-plus"></i>
-                                        </button>`;
-                const citaChip = document.querySelector(`.horario-chip[data-idx="${idx}"]`);
-                citaChip.appendChild(agregarHorario);
-                agregarHorario.style.display = 'flex';
-                document.getElementById('nuevoHorarioFecha').value = h.fecha;
-                document.getElementById('nuevoHorarioHora').value = h.hora;
-                document.getElementById('btnAgregarHorario').style.display = 'none';
-            } else {
-                agregarHorario.style.display = 'none';
+                    <input type="time" id="nuevoHorarioHora" />
+                </div>
+                <button id="btnAgregarHorario" class="btn-icon">
+                    <i class="fas fa-plus"></i>
+                </button>`;
+
+                        const citaChip = document.querySelector(`.horario-chip[data-idx="${idx}"]`);
+                        citaChip.appendChild(agregarHorario);
+                        agregarHorario.style.display = 'flex';
+                        document.getElementById('nuevoHorarioFecha').value = h.fecha;
+                        document.getElementById('nuevoHorarioHora').value = h.hora;
+                        document.getElementById('btnAgregarHorario').style.display = 'none';
+                    } else {
+                        agregarHorario.style.display = 'none';
+                    }
+                }
             }
         }
         /*
@@ -613,7 +729,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     $('#modalCita').modal('hide');
                     horariosSeleccionados = [];
                     renderHorariosSeleccionados();
-                    refrescarCitasEspecialista(selectedespecialista);
+                    refrescarCitas(selectedespecialista);
                 } else {
                     mostrarMensajeFlotante('Error al agendar la cita: ' + response.error + '\n' + response.message);
                 }
@@ -621,11 +737,16 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    $(document).on('click', '.btn-cancelar', function () {
+        const usuarioModal = bootstrap.Modal.getInstance(document.getElementById('usuarioModal'));
+        usuarioModal.hide();
+    })
+
     // Guardar paciente 
     $(document).on('click', '#btnGuardarPaciente', function () {
         const formUsuario = $('#formUsuario');
         if (formUsuario[0].checkValidity()) {
-            const usuarioModal = new bootstrap.Modal(document.getElementById('usuarioModal'));
+            const usuarioModal = bootstrap.Modal.getInstance(document.getElementById('usuarioModal'));
             let url = baseurl + 'controllers/Pacientes/PacienteController.php?action=create';
             const formDataObj = {};
             const formDataArray = formUsuario.serializeArray();
@@ -640,18 +761,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 data: { data: JSON.stringify(formDataObj) },
                 dataType: 'json',
                 success: function (response) {
+                    console.log(response);
                     var mensaje = document.getElementById('mensaje');
                     mensaje.textContent = '';
-                    mensaje.textContent = response.message;
-                    mensaje.className = 'my-3 ' + response.success ? 'alert alert-success' : 'alert alert-danger';
+                    mensaje.textContent = response.message ?? response.error;
+                    mensaje.className = 'my-3 ' + (response.success ? 'alert alert-success' : 'alert alert-danger');
                     mensaje.hidden = false;
 
                     setTimeout(function () {
-                        usuarioModal.hide();
-                        mensaje.hidden = true;
-
-                        // ✅ Redirección si fue exitoso
                         if (response.success && response.paciente_id) {
+                            mensaje.hidden = true;
+                            usuarioModal.hide();
+                            // ✅ Redirección si fue exitoso
                             $('.avatar-iniciales').text(getInitials(formDataObj['nombres'], formDataObj['apellidos']));
                             $('.avatar-iniciales').css('background-color', stringToColor(`${formDataObj['nombres']} ${formDataObj['apellidos']}`));
                             $('.paciente-cita').attr('data-id', response.paciente_id);
@@ -675,92 +796,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    function getInitials(nombre, apellido) {
-        let n = nombre ? nombre.trim()[0] : '';
-        let a = apellido ? apellido.trim()[0] : '';
-        return (n + a).toUpperCase();
-    }
-
-    function stringToColor(str) {
-        // Simple hash to color
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            hash = str.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        const color = `hsl(${hash % 360}, 70%, 60%)`;
-        return color;
-    }
-
-    function calcularEdad(fechaNacStr) {
-        const hoy = new Date();
-        const partes = fechaNacStr.split('-');
-        if (partes.length !== 3) return '';
-        const anio = parseInt(partes[0], 10);
-        const mes = parseInt(partes[1], 10) - 1;
-        const dia = parseInt(partes[2], 10);
-        const fechaNac = new Date(anio, mes, dia);
-        let edad = hoy.getFullYear() - fechaNac.getFullYear();
-        const m = hoy.getMonth() - fechaNac.getMonth();
-        if (m < 0 || (m === 0 && hoy.getDate() < fechaNac.getDate())) {
-            edad--;
-        }
-        return edad;
-    }
-
-    // Botón actualizar horario
-    /*
-    if (!document.getElementById('btnActualizarHorario') && document.getElementById('btnEditarHorario')) {
-        const btnActualizar = document.getElementById('btnEditarHorario');
-        btnActualizar.id = 'btnActualizarHorario';
-        btnActualizar.className = 'btn-pagar';
-        btnActualizar.style.backgroundColor = '#ff7e00';
-        btnActualizar.style.display = 'none';
-    }
-        */
-    /*
- if (document.getElementById('btnActualizarHorario')) {
-     document.getElementById('btnActualizarHorario').onclick = function () {
-         console.log('Se ha hecho clic en el boton actualizae!');
-         if (idxEditando === null) return;
-         const fecha = document.getElementById('nuevoHorarioFecha').value;
-         const hora = document.getElementById('nuevoHorarioHora').value;
-         if (fecha && hora) {
-             let horaIni = formatearHora12h(hora);
-             let horaFin = formatearHora12h(sumar30Minutos(hora));
-             horariosSeleccionados[idxEditando] = { fecha, horaIni, horaFin, hora };
-             idxEditando = null;
-             renderHorariosSeleccionados();
-             actualizarEventosVisuales();
-             document.getElementById('nuevoHorarioFecha').value = '';
-             document.getElementById('nuevoHorarioHora').value = '';
-             document.getElementById('btnAgregarHorario').style.display = '';
-             document.getElementById('btnActualizarHorario').style.display = 'none';
-             document.querySelector('.agregar-horario').style.display = '';
-         }
-     };
- }
-     */
-
-    /*
-       // Botón agregar horario
-       if (document.getElementById('btnAgregarHorario')) {
-           document.getElementById('btnAgregarHorario').onclick = function () {
-               const fecha = document.getElementById('nuevoHorarioFecha').value;
-               const hora = document.getElementById('nuevoHorarioHora').value;
-               if (!fecha || !hora) return;
-               // Evita duplicados
-               if (horariosSeleccionados.some(h => h.fecha === fecha && h.hora === hora && h.idespecialista === selectedespecialista)) return;
-               let horaIni = formatearHora12h(hora);
-               let horaFin = formatearHora12h(sumar30Minutos(hora));
-               horariosSeleccionados.push({ fecha, horaIni, horaFin, hora, idespecialista: selectedespecialista, especialistaSeleccionado: especialistaSeleccionado });
-               renderHorariosSeleccionados();
-               actualizarEventosVisuales();
-               document.getElementById('nuevoHorarioFecha').value = '';
-               document.getElementById('nuevoHorarioHora').value = '';
-           };
-       }
-           */
-
     window.eliminarHorario = function (idx) {
         horariosSeleccionados.splice(idx, 1);
         idxEditando = null;
@@ -775,51 +810,213 @@ document.addEventListener('DOMContentLoaded', function () {
         return $.get(baseurl + `controllers/Citas/CitasController.php?action=read&idespecialista=${idespecialista}`);
     }
 
-    function refrescarCitasEspecialista(idespecialista) {
-        obtenerCitasEspecialista(idespecialista).then(function (citas) {
-            console.log("📅 Citas del especialista:", citas);
+    function obtenerCitas() {
+        return $.get(baseurl + `controllers/Citas/CitasController.php?action=read`);
+    }
 
-            // Elimina eventos de citas anteriores
-            calendar.getEvents().forEach(ev => {
-                if (ev.extendedProps && ev.extendedProps.tipo === 'cita-existente') ev.remove();
+    function refrescarCitas(idespecialista) {
+        if (idespecialista) {
+            obtenerCitasEspecialista(idespecialista).then(function (citas) {
+                citasGlobales = citas;
+                procesarYMostrarCitas(citas);
             });
-
-            // Agrega visualmente cada cita
-            citas.forEach(cita => {
-                const horaIni = formatearHora12h(cita.hora_inicio.slice(0, 5));
-                const horaFin = formatearHora12h(cita.hora_fin.slice(0, 5));
-                const nombreCompleto = `${cita.paciente_nombres} ${cita.paciente_apellidos}`;
-                const estado = `cita-${estadosCita[cita.idestado]}`
-
-                calendar.addEvent({
-                    title: `
-    <div class="evento-contenedor">
-      <div class="nombre-arriba"><strong>${nombreCompleto}</strong></div>
-      <div class="check-horario">
-        <span class='mi-check-clase'>
-          <svg xmlns="http://www.w3.org/2000/svg" width="17.56px" height="17.56px" viewBox="0 0 17.56 17.56">
-            <style>.mi-st10{fill:#48B02C;} .mi-st11{fill:#FFFFFF;}</style>
-            <g>
-              <path class='mi-st10' d='M8.78,0c4.85,0,8.78,3.93,8.78,8.78s-3.93,8.78-8.78,8.78C3.93,17.56,0,13.63,0,8.78S3.93,0,8.78,0'/>
-              <path class='mi-st11' d='M6,13.06L2.81,9.65c-0.35-0.37-0.45-0.93-0.2-1.37C3.02,7.54,3.97,7.47,4.5,8.03l2.48,2.65l3.92-3.66
-                c0.04-0.03,0.07-0.06,0.11-0.09l1.82-1.7c0.37-0.35,0.93-0.45,1.37-0.2c0.74,0.41,0.81,1.37,0.25,1.89l-5.63,5.26l-0.01-0.01
-                l-1.95,1.82L6,13.06z'/>
-            </g>
-          </svg>
-        </span>
-        <span class="horario-agendado">Horario: ${horaIni} - ${horaFin}</span>
-      </div>
-    </div>`,
-                    start: `${cita.fecha}T${cita.hora_inicio}`,
-                    end: `${cita.fecha}T${cita.hora_fin}`,
-                    display: 'background',
-                    classNames: ['fc-slot-custom-content', 'cita-agendada-evento', estado],
-                    extendedProps: {
-                        tipo: 'cita-existente'
-                    }
-                });
+        } else {
+            obtenerCitas().then(function (citas) {
+                citasGlobales = citas;
+                procesarYMostrarCitas(citas);
             });
+        }
+    }
+
+    function procesarYMostrarCitas(citas) {
+        // Elimina eventos de citas anteriores
+        calendar.getEvents().forEach(ev => {
+            if (ev.extendedProps && ev.extendedProps.tipo === 'cita-existente') ev.remove();
         });
+
+        // Agrupa las citas por fecha y hora
+        const citasAgrupadas = agruparCitasPorHorario(citas);
+
+        // Procesa cada grupo de citas
+        Object.keys(citasAgrupadas).forEach(clave => {
+            const gruposCitas = citasAgrupadas[clave];
+
+            if (gruposCitas.length === 1) {
+                // Una sola cita: mostrar normal
+                addCitaEvent(gruposCitas[0]);
+            } else {
+                // Múltiples citas: mostrar como cuadrados
+                addMultiplesCitasEvent(gruposCitas, clave);
+            }
+        });
+    }
+
+    function agruparCitasPorHorario(citas) {
+        const grupos = {};
+
+        citas.forEach(cita => {
+            const clave = `${cita.fecha}_${cita.hora_inicio}_${cita.hora_fin}`;
+            if (!grupos[clave]) {
+                grupos[clave] = [];
+            }
+            grupos[clave].push(cita);
+        });
+
+        return grupos;
+    }
+
+    function getSVGPendiente() {
+        return `<!-- Generator: Adobe Illustrator 25.2.3, SVG Export Plug-In  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="11.15px"
+	 height="11.15px" viewBox="0 0 11.15 11.15" style="overflow:visible;enable-background:new 0 0 11.15 11.15;"
+	 xml:space="preserve">
+<style type="text/css">
+	.st010{fill-rule:evenodd;clip-rule:evenodd;fill:#F07E0B;}
+	.st011{fill:#FFFFFF;}
+</style>
+<defs>
+</defs>
+<g>
+	<g>
+		<path class="st010" d="M5.57,0c3.08,0,5.57,2.5,5.57,5.57s-2.5,5.57-5.57,5.57C2.5,11.15,0,8.65,0,5.57S2.5,0,5.57,0"/>
+	</g>
+	<path class="st011" d="M7.82,8.34c-0.11,0-0.22-0.04-0.3-0.12L5.17,5.88C5.09,5.8,5.05,5.69,5.05,5.57V2.16
+		c0-0.24,0.19-0.43,0.43-0.43c0.24,0,0.43,0.19,0.43,0.43V5.4l2.22,2.22c0.17,0.17,0.17,0.44,0,0.6c0,0,0,0,0,0
+		C8.04,8.3,7.93,8.35,7.82,8.34z"/>
+</g>
+</svg>
+`;
+    }
+
+    function getSVGAnulado() {
+        return `<!-- Generator: Adobe Illustrator 25.2.3, SVG Export Plug-In  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="11px"
+	 height="11px" viewBox="0 0 11 11" style="overflow:visible;enable-background:new 0 0 11 11;" xml:space="preserve">
+<style type="text/css">
+	.st012{fill:none;stroke:#E5252A;stroke-linecap:round;stroke-miterlimit:10;}
+</style>
+<defs>
+</defs>
+<g>
+	<g id="g327_1_" transform="translate(492,135)">
+		<path id="path329_1_" class="st012" d="M-481.5-129.5c0,2.76-2.24,5-5,5s-5-2.24-5-5c0-2.76,2.24-5,5-5S-481.5-132.26-481.5-129.5z"
+			/>
+	</g>
+	<g id="g331_1_" transform="translate(347,105)">
+		<path id="path333_1_" class="st012" d="M-342.8-98.2l2.61-2.61"/>
+	</g>
+	<g id="g335_1_" transform="translate(407,105)">
+		<path id="path337_1_" class="st012" d="M-400.2-98.2l-2.61-2.61"/>
+	</g>
+</g>
+</svg>
+`;
+    }
+
+    function getSVGcancelado() {
+        return `<!-- Generator: Adobe Illustrator 25.2.3, SVG Export Plug-In  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="11.15px"
+	 height="11.15px" viewBox="0 0 11.15 11.15" style="overflow:visible;enable-background:new 0 0 11.15 11.15;"
+	 xml:space="preserve">
+<style type="text/css">
+	.st0{fill-rule:evenodd;clip-rule:evenodd;fill:#48B02C;}
+	.st1{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
+</style>
+<defs>
+</defs>
+<g>
+	<path class="st0" d="M5.57,0c3.08,0,5.57,2.5,5.57,5.57s-2.5,5.57-5.57,5.57C2.5,11.15,0,8.65,0,5.57S2.5,0,5.57,0"/>
+	<path class="st1" d="M3.81,8.29L1.78,6.13C1.56,5.89,1.5,5.54,1.65,5.26c0.26-0.47,0.87-0.52,1.2-0.16l1.57,1.68l2.49-2.33
+		C6.94,4.43,6.96,4.41,6.99,4.4l1.16-1.08C8.38,3.1,8.73,3.03,9.01,3.19c0.47,0.26,0.52,0.87,0.16,1.2L5.6,7.73l0,0L4.36,8.88
+		L3.81,8.29z"/>
+</g>
+</svg>
+`;
+    }
+
+    function getSVGCita(estado) {
+        switch (estado) {
+            case 'cita-pendiente':
+                return getSVGPendiente();
+            case 'cita-cancelado':
+                return getSVGcancelado();
+            case 'cita-anulado':
+                return getSVGAnulado();
+            default:
+                return '';
+        }
+    }
+
+    function addCitaEvent(cita) {
+        const horaIni = formatearHora12h(cita.hora_inicio.slice(0, 5));
+        const horaFin = formatearHora12h(cita.hora_fin.slice(0, 5));
+        const nombreCompleto = `${cita.paciente_nombres} ${cita.paciente_apellidos}`;
+        const estado = `cita-${estadosCita[cita.idestado]}`;
+
+        calendar.addEvent({
+            title: `
+<div class="evento-contenedor">
+  <div class="nombre-arriba"><strong>${nombreCompleto}</strong></div>
+  <div class="svg-horario">
+    <span class='mi-check-clase'>
+      ${getSVGCita(estado)}
+    </span>
+    <span class="horario-agendado">Horario: ${horaIni} - ${horaFin}</span>
+  </div>
+</div>`,
+            start: `${cita.fecha}T${cita.hora_inicio}`,
+            end: `${cita.fecha}T${cita.hora_fin}`,
+            classNames: ['fc-slot-custom-content', 'cita-agendada-evento', estado],
+            extendedProps: {
+                cita: cita,
+                tipo: 'cita-existente',
+                citaId: cita.id
+            }
+        });
+    }
+
+    function addMultiplesCitasEvent(citas, clave) {
+        const primeraCita = citas[0];
+
+        // Genera los cuadrados de colores
+        const cuadrados = citas.map((cita, index) => {
+            const estado = estadosCita[cita.idestado];
+            const colorClass = getColorClassByEstado(estado);
+
+            return `<div class="cita-cuadrado ${colorClass}" 
+                     data-cita-id="${cita.idcita}">
+                </div>`;
+        }).join('');
+
+        const contenidoHTML = `
+    <div class="cuadrados-container">
+        ${cuadrados}
+    </div>`;
+
+        calendar.addEvent({
+            title: contenidoHTML,
+            start: `${primeraCita.fecha}T${primeraCita.hora_inicio}`,
+            end: `${primeraCita.fecha}T${primeraCita.hora_fin}`,
+            classNames: ['fc-slot-custom-content', 'multiples-citas-evento'],
+            extendedProps: {
+                tipo: 'cita-existente',
+                multiple: true,
+                citas: citas
+            }
+        });
+    }
+
+    function getColorClassByEstado(estado) {
+        const coloresEstado = {
+            'pendiente': 'cuadrado-pendiente',
+            'confirmada': 'cuadrado-confirmada',
+            'completada': 'cuadrado-completada',
+            'cancelada': 'cuadrado-cancelada',
+            'no-asistio': 'cuadrado-no-asistio',
+            'reprogramada': 'cuadrado-reprogramada'
+        };
+
+        return coloresEstado[estado] || 'cuadrado-default';
     }
 
     //Cambio de horario segun la disponibilidad del especialista
@@ -828,10 +1025,10 @@ document.addEventListener('DOMContentLoaded', function () {
         especialistaSeleccionado = $(this).find('option:selected').text();
         if (selectedespecialista) {
             obtenerDisponibilidadEspecialista(selectedespecialista).then(function (data) {
-                disponibilidadActual = data;
+                disponibilidadEspecialista = data;
                 actualizarBusinessHours();
             });
-            refrescarCitasEspecialista(selectedespecialista);
+            refrescarCitas(selectedespecialista);
             // Solo actualiza la visualización en el calendario
             actualizarEventosVisuales(true);
             lastEspecialista = selectedespecialista;
@@ -845,7 +1042,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     function actualizarBusinessHours() {
-        if (!disponibilidadActual || disponibilidadActual.length === 0) {
+        if (!disponibilidadEspecialista || disponibilidadEspecialista.length === 0) {
             calendar.setOption('businessHours', [{
                 daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
                 startTime: '00:00',
@@ -855,7 +1052,6 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
         const diasMap = {
-            'domingo': 0,
             'lunes': 1,
             'martes': 2,
             'miércoles': 3,
@@ -863,7 +1059,7 @@ document.addEventListener('DOMContentLoaded', function () {
             'viernes': 5,
             'sábado': 6
         };
-        const bh = disponibilidadActual.map(d => {
+        const bh = disponibilidadEspecialista.map(d => {
             const start = d.horainicio.slice(0, 5);
             // Suma 30 minutos a la hora de fin para que el sombreado NO incluya la hora de fin
             let [h, m] = d.horafin.slice(0, 5).split(':');
@@ -893,7 +1089,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
         }, 10);
     }
-    let disponibilidadActual = [];
 
     //Busqueda de pacientes
     $('#searchPaciente').on('keyup', function () {
@@ -942,20 +1137,15 @@ document.addEventListener('DOMContentLoaded', function () {
     // Mensaje flotante si no hay especialista seleccionado
     function mostrarMensajeFlotante(msg) {
         let div = document.createElement('div');
-        div.className = 'mensaje-flotante';
+        div.className = 'alert-danger';
         div.textContent = msg;
         Object.assign(div.style, {
             position: 'fixed',
             top: '30px',
             left: '50%',
             transform: 'translateX(-50%)',
-            background: '#e74c3c',
-            color: '#fff',
             padding: '12px 28px',
-            borderRadius: '8px',
             zIndex: 9999,
-            fontWeight: 'bold',
-            fontSize: '1.1em',
             boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
         });
         document.body.appendChild(div);
@@ -999,7 +1189,7 @@ function sumar30Minutos(hora) {
 
 // Personaliza el renderizado de los eventos para permitir HTML en el título
 calendar.setOption('eventContent', function (arg) {
-    if (arg.event.display === 'background' && arg.event.classNames.includes('fc-slot-custom-content')) {
+    if (arg.event.classNames.includes('fc-slot-custom-content')) {
         return { html: arg.event.title };
     }
     // ...otros casos si es necesario...

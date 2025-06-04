@@ -135,3 +135,21 @@ body {
   border-bottom: 1px solid #76869e;
   margin-bottom: 1rem;
 }
+
+.alert-success {
+  background-color: #48b02c2b !important;
+  color: #2e7d32 !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  width: max-content;
+  border: none;
+}
+
+.alert-danger {
+  background-color: #c42d352b !important;
+  color: #c42d35 !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  width: max-content;
+  border: none;
+}

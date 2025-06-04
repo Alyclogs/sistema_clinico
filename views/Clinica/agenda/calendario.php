@@ -24,7 +24,6 @@ $idusuario = $_SESSION['idusuario'];
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="../../../assets/css/calendar.css">
     <link rel="stylesheet" href="../../../assets/css/general.css">
-    <link rel="stylesheet" href="<?php echo $base_url ?>assets/css/general.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js'></script>
 </head>
@@ -161,21 +160,6 @@ $idusuario = $_SESSION['idusuario'];
                                     Seleccione sus citas en la agenda</div>
                                 <div class="modal-cita-body">
                                     <div id="horariosSeleccionados" class="citas-lista"></div>
-
-                                    <div class="agregar-horario">
-                                        <div class="calendario">
-                                            <i class="fas fa-calendar-alt"></i>
-                                            <input type="date" id="nuevoHorarioFecha" />
-                                        </div>
-                                        <div class="reloj">
-                                            <i class="fas fa-clock"></i>
-                                            <input type="time" id="nuevoHorarioHora" />
-                                        </div>
-                                        <button id="btnAgregarHorario" class="btn-icon">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                    </div>
-
                                     <div class="footer-modal">
                                         <button id="btnReservar" class="btn-reservar">Reservar</button>
                                         <button id="btnPagar" class="btn-pagar">Pagar</button>
@@ -204,7 +188,7 @@ $idusuario = $_SESSION['idusuario'];
 
                 </div>
 
-                <div id="mensaje" class="my-3"></div>
+                <div id="mensaje" class="my-3" style="display: flex; max-width: 100%;"></div>
 
             </div>
         </div>

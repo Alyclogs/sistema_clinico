@@ -18,13 +18,21 @@ switch ($action) {
         if (isset($_POST['data'])) {
             $data = json_decode($_POST['data'], true);
             $mensaje = 'Paciente agregado correctamente';
-            $paciente_id = $model->crearPaciente($data);
-            if ($paciente_id != null) {
-                $result = true;
-            } else {
-                echo json_encode(['error' => 'No existe id de paciente']);
+            try {
+                $paciente_id = $model->crearPaciente($data);
+                if ($paciente_id != null) {
+                    $result = true;
+                } else {
+                    echo json_encode(['message' => 'No existe id de paciente']);
+                }
+                if ($result = true) {
+                    echo json_encode(['success' => $result, 'message' => $mensaje, 'paciente_id' => $paciente_id]);
+                } else {
+                    echo json_encode(['message' => 'Error al agregar al paciente']);
+                }
+            } catch (Exception $e) {
+                echo json_encode(['error' => 'Error al agregar al paciente: ' . $e->getMessage()]);
             }
-            echo json_encode(['success' => $result, 'message' => $mensaje, 'paciente_id' => $paciente_id]);
         } else {
             echo json_encode(['error' => 'Datos no proporcionados']);
         }

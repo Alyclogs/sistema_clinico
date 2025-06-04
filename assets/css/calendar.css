@@ -58,14 +58,16 @@ body {
   top: 10.9rem;
 }
 
-.btn-calendario .btn-editar-horario.btn-editando .st05 {
-  fill: #f07e0b;
+.cita-chip-buttons .btn-editar-horario.btn-editando {
   border-color: #f07e0b !important;
 }
 
-.btn-editar-horario.btn-editando:hover .st05 {
-  fill: #e77707;
-  border-color: #e77707 !important;
+.cita-chip-buttons .btn-editar-horario.btn-editando .st05 {
+  fill: #f07e0b !important;
+}
+
+.cita-chip-buttons .btn-editar-horario.btn-editando:hover .st05 {
+  fill: #e77707 !important;
 }
 
 .btn-editar-horario:hover .st05 {
@@ -503,11 +505,11 @@ a.fc-col-header-cell-cushion {
 }
 
 .fc .fc-non-business {
-  background-color: #ff2b3216 !important;
+  background-color: #cccccc40 !important;
 }
 
 .fc-blocked-almuerzo {
-  background-color: #ff2b3216 !important;
+  background-color: #cccccc40 !important;
 }
 
 .fc-timegrid-col-bg .fc-highlight {
@@ -530,13 +532,14 @@ a.fc-col-header-cell-cushion {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.fc .fc-bg-event {
+.fc-event.fc-slot-custom-content {
   opacity: 1 !important;
+  background: none !important;
 }
 
-.fc-slot-custom-content {
-  background-color: #60bfe9 !important;
-  pointer-events: none;
+.fc-event.fc-slot-custom-content {
+  background-color: #76869e !important;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -548,6 +551,7 @@ a.fc-col-header-cell-cushion {
   height: 100%;
   z-index: 10;
 }
+
 .fc-slot-check {
   color: #27ae60;
   font-size: 1.2em;
@@ -555,6 +559,7 @@ a.fc-col-header-cell-cushion {
   display: flex;
   align-items: center;
 }
+
 .fc-slot-horario {
   font-size: 0.95em;
   font-weight: 600;
@@ -608,17 +613,17 @@ a.fc-col-header-cell-cushion {
   border-left: 5px solid #60bfe9;
 }
 
-.cita-agendada-evento.cita-pendiente.fc-bg-event {
+.cita-agendada-evento.cita-pendiente.fc-event {
   background: #f07e0b12 !important;
   border-left: 5px solid #f07e0b;
 }
 
-.cita-agendada-evento.cita-cancelado.fc-bg-event {
+.cita-agendada-evento.cita-cancelado.fc-event {
   background: #48b02c10 !important;
   border-left: 5px solid #48b02c;
 }
 
-.cita-agendada-evento.cita-anulado.fc-bg-event {
+.cita-agendada-evento.cita-anulado.fc-event {
   background: #e5252a12 !important;
   border-left: 5px solid #e5252a;
 }
@@ -699,4 +704,167 @@ a.fc-col-header-cell-cushion {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
   margin-right: 2px;
   letter-spacing: 1px;
+}
+
+a.fc-event.fc-slot-custom-content.multiples-citas-evento {
+  background-color: transparent !important;
+  border: none !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 4px;
+}
+
+.fc-timegrid-event-harness-inset .fc-timegrid-event,
+.fc-timegrid-event.fc-event-mirror,
+.fc-timegrid-more-link {
+  box-shadow: none !important;
+}
+
+.fc-timegrid-event .fc-event-main {
+  padding: 1px 1px 0px;
+  display: flex;
+  align-items: center;
+}
+
+.svg-horario {
+  gap: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.info-horario {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 10px;
+}
+
+.horario-texto {
+  font-weight: bold;
+  color: #333;
+}
+
+.contador-citas {
+  color: #666;
+  font-size: 9px;
+}
+
+.cuadrados-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  max-width: 60px;
+}
+
+.cita-cuadrado {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.cita-cuadrado:hover {
+  transform: scale(1.3);
+  z-index: 10;
+  position: relative;
+}
+
+/* Colores según estado */
+.cuadrado-pendiente {
+  background-color: #ffc107; /* Amarillo */
+  border: 1px solid #e0a800;
+}
+
+.cuadrado-cancelado {
+  background-color: #28a745; /* Verde */
+  border: 1px solid #1e7e34;
+}
+
+.cuadrado-anulado {
+  background-color: #dc3545; /* Rojo */
+  border: 1px solid #bd2130;
+}
+
+.cuadrado-no-asistio {
+  background-color: #6c757d; /* Gris */
+  border: 1px solid #545b62;
+}
+
+.cuadrado-reprogramada {
+  background-color: #fd7e14; /* Naranja */
+  border: 1px solid #e55a00;
+}
+
+.cuadrado-default {
+  background-color: #e9ecef; /* Gris claro */
+  border: 1px solid #ced4da;
+}
+
+.fc .fc-highlight {
+  display: none;
+}
+
+.mytooltip {
+  flex-direction: row;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-tooltip-cita {
+  position: absolute;
+  z-index: 9999;
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  width: 320px;
+  font-size: 14px;
+}
+
+.tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.avatar-iniciales {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-ver-cita {
+  margin-left: auto;
+  max-height: fit-content;
+  background-color: #f60;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.tooltip-footer {
+  padding-top: 6px;
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+.icono-reloj {
+  margin-right: 4px;
 }

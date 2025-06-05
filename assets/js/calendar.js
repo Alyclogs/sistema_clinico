@@ -5,6 +5,10 @@ var selectedsubarea = "";
 var selectedespecialista = "";
 let lastEspecialista = null;
 let horariosPorEspecialista = {};
+let horariosSeleccionados = [];
+let especialistaSeleccionado = '';
+let disponibilidadEspecialista = [];
+let citasGlobales = [];
 let estadosCita = { '3': 'pendiente', '4': 'cancelado', '5': 'anulado' }
 
 function calcularEdad(fechaNacStr) {
@@ -51,8 +55,9 @@ function mostrarTooltipCita(cita, targetElement) {
     const edad = calcularEdad(fechaNacimiento);
     const especialista = `${cita.especialista_nombre} ${cita.especialista_apellidos ?? ''}`;
     const horario = `${formatearHora12h(cita.hora_inicio)} - ${formatearHora12h(cita.hora_fin)}`;
-    const color = stringToColor(pacienteNombre);
-    const iniciales = getInitials(cita.paciente_nombres, cita.paciente_apellidos);
+    //const color = stringToColor(pacienteNombre);
+    //const iniciales = getInitials(cita.paciente_nombres, cita.paciente_apellidos);
+    const svgEstado = getSVGCita(`cita-${estadosCita[cita.idestado]}`);
 
     const tooltip = document.createElement('div');
     tooltip.className = 'custom-tooltip-cita';
@@ -60,7 +65,7 @@ function mostrarTooltipCita(cita, targetElement) {
     <div class="mytooltip">
     <div class="tooltip-content">
         <div class="tooltip-header">
-            <span class="avatar-iniciales" style="background-color:${color}">${iniciales}</span>
+            <img class="avatar-iniciales" src="${cita.paciente_foto}">
             <div class="datos-paciente">
                 <strong>${pacienteNombre}</strong>
                 <div class="paciente-detalles">${fechaNacimiento} - ${edad} años</div>
@@ -69,29 +74,12 @@ function mostrarTooltipCita(cita, targetElement) {
         </div>
         <div class="tooltip-footer">
             <div class="especialista"><strong>${especialista}</strong></div>
-            <div class="horario">
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="11.15px"
-	 height="11.15px" viewBox="0 0 11.15 11.15" style="overflow:visible;enable-background:new 0 0 11.15 11.15;"
-	 xml:space="preserve">
-<style type="text/css">
-	.st012{fill-rule:evenodd;clip-rule:evenodd;fill:#F07E0B;}
-	.st13{fill:#FFFFFF;}
-</style>
-<defs>
-</defs>
-<g>
-	<g>
-		<path class="st012" d="M5.57,0c3.08,0,5.57,2.5,5.57,5.57s-2.5,5.57-5.57,5.57C2.5,11.15,0,8.65,0,5.57S2.5,0,5.57,0"/>
-	</g>
-	<path class="st13" d="M7.82,8.34c-0.11,0-0.22-0.04-0.3-0.12L5.17,5.88C5.09,5.8,5.05,5.69,5.05,5.57V2.16
-		c0-0.24,0.19-0.43,0.43-0.43c0.24,0,0.43,0.19,0.43,0.43V5.4l2.22,2.22c0.17,0.17,0.17,0.44,0,0.6c0,0,0,0,0,0
-		C8.04,8.3,7.93,8.35,7.82,8.34z"/>
-</g>
-</svg>
+            <div class="svg-horario">
+            ${svgEstado}
 ${horario}</div>
         </div>
         </div>
-        <button class="btn-ver-cita" onclick="verCita(${cita.idcita})">Ver cita</button>
+        <button class="btn btn-light btn-ver-cita" onclick="verCita(${cita.idcita})">Ver cita</button>
         </div>`;
 
     document.body.appendChild(tooltip);
@@ -103,8 +91,92 @@ ${horario}</div>
     targetElement._tooltip = tooltip;
 
     tooltip.addEventListener('mouseleave', function () {
-        ocultarTooltip();
+        setTimeout(() => {
+            ocultarTooltip();
+        }, 1000)
     })
+}
+
+function getSVGPendiente() {
+    return `<!-- Generator: Adobe Illustrator 25.2.3, SVG Export Plug-In  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="11.15px"
+	 height="11.15px" viewBox="0 0 11.15 11.15" style="overflow:visible;enable-background:new 0 0 11.15 11.15;"
+	 xml:space="preserve">
+<style type="text/css">
+	.st010{fill-rule:evenodd;clip-rule:evenodd;fill:#F07E0B;}
+	.st011{fill:#FFFFFF;}
+</style>
+<defs>
+</defs>
+<g>
+	<g>
+		<path class="st010" d="M5.57,0c3.08,0,5.57,2.5,5.57,5.57s-2.5,5.57-5.57,5.57C2.5,11.15,0,8.65,0,5.57S2.5,0,5.57,0"/>
+	</g>
+	<path class="st011" d="M7.82,8.34c-0.11,0-0.22-0.04-0.3-0.12L5.17,5.88C5.09,5.8,5.05,5.69,5.05,5.57V2.16
+		c0-0.24,0.19-0.43,0.43-0.43c0.24,0,0.43,0.19,0.43,0.43V5.4l2.22,2.22c0.17,0.17,0.17,0.44,0,0.6c0,0,0,0,0,0
+		C8.04,8.3,7.93,8.35,7.82,8.34z"/>
+</g>
+</svg>
+`;
+}
+
+function getSVGAnulado() {
+    return `<!-- Generator: Adobe Illustrator 25.2.3, SVG Export Plug-In  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="11px"
+	 height="11px" viewBox="0 0 11 11" style="overflow:visible;enable-background:new 0 0 11 11;" xml:space="preserve">
+<style type="text/css">
+	.st012{fill:none;stroke:#E5252A;stroke-linecap:round;stroke-miterlimit:10;}
+</style>
+<defs>
+</defs>
+<g>
+	<g id="g327_1_" transform="translate(492,135)">
+		<path id="path329_1_" class="st012" d="M-481.5-129.5c0,2.76-2.24,5-5,5s-5-2.24-5-5c0-2.76,2.24-5,5-5S-481.5-132.26-481.5-129.5z"
+			/>
+	</g>
+	<g id="g331_1_" transform="translate(347,105)">
+		<path id="path333_1_" class="st012" d="M-342.8-98.2l2.61-2.61"/>
+	</g>
+	<g id="g335_1_" transform="translate(407,105)">
+		<path id="path337_1_" class="st012" d="M-400.2-98.2l-2.61-2.61"/>
+	</g>
+</g>
+</svg>
+`;
+}
+
+function getSVGcancelado() {
+    return `<!-- Generator: Adobe Illustrator 25.2.3, SVG Export Plug-In  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="11.15px"
+	 height="11.15px" viewBox="0 0 11.15 11.15" style="overflow:visible;enable-background:new 0 0 11.15 11.15;"
+	 xml:space="preserve">
+<style type="text/css">
+	.st013{fill-rule:evenodd;clip-rule:evenodd;fill:#48B02C;}
+	.st014{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
+</style>
+<defs>
+</defs>
+<g>
+	<path class="st013" d="M5.57,0c3.08,0,5.57,2.5,5.57,5.57s-2.5,5.57-5.57,5.57C2.5,11.15,0,8.65,0,5.57S2.5,0,5.57,0"/>
+	<path class="st014" d="M3.81,8.29L1.78,6.13C1.56,5.89,1.5,5.54,1.65,5.26c0.26-0.47,0.87-0.52,1.2-0.16l1.57,1.68l2.49-2.33
+		C6.94,4.43,6.96,4.41,6.99,4.4l1.16-1.08C8.38,3.1,8.73,3.03,9.01,3.19c0.47,0.26,0.52,0.87,0.16,1.2L5.6,7.73l0,0L4.36,8.88
+		L3.81,8.29z"/>
+</g>
+</svg>
+`;
+}
+
+function getSVGCita(estado) {
+    switch (estado) {
+        case 'cita-pendiente':
+            return getSVGPendiente();
+        case 'cita-cancelado':
+            return getSVGcancelado();
+        case 'cita-anulado':
+            return getSVGAnulado();
+        default:
+            return '';
+    }
 }
 
 const calendar = new FullCalendar.Calendar(calendarEl, {
@@ -139,12 +211,9 @@ const calendar = new FullCalendar.Calendar(calendarEl, {
         }
     },
     eventClick: function (info) {
-        // Si es evento múltiple, no hacer nada (los cuadrados manejan sus propios clicks)
         if (info.event.extendedProps.multiple) {
             return false; // Prevenir comportamiento por defecto
         }
-
-        // Para eventos individuales, puedes agregar tu lógica aquí
         console.log('Evento individual clickeado:', info.event);
     },
     eventMouseEnter: function (info) {
@@ -162,21 +231,20 @@ const calendar = new FullCalendar.Calendar(calendarEl, {
                     }
                 });
 
-                /*
                 cuadrado.addEventListener('mouseleave', function () {
-                    ocultarTooltip();
+                    setTimeout(() => {
+                        ocultarTooltip();
+                    }, 1000)
                 });
-                */
             });
         } else if (event.extendedProps.cita && event.classNames.includes('cita-agendada-evento')) {
             mostrarTooltipCita(event.extendedProps.cita, info.el);
         }
     },
     eventMouseLeave: function (info) {
-        /*
         setTimeout(() => {
             ocultarTooltip();
-        }, 1000)}*/
+        }, 1500)
     }
 });
 
@@ -214,7 +282,7 @@ const miniCalendar = new FullCalendar.Calendar(miniCalendarEl, {
 document.addEventListener('DOMContentLoaded', function () {
 
     refrescarCitas();
-    //actualizarEventosVisuales(false);
+    //refrescarCitas(false);
 
     updateCalendarDateRange(calendar);
     resaltarBloqueoAlmuerzo();
@@ -277,6 +345,26 @@ document.addEventListener('DOMContentLoaded', function () {
         buscarEspecialistaPorAreaySubarea(selectedarea, selectedsubarea);
     })
 
+    //Cambio de horario segun la disponibilidad del especialista
+    $("#filtro-especialista").change(function () {
+        selectedespecialista = $(this).val();
+        especialistaSeleccionado = $(this).find('option:selected').text();
+        if (selectedespecialista) {
+            obtenerDisponibilidadEspecialista(selectedespecialista).then(function (data) {
+                disponibilidadEspecialista = data;
+                actualizarBusinessHours();
+            });
+            refrescarCitas(selectedespecialista);
+            lastEspecialista = selectedespecialista;
+        } else {
+            mostrarMensajeFlotante('Debe seleccionar un especialista primero');
+            calendar.setOption('businessHours', []);
+            refrescarCitas();
+            lastEspecialista = null;
+        }
+        // NO modificar la lista del modal ni horariosSeleccionados
+    });
+
     document.getElementById('prev-week').addEventListener('click', function () {
         calendar.prev();
         updateCalendarDateRange(calendar);
@@ -286,11 +374,6 @@ document.addEventListener('DOMContentLoaded', function () {
         calendar.next();
         updateCalendarDateRange(calendar);
     });
-
-    let horariosSeleccionados = [];
-    let especialistaSeleccionado = '';
-    let disponibilidadEspecialista = [];
-    let citasGlobales = [];
 
     // Selección de una sola celda a la vez (NO permite rangos)
     calendar.setOption('selectable', true);
@@ -327,15 +410,15 @@ document.addEventListener('DOMContentLoaded', function () {
             let horaFin = formatearHora12h(sumar30Minutos(hora));
             const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
             const nombreDia = dias[info.start.getDay()];
-            const disp = disponibilidadEspecialista.find(d => d.fecha === nombreDia);
+            const disp = disponibilidadEspecialista.filter(d => d.fecha === nombreDia);
             let disponible = false;
             if (disp) {
                 const horaSel = (hora.length === 5 ? hora + ':00' : hora);
-                if (hora >= '13:00' && hora < '14:00' && hora < '9:00' && hora > '17:00') {
+                if ((hora >= '13:00' && hora < '14:00') || (hora < '9:00' && hora > '17:00')) {
                     mostrarMensajeFlotante('Horario fuera de disponibilidad');
                     return;
                 }
-                disponible = (horaSel >= disp.horainicio && horaSel <= disp.horafin);
+                disponible = disp.some(d => horaSel >= d.horainicio && horaSel <= d.horafin);
             }
             if (!disponible) {
                 mostrarMensajeFlotante('Horario fuera de disponibilidad');
@@ -346,25 +429,6 @@ document.addEventListener('DOMContentLoaded', function () {
             actualizarEventosVisuales();
         }
     });
-
-    function actualizarEventosVisuales(render = true, global = true) {
-        // Limpia todos los eventos visuales previos
-        calendar.getEvents().forEach(ev => {
-            if (ev.extendedProps && ev.extendedProps.tipo === 'seleccionado') ev.remove();
-        });
-        if (!render) return;
-        // Solo muestra los horarios seleccionados del especialista activo
-        horariosSeleccionados.filter(h => h.idespecialista === selectedespecialista).forEach(h => {
-            calendar.addEvent({
-                title: `<span class='fc-slot-horario'>${h.horaIni} - ${h.horaFin}</span>`,
-                start: h.fecha + 'T' + h.hora + ':00',
-                end: h.fecha + 'T' + sumar30Minutos(h.hora) + ':00',
-                //display: 'background',
-                classNames: ['fc-slot-custom-content'],
-                extendedProps: { tipo: 'seleccionado' }
-            });
-        });
-    }
 
     // --- GESTIÓN DE HORARIOS SELECCIONADOS  ---
     var idxEditando = null; // Índice del horario que se está editando
@@ -439,14 +503,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         // Mostrar/ocultar mensaje y body según cantidad de horarios
         const noHorarios = document.querySelector('.no-horarios-selected');
-        const subtitulo = document.querySelector('.subtitulo');
+        const subtituloCitas = document.getElementById('.subCitasSeleccionadas');
         const modalCitaBody = document.querySelector('.modal-cita-body');
         const agregarMas = document.querySelector('.agregar-mas');
         const horariosSeleccionadosDiv = document.getElementById('horariosSeleccionados');
         const agregarHorarioDiv = document.querySelector('.agregar-horario');
         const footerModal = document.querySelector('.footer-modal');
         if (horariosSeleccionados.length === 0) {
-            if (subtitulo) subtitulo.style.display = 'none';
+            if (subtituloCitas) subtituloCitas.style.display = 'none';
             if (noHorarios) noHorarios.style.display = 'flex';
             if (modalCitaBody) modalCitaBody.style.display = 'none';
             if (agregarMas) agregarMas.style.display = 'block';
@@ -454,7 +518,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (agregarHorarioDiv) agregarHorarioDiv.style.display = 'none';
             if (footerModal) footerModal.style.display = 'none'; // <-- fuerza ocultar footer
         } else {
-            if (subtitulo) subtitulo.style.display = 'block';
+            if (subtituloCitas) subtituloCitas.style.display = 'block';
             if (noHorarios) noHorarios.style.display = 'none';
             if (modalCitaBody) modalCitaBody.style.display = 'block';
             if (agregarMas) agregarMas.style.display = 'block';
@@ -462,7 +526,7 @@ document.addEventListener('DOMContentLoaded', function () {
             //if (agregarHorarioDiv) agregarHorarioDiv.style.display = 'flex';
             if (footerModal) footerModal.style.display = 'flex'; // <-- fuerza mostrar footer
         }
-        actualizarEventosVisuales();
+        refrescarCitas();
         //document.querySelector('.agregar-horario').style.display = 'flex';
     }
 
@@ -479,7 +543,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     if (fecha && hora) {
                         if (hora >= '13:00' && hora < '14:00') {
-                            console.log('Hora de almuerzo seleccionada (X)');
                             mostrarMensajeFlotante('Horario fuera de disponibilidad');
                             return;
                         }
@@ -493,13 +556,11 @@ document.addEventListener('DOMContentLoaded', function () {
                                 let fechaSel = new Date(horariosSeleccionados[idxEditando].fecha);
                                 const nombreDia = dias[fechaSel.getDay()];
                                 let disponible = false;
-                                console.log(disponibilidadEspecialista);
 
                                 const disp = disponibilidadEspecialista.find(d => d.fecha === nombreDia);
                                 if (disp) {
                                     const horaSel = (hora.length === 5 ? hora + ':00' : hora);
                                     disponible = (horaSel >= disp.horainicio && horaSel <= disp.horafin);
-                                    console.log(`HoraSel: ${horaSel}, disponibilidad.horaInicio: ${disp.horainicio}, disp.horaFin: ${disp.horafin}, disponible? ${disponible}`)
                                 }
 
                                 if (!disponible) {
@@ -511,12 +572,9 @@ document.addEventListener('DOMContentLoaded', function () {
                                 return obtenerCitasEspecialista(horariosSeleccionados[idxEditando].idespecialista);
                             })
                             .then(function (citasEspecialista) {
-                                console.log(citasEspecialista);
                                 const cit = citasEspecialista.find(d => d.fecha === fecha && d.hora_inicio === hora);
-                                console.log(fecha, hora);
 
                                 if (cit) {
-                                    console.log('horario no disponible');
                                     mostrarMensajeFlotante('Horario fuera de disponibilidad');
                                     return;
                                 }
@@ -530,7 +588,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                                 idxEditando = null;
                                 renderHorariosSeleccionados();
-                                actualizarEventosVisuales();
+                                refrescarCitas();
 
                                 // Remover elemento de edición correctamente
                                 const elementoEdicion = document.querySelector(`.horario-chip[data-idx="${idxActual}"] .agregar-horario`);
@@ -547,12 +605,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 } else {
                     // Si es otro, inicia edición
-                    console.log('EDITANDO NUEVO HORARIO CON ID ', idx);
                     idxEditando = idx;
                     renderHorariosSeleccionados();
                     const h = horariosSeleccionados[idx];
                     let agregarHorario = document.querySelector('.agregar-horario');
-                    console.log('Agregar horario existe? ', agregarHorario != null);
 
                     if (!agregarHorario) {
                         agregarHorario = document.createElement('div');
@@ -626,39 +682,30 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
         }
-        /*
-        if (e.target.closest('.agregar-mas a')) {
-            e.preventDefault();
-            if (especialistaSeleccionado === '') {
-                mostrarMensajeFlotante('Debe seleccionar un especialista primero');
-                return;
-            }
-            idxEditando = null;
-            document.querySelector('.agregar-horario').style.display = 'flex';
-            document.getElementById('btnAgregarHorario').style.display = '';
-            let btnActualizar = document.getElementById('btnActualizarHorario');
-            if (btnActualizar) btnActualizar.style.display = 'none';
-        }
-            */
         if (e.target.closest(".paciente-item")) {
-            const paciente = e.target.closest(".paciente-item");
-            const idPaciente = paciente.dataset.id;
-            const nombreCompleto = paciente.querySelector('.paciente-nombre strong').textContent;
-            const dni = paciente.querySelector('.dni').textContent.replace('DNI: ', '').replace('|', '').trim();
-            const fechaNac = paciente.querySelector('.fecha-nac').textContent.trim();
-            const edad = calcularEdad(fechaNac);
+            const pacienteItem = e.target.closest(".paciente-item");
+            const idPaciente = pacienteItem.dataset.id;
+            //const nombreCompleto = paciente.querySelector('.paciente-nombre strong').textContent;
+            const dni = pacienteItem.querySelector('.dni').textContent.replace('DNI: ', '').replace('|', '').trim();
+            //const fechaNac = paciente.querySelector('.fecha-nac').textContent.trim();
+            buscarPacientes(dni).then(pacientes => {
+                console.log(pacientes);
+                const pacienteActual = pacientes[0];
+                const edad = calcularEdad(pacienteActual.fecha_nacimiento);
 
-            $('.avatar-iniciales').text(getInitials(nombreCompleto.split(' ')[0], nombreCompleto.split(' ')[1]));
-            $('.avatar-iniciales').css('background-color', stringToColor(nombreCompleto));
-            $('.paciente-cita').attr('data-id', idPaciente);
-            $('.paciente-nombre').text(nombreCompleto);
-            $('.pacientesel-dni').text(`DNI: ${dni}`);
-            $('.pacientesel-edad').text(`Edad: ${edad} años`);
-            $('.paciente-detalles span').css('color', '#76869E');
+                //$('.avatar-iniciales').text(getInitials(nombreCompleto.split(' ')[0], nombreCompleto.split(' ')[1]));
+                //$('.avatar-iniciales').css('background-color', stringToColor(nombreCompleto));
+                $('.paciente-cita').attr('data-id', idPaciente);
+                $('#pacienteSelFoto').attr('src', pacienteActual.foto);
+                $('.paciente-nombre').text(`${pacienteActual.nombres} ${pacienteActual.apellidos}`);
+                $('.pacientesel-dni').text(`DNI: ${pacienteActual.dni}`);
+                $('.pacientesel-edad').text(`Edad: ${edad} años`);
+                $('.paciente-detalles span').css('color', '#76869E');
 
-            $('#subtituloPaciente').show();
-            $('#pacienteSeleccionado').show();
-            $('#resultadoPacientes').css('display', 'none').empty();
+                $('#subPacienteSeleccionado').show();
+                $('#pacienteSeleccionado').show();
+                $('#resultadoPacientes').css('display', 'none').empty();
+            });
         }
         if (e.target.closest('#btnPagar')) {
             if (!selectedespecialista) {
@@ -722,10 +769,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 fecha: fecha,
                 idestado: idestado
             };
-            console.log('Datos de la cita:', data); //Correcto
             $.post(baseurl + 'controllers/Citas/CitasController.php?action=create', { data: JSON.stringify(data) }, function (response) {
                 if (response.success) {
-                    console.log('Cita agendada correctamente');
                     $('#modalCita').modal('hide');
                     horariosSeleccionados = [];
                     renderHorariosSeleccionados();
@@ -761,16 +806,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 data: { data: JSON.stringify(formDataObj) },
                 dataType: 'json',
                 success: function (response) {
-                    console.log(response);
-                    var mensaje = document.getElementById('mensaje');
-                    mensaje.textContent = '';
-                    mensaje.textContent = response.message ?? response.error;
-                    mensaje.className = 'my-3 ' + (response.success ? 'alert alert-success' : 'alert alert-danger');
-                    mensaje.hidden = false;
+                    let textContent = response.message ?? response.error;
+                    mostrarMensajeFlotante(textContent, response.success);
 
                     setTimeout(function () {
                         if (response.success && response.paciente_id) {
-                            mensaje.hidden = true;
                             usuarioModal.hide();
                             // ✅ Redirección si fue exitoso
                             $('.avatar-iniciales').text(getInitials(formDataObj['nombres'], formDataObj['apellidos']));
@@ -814,17 +854,37 @@ document.addEventListener('DOMContentLoaded', function () {
         return $.get(baseurl + `controllers/Citas/CitasController.php?action=read`);
     }
 
+    function actualizarEventosVisuales(render = true) {
+        // Limpia todos los eventos visuales previos
+        calendar.getEvents().forEach(ev => {
+            if (ev.extendedProps && ev.extendedProps.tipo === 'seleccionado') ev.remove();
+        });
+        if (!render) return;
+        // Solo muestra los horarios seleccionados del especialista activo
+        horariosSeleccionados.filter(h => h.idespecialista === selectedespecialista).forEach(h => {
+            calendar.addEvent({
+                title: `<span class='fc-slot-check'></span>
+                        <span class='fc-slot-horario'>${h.horaIni} - ${h.horaFin}</span>`,
+                start: h.fecha + 'T' + h.hora + ':00',
+                end: h.fecha + 'T' + sumar30Minutos(h.hora) + ':00',
+                display: 'background',
+                classNames: ['fc-slot-custom-content'],
+                extendedProps: { tipo: 'seleccionado' }
+            });
+        });
+    }
+
     function refrescarCitas(idespecialista) {
-        if (idespecialista) {
+        if (idespecialista != null && idespecialista !== '') {
             obtenerCitasEspecialista(idespecialista).then(function (citas) {
                 citasGlobales = citas;
                 procesarYMostrarCitas(citas);
-            });
+            }).catch(e => console.log(e));
         } else {
             obtenerCitas().then(function (citas) {
                 citasGlobales = citas;
                 procesarYMostrarCitas(citas);
-            });
+            }).catch(e => console.log(e));;
         }
     }
 
@@ -863,88 +923,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         return grupos;
-    }
-
-    function getSVGPendiente() {
-        return `<!-- Generator: Adobe Illustrator 25.2.3, SVG Export Plug-In  -->
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="11.15px"
-	 height="11.15px" viewBox="0 0 11.15 11.15" style="overflow:visible;enable-background:new 0 0 11.15 11.15;"
-	 xml:space="preserve">
-<style type="text/css">
-	.st010{fill-rule:evenodd;clip-rule:evenodd;fill:#F07E0B;}
-	.st011{fill:#FFFFFF;}
-</style>
-<defs>
-</defs>
-<g>
-	<g>
-		<path class="st010" d="M5.57,0c3.08,0,5.57,2.5,5.57,5.57s-2.5,5.57-5.57,5.57C2.5,11.15,0,8.65,0,5.57S2.5,0,5.57,0"/>
-	</g>
-	<path class="st011" d="M7.82,8.34c-0.11,0-0.22-0.04-0.3-0.12L5.17,5.88C5.09,5.8,5.05,5.69,5.05,5.57V2.16
-		c0-0.24,0.19-0.43,0.43-0.43c0.24,0,0.43,0.19,0.43,0.43V5.4l2.22,2.22c0.17,0.17,0.17,0.44,0,0.6c0,0,0,0,0,0
-		C8.04,8.3,7.93,8.35,7.82,8.34z"/>
-</g>
-</svg>
-`;
-    }
-
-    function getSVGAnulado() {
-        return `<!-- Generator: Adobe Illustrator 25.2.3, SVG Export Plug-In  -->
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="11px"
-	 height="11px" viewBox="0 0 11 11" style="overflow:visible;enable-background:new 0 0 11 11;" xml:space="preserve">
-<style type="text/css">
-	.st012{fill:none;stroke:#E5252A;stroke-linecap:round;stroke-miterlimit:10;}
-</style>
-<defs>
-</defs>
-<g>
-	<g id="g327_1_" transform="translate(492,135)">
-		<path id="path329_1_" class="st012" d="M-481.5-129.5c0,2.76-2.24,5-5,5s-5-2.24-5-5c0-2.76,2.24-5,5-5S-481.5-132.26-481.5-129.5z"
-			/>
-	</g>
-	<g id="g331_1_" transform="translate(347,105)">
-		<path id="path333_1_" class="st012" d="M-342.8-98.2l2.61-2.61"/>
-	</g>
-	<g id="g335_1_" transform="translate(407,105)">
-		<path id="path337_1_" class="st012" d="M-400.2-98.2l-2.61-2.61"/>
-	</g>
-</g>
-</svg>
-`;
-    }
-
-    function getSVGcancelado() {
-        return `<!-- Generator: Adobe Illustrator 25.2.3, SVG Export Plug-In  -->
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="11.15px"
-	 height="11.15px" viewBox="0 0 11.15 11.15" style="overflow:visible;enable-background:new 0 0 11.15 11.15;"
-	 xml:space="preserve">
-<style type="text/css">
-	.st0{fill-rule:evenodd;clip-rule:evenodd;fill:#48B02C;}
-	.st1{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
-</style>
-<defs>
-</defs>
-<g>
-	<path class="st0" d="M5.57,0c3.08,0,5.57,2.5,5.57,5.57s-2.5,5.57-5.57,5.57C2.5,11.15,0,8.65,0,5.57S2.5,0,5.57,0"/>
-	<path class="st1" d="M3.81,8.29L1.78,6.13C1.56,5.89,1.5,5.54,1.65,5.26c0.26-0.47,0.87-0.52,1.2-0.16l1.57,1.68l2.49-2.33
-		C6.94,4.43,6.96,4.41,6.99,4.4l1.16-1.08C8.38,3.1,8.73,3.03,9.01,3.19c0.47,0.26,0.52,0.87,0.16,1.2L5.6,7.73l0,0L4.36,8.88
-		L3.81,8.29z"/>
-</g>
-</svg>
-`;
-    }
-
-    function getSVGCita(estado) {
-        switch (estado) {
-            case 'cita-pendiente':
-                return getSVGPendiente();
-            case 'cita-cancelado':
-                return getSVGcancelado();
-            case 'cita-anulado':
-                return getSVGAnulado();
-            default:
-                return '';
-        }
     }
 
     function addCitaEvent(cita) {
@@ -1019,28 +997,6 @@ document.addEventListener('DOMContentLoaded', function () {
         return coloresEstado[estado] || 'cuadrado-default';
     }
 
-    //Cambio de horario segun la disponibilidad del especialista
-    $("#filtro-especialista").change(function () {
-        selectedespecialista = $(this).val();
-        especialistaSeleccionado = $(this).find('option:selected').text();
-        if (selectedespecialista) {
-            obtenerDisponibilidadEspecialista(selectedespecialista).then(function (data) {
-                disponibilidadEspecialista = data;
-                actualizarBusinessHours();
-            });
-            refrescarCitas(selectedespecialista);
-            // Solo actualiza la visualización en el calendario
-            actualizarEventosVisuales(true);
-            lastEspecialista = selectedespecialista;
-        } else {
-            mostrarMensajeFlotante('Debe seleccionar un especialista primero');
-            calendar.setOption('businessHours', []);
-            actualizarEventosVisuales(false);
-            lastEspecialista = null;
-        }
-        // NO modificar la lista del modal ni horariosSeleccionados
-    });
-
     function actualizarBusinessHours() {
         if (!disponibilidadEspecialista || disponibilidadEspecialista.length === 0) {
             calendar.setOption('businessHours', [{
@@ -1100,27 +1056,34 @@ document.addEventListener('DOMContentLoaded', function () {
         buscarPacientes(query);
     });
 
-    function buscarPacientes(query) {
-        $.get(baseurl + `controllers/Pacientes/PacienteController.php?action=buscar&filtro=${encodeURIComponent(query)}`, function (data) {
-            const pacientes = Array.isArray(data) ? data : JSON.parse(data);
-            let html = '';
+    function buscarPacientes(query = '') {
+        return new Promise((resolve, reject) => {
+            $.get(
+                baseurl + `controllers/Pacientes/PacienteController.php?action=buscar&filtro=${encodeURIComponent(query)}`,
+                function (data) {
+                    let pacientes = Array.isArray(data) ? data : JSON.parse(data);
+                    let html = '';
 
-            if (pacientes.length > 0) {
-                pacientes.forEach(p => {
-                    html += `<div class="paciente-item" data-id="${p.idpaciente}">
-            <div class="paciente-nombre">
-                <strong>${p.nombres} ${p.apellidos}</strong>
-            </div>
-            <div class="paciente-detalles">
-                <span class="fecha-nac">${p.fecha_nacimiento}</span>
-                <span class="dni">DNI: ${p.dni}</span> 
-            </div>
-        </div>`;
-                });
-            } else {
-                html = '<div class="paciente-item">No se encontraron pacientes</div>';
-            }
-            $('#resultadoPacientes').html(html).css('display', 'flex');
+                    if (pacientes.length > 0) {
+                        pacientes.forEach(p => {
+                            html += `<div class="paciente-item" data-id="${p.idpaciente}">
+                            <div class="paciente-nombre">
+                                <strong>${p.nombres} ${p.apellidos}</strong>
+                            </div>
+                            <div class="paciente-detalles">
+                                <span class="fecha-nac">${p.fecha_nacimiento}</span>
+                                <span class="dni">DNI: ${p.dni}</span> 
+                            </div>
+                        </div>`;
+                        });
+                    } else {
+                        html = '<div class="paciente-item">No se encontraron pacientes</div>';
+                    }
+
+                    $('#resultadoPacientes').html(html).css('display', 'flex');
+                    resolve(pacientes);
+                }
+            ).fail(reject);
         });
     }
 
@@ -1135,10 +1098,16 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Mensaje flotante si no hay especialista seleccionado
-    function mostrarMensajeFlotante(msg) {
-        let div = document.createElement('div');
-        div.className = 'alert-danger';
+    function mostrarMensajeFlotante(msg, exito = false) {
+        let div = document.getElementById('mensajeFlotante');
+        /*
+        if (div) div.remove();
+        div = document.createElement('div');
+        div.id = 'mensajeFlotante';
+        */
+        div.className = 'my-3 ' + (exito ? 'alert-success' : 'alert-danger');
         div.textContent = msg;
+        /*
         Object.assign(div.style, {
             position: 'fixed',
             top: '30px',
@@ -1148,7 +1117,9 @@ document.addEventListener('DOMContentLoaded', function () {
             zIndex: 9999,
             boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
         });
-        document.body.appendChild(div);
+        */
+        //document.body.appendChild(div);
+        div.hidden = false;
         setTimeout(() => {
             div.remove();
         }, 2200);

@@ -1,11 +1,9 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
 $base_url = 'http://localhost/SistemaClinico/';
 $current_url = "https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 
 // Supongamos que el rol está guardado en la sesión
+
 $rol_usuario = $_SESSION['rol'] ?? ''; // Si no hay rol, cadena vacía
 
 // Controlar la clase 'active' para un enlace específico
@@ -13,6 +11,7 @@ $activeUsuarios = (strpos($current_url, $base_url . 'views/Clinica/usuarios/inde
 $activeCalendario = (strpos($current_url, $base_url . 'views/Clinica/agenda/calendario.php') === 0) ? 'active' : '';
 $activeEspecialista = (strpos($current_url, $base_url . 'views/Clinica/especialistas/index.php') === 0) ? 'active' : '';
 $activePagos = (strpos($current_url, $base_url . 'views/Clinica/pagos/index.php') === 0) ? 'active' : '';
+
 
 // Controlar visibilidad según rol
 // Si el rol NO es 'SuperUsuario', ocultar el menú (display:none)

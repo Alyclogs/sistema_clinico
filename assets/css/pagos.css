@@ -1,9 +1,17 @@
-.pagos-tablas{
-    width:80%;
+@font-face {
+    font-family: 'Type Machine';
+    src: url('fonts/Type Machine.ttf') format('truetype');
 }
 
-.previsualizacion-ticket{
-    width:20%;
+.pagos-tablas{
+    width:60%;
+}
+
+.caja-general-ticket{
+      width: 40%;
+    display: flex
+;
+    justify-content: center;
 }
 
 .info-paciente{
@@ -11,8 +19,21 @@
     background: #f07e0b;
     padding: 5px 15px;
     border-radius: 10px;
-   
+       display: flex
+;
+    align-items: center;
+    gap: 10px;
     
+}
+
+.container-tabla-pagos{
+        margin-top: 10px;
+    background: #fff;
+    padding: 10px 20px;
+    border-radius: 20px;
+}
+.info-paciente svg{
+width:14px;    
 }
 
 .info-paciente span{
@@ -70,10 +91,313 @@
 
 }
 
-.circulo-check.active{
-    padding:20px;
+.circulo-check.activo{
+ 
     background:#76869e;
 }
+
+.encabezado-ticket p{
+    color:#76869e;
+    font-size:14px;
+    font-weight:600;
+    margin:0;text-align:center;
+}
+
+
+
+.papel-ticket{
+ width: 80mm;
+    height:auto;
+    border: 0.25px solid #59636d;
+    background:#fff;
+    font-family: 'Type Machine', sans-serif;
+    
+}
+
+.cabeza-ticket {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+        padding: 15px;
+}
+.cabeza-ticket span{
+    font-size:12px;
+    font-weight:400;
+    color:#59636d;
+}
+
+.codigo-ticket{
+    padding: 15px;
+    border: 0.7px dashed #59636d;
+    border-left: none;
+    border-right: none;
+    display: flex
+;
+    align-items: center;
+    justify-content: center;
+}
+
+.codigo-ticket span{
+    font-size:12px;
+    font-weight:400;
+    color:#59636d;
+}
+
+
+.nombres-ticket span{
+      font-size:12px;
+    font-weight:400;
+    color:#59636d;
+}
+
+.nombres-ticket{
+    display: flex
+;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.encabezado-tabla-ticket{
+         display: flex
+;
+    align-items: center;
+   justify-content: space-between;
+    border: 0.7px dashed #59636d;
+    border-left: none;
+    border-right: none;
+    width: 100%;
+}
+
+.ancho-encabezado{
+    width:20%;
+}
+
+.encabezado-tabla{
+      padding: 15px;
+    display: flex
+;
+    align-items: center;
+    justify-content: center;
+}
+
+.encabezado-tabla span{
+     font-size:12px;
+    font-weight:400;
+    color:#59636d;
+    text-align:center;
+}
+
+.cantidad-producto{
+    display:flex;
+   
+}
+.span-caja{
+    padding:10px 15px 0px 15px;
+    display:flex;
+}
+.span-caja span{
+       font-size:12px;
+    font-weight:400;
+    color:#59636d;
+}
+
+.ancho-producto{
+    width:80%;
+}
+
+.caja-cantidad{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.caja-cantidad span{
+    text-align:center;
+}
+
+
+.precios-producto{
+        display: flex
+;
+     justify-content: space-between;
+
+}
+
+
+.span-caja-precio{
+    align-items:center;
+    justify-content:center;
+}
+
+
+.total-tabla-ticket{
+    display:flex;
+    justify-content: space-between;
+}
+
+
+.ancho-total{
+    width:60%;
+}
+
+.titulo-total{
+    justify-content: start;
+    padding: 5px 15px;
+}
+
+.caja-total-ticket{
+        margin: 15px 0px;
+            border: 0.7px dashed #59636d;
+    border-left: none;
+    border-right: none;
+        padding: 15px 0px;
+}
+
+.ancho-monto{
+    width:100%;
+}
+
+.gracias-ticket {
+display: flex
+;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 0.7px dashed #59636d;
+    padding-bottom: 15px;
+}
+
+
+.gracias-ticket span {
+    font-size: 12px;
+    font-weight: 400;
+    color: #59636d;
+}
+.caja-imagen-qr{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+
+.btn-pagar{
+    background: #f07e0b;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+}
+
+.encabezado-medios-pagos span{
+    color:#76869e;
+    font-size:20px;
+    font-weight:700;
+}
+.form-row{
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    margin: 20px 0px;
+    gap: 20px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+}
+
+.form-group{
+        display: flex
+;
+    gap: 20px;
+    align-items: center;
+
+}
+
+.form-pago label{
+    font-size:14px;
+    color:#76869e;
+    font-weight:400;
+    width:50%;
+}
+
+.form-pago input, .form-pago select{
+       width: 251px;
+    height: 39px;
+    background-color: #76869e1a;
+    color: #59636d;
+    font-size: 14px;
+    font-weight: 700;
+    border: none;
+    border-radius: 5px;
+}
+.table tbody tr{
+        border-bottom: 5px solid #fff;
+}
+
+.container-medios-pago{
+    margin-top:20px;
+}
+
+.form-container-two{
+        display: flex
+;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.campo-flex-end{
+    display:flex;
+    justify-content:flex-end;
+    width:70%;
+}
+
+.btn-imprimir button{
+  background: #f07e0b !important;
+    color: #fff !important;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;  
+    border-radius:5px;
+}
+.previsualizacion-ticket{
+        display: flex
+;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+@media print {
+  @page {
+    size: 80mm auto;
+    margin: 0;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #ticket, #ticket * {
+    visibility: visible;
+  }
+
+  #ticket {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm;
+    padding: 0;
+    margin: 0;
+  }
+
+  .btn-imprimir {
+    display: none;
+  }
+}
+
+
+
 
 
 

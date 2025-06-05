@@ -1,8 +1,12 @@
 <?php
 // Importa la clase PDO
 require_once __DIR__ . '/../../config/database.php';
+
+
 class UsuarioModel
 {
+
+    private $baseurl = "http://localhost/SistemaClinico/";
     public function verificarUsuario($usuario, $password)
     {
         try {
@@ -151,7 +155,7 @@ ORDER BY u.idUsuario DESC;
         try {
             $pdo = connectDatabase();
 
-            $stmt = $pdo->prepare("SELECT * FROM roles WHERE rol !='Especialista' ");
+            $stmt = $pdo->prepare("SELECT * FROM roles WHERE rol !='Especialista' and rol !='Paciente' ");
             $stmt->execute();
             $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
             closeDatabase($pdo);
@@ -178,14 +182,37 @@ ORDER BY u.idUsuario DESC;
         }
     }
 
-    public function guardarUsuario($nombres, $apellidos, $dni, $telefono, $correo, $idestado, $idrol, $usuario, $passwordHash)
+    public function guardarUsuario($nombres, $apellidos, $dni, $telefono, $correo, $idestado, $idrol, $usuario, $passwordHash, $sexo)
     {
+        $baseurl = $this->baseurl;
+
         $pdo = connectDatabase();
+
+        // Avatares seg��n sexo
+        $imagenesMujeres = [
+            $baseurl . "assets/img/area2mujer.png",
+            $baseurl . "assets/img/area1mujer.png",
+
+        ];
+
+        $imagenesHombres = [
+            $baseurl . "assets/img/area2hombre.png",
+            $baseurl . "assets/img/area1hombre.png",
+        ];
+
+        // Seleccionar imagen aleatoria seg��n sexo
+        if (strtolower($sexo) === 'F') {
+            $foto = $imagenesMujeres[array_rand($imagenesMujeres)];
+        } else {
+            $foto = $imagenesHombres[array_rand($imagenesHombres)];
+        }
 
         try {
             $stmt = $pdo->prepare("
-            INSERT INTO usuarios (nombres, apellidos, dni, telefono, correo, idestado, idrol, usuario, password)
-            VALUES (:nombres, :apellidos, :dni, :telefono, :correo, :idestado, :idrol, :usuario, :password)
+            INSERT INTO usuarios 
+                (nombres, apellidos, dni, telefono, correo, idestado, idrol, usuario, password, foto , sexo)
+            VALUES 
+                (:nombres, :apellidos, :dni, :telefono, :correo, :idestado, :idrol, :usuario, :password, :foto , :sexo)
         ");
 
             $executed = $stmt->execute([
@@ -197,13 +224,15 @@ ORDER BY u.idUsuario DESC;
                 'idestado' => $idestado,
                 'idrol' => $idrol,
                 'usuario' => $usuario,
-                'password' => $passwordHash
+                'password' => $passwordHash,
+                'foto' => $foto,
+                'sexo' => $sexo,
             ]);
 
             if ($executed) {
                 return $pdo->lastInsertId(); // Retornar el ID del usuario insertado
             } else {
-                throw new Exception("Error al insertar el usuario en la base de datos: " . $executed);
+                throw new Exception("Error al insertar el usuario en la base de datos.");
             }
         } catch (PDOException $e) {
             throw $e;
@@ -211,6 +240,7 @@ ORDER BY u.idUsuario DESC;
             closeDatabase($pdo);
         }
     }
+
 
 
     public function actualizarUsuario($id, $nombres, $apellidos, $dni, $telefono, $correo, $idestado, $idrol, $usuario, $password)

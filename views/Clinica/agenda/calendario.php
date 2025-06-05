@@ -144,8 +144,9 @@ $idusuario = $_SESSION['idusuario'];
                                         </svg>
                                     </button>
                                 </div>
+                                <div id="subPacienteSeleccionado" class="subtitulo" style="display: none;">PACIENTE SELECCIONADO</div>
                                 <div id="pacienteSeleccionado" class="paciente-seleccionado" style="display:none;">
-                                    <span class="avatar-iniciales"></span>
+                                    <img id="pacienteSelFoto" class="avatar-iniciales"></img>
                                     <div id="pacienteCita" class="paciente-cita">
                                         <div id="pacienteSelNombre" class="paciente-nombre"></div>
                                         <div id="pacienteSelDetalles" class="paciente-detalles">
@@ -155,7 +156,7 @@ $idusuario = $_SESSION['idusuario'];
                                     </div>
                                 </div>
                                 <input type="hidden" id="idUsuario" value=<?php echo $idusuario ?> />
-                                <div class="subtitulo" style="display: none;">CITAS SELECCIONADAS</div>
+                                <div id="subCitasSeleccionadas" class="subtitulo" style="display: none;">CITAS SELECCIONADAS</div>
                                 <div class="no-horarios-selected">No se han seleccionado citas.
                                     Seleccione sus citas en la agenda</div>
                                 <div class="modal-cita-body">
@@ -185,13 +186,12 @@ $idusuario = $_SESSION['idusuario'];
                         <button type="button" class="btn btn-secondary btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
                         <button type="button" class="btn btn-primary btn-guardar" id="btnGuardarPaciente">Guardar Cambios</button>
                     </div>
-
                 </div>
-
-                <div id="mensaje" class="my-3" style="display: flex; max-width: 100%;"></div>
-
             </div>
         </div>
+    </div>
+    <div class="mensaje-alert">
+        <div id="mensajeFlotante" class="my-3"></div>
     </div>
 </body>
 

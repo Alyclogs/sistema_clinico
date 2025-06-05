@@ -38,6 +38,7 @@ body {
   color: #e5252a;
   font-size: 14px;
   font-weight: 600;
+  margin-right: 2px;
 }
 
 #formUsuario input,
@@ -136,6 +137,19 @@ body {
   margin-bottom: 1rem;
 }
 
+.mensaje-alert {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+  transform: translate(-50%, -50%);
+  top: 4%;
+  left: 50%;
+  background: #fff;
+  z-index: 9999;
+  border-radius: 5px;
+}
 .alert-success {
   background-color: #48b02c2b !important;
   color: #2e7d32 !important;
@@ -143,8 +157,8 @@ body {
   font-weight: 700 !important;
   width: max-content;
   border: none;
+  margin: 0 !important;
 }
-
 .alert-danger {
   background-color: #c42d352b !important;
   color: #c42d35 !important;
@@ -152,4 +166,5 @@ body {
   font-weight: 700 !important;
   width: max-content;
   border: none;
+  margin: 0 !important;
 }

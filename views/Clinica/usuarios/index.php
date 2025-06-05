@@ -46,6 +46,11 @@ $estados = $userModel->obtenerEstados();
 
 
             <div class="lado-derecho">
+
+                <div class="mensaje-alert">
+                    <div id="mensaje-usuarios" class="my-3"></div>
+                </div>
+
                 <?php include '../../../sections/header.php'; ?>
                 <div class="col page-container">
 
@@ -161,7 +166,7 @@ $estados = $userModel->obtenerEstados();
 
                 </div>
 
-                <div id="mensaje" class="my-3"></div>
+
 
             </div>
         </div>

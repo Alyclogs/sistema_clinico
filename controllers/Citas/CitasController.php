@@ -31,6 +31,6 @@ switch ($action) {
 
 
     default:
-        echo json_encode(['error' => 'AcciÃ³n no vÃ¡lida']);
+        echo json_encode(['error' => 'Acci¨®n no v¨¢lida']);
         break;
 }

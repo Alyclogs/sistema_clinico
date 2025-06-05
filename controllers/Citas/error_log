@@ -1,12 +1,109 @@
-[31-May-2025 18:49:06 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method CitasModel::crearCita() in /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php:24
+[03-Jun-2025 15:42:54 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1452 Cannot add or update a child row: a foreign key constraint fails (`neuroeduca_sistema_clinico`.`citas`, CONSTRAINT `citas_ibfk_4` FOREIGN KEY (`idestado`) REFERENCES `estados` (`idestado`)) in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php:41
 Stack trace:
-#0 {main}
-  thrown in /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php on line 24
-[31-May-2025 18:49:06 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method CitasModel::crearCita() in /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php:24
+#0 /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php(41): PDOStatement->execute()
+#1 /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php(24): CitasModel->crearCita(Array)
+#2 {main}
+  thrown in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php on line 41
+[03-Jun-2025 15:42:54 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1452 Cannot add or update a child row: a foreign key constraint fails (`neuroeduca_sistema_clinico`.`citas`, CONSTRAINT `citas_ibfk_4` FOREIGN KEY (`idestado`) REFERENCES `estados` (`idestado`)) in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php:41
 Stack trace:
-#0 {main}
-  thrown in /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php on line 24
-[31-May-2025 18:49:06 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method CitasModel::crearCita() in /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php:24
+#0 /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php(41): PDOStatement->execute()
+#1 /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php(24): CitasModel->crearCita(Array)
+#2 {main}
+  thrown in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php on line 41
+[03-Jun-2025 15:42:54 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1452 Cannot add or update a child row: a foreign key constraint fails (`neuroeduca_sistema_clinico`.`citas`, CONSTRAINT `citas_ibfk_4` FOREIGN KEY (`idestado`) REFERENCES `estados` (`idestado`)) in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php:41
 Stack trace:
-#0 {main}
-  thrown in /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php on line 24
+#0 /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php(41): PDOStatement->execute()
+#1 /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php(24): CitasModel->crearCita(Array)
+#2 {main}
+  thrown in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php on line 41
+[04-Jun-2025 22:31:35 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'u.nombres AS especialista_nombre,
+                u.apellidos AS especialist...' at line 7 in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php:48
+Stack trace:
+#0 /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php(48): PDOStatement->execute()
+#1 /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php(13): CitasModel->obtenerCitasPorEspecialista(6)
+#2 {main}
+  thrown in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php on line 48
+[04-Jun-2025 22:32:51 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'u.nombres AS especialista_nombre,
+                u.apellidos AS especialist...' at line 7 in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php:48
+Stack trace:
+#0 /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php(48): PDOStatement->execute()
+#1 /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php(13): CitasModel->obtenerCitasPorEspecialista(6)
+#2 {main}
+  thrown in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php on line 48
+[04-Jun-2025 22:33:11 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'u.nombres AS especialista_nombre,
+                u.apellidos AS especialist...' at line 7 in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php:48
+Stack trace:
+#0 /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php(48): PDOStatement->execute()
+#1 /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php(13): CitasModel->obtenerCitasPorEspecialista(6)
+#2 {main}
+  thrown in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php on line 48
+[04-Jun-2025 22:33:11 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'u.nombres AS especialista_nombre,
+                u.apellidos AS especialist...' at line 7 in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php:48
+Stack trace:
+#0 /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php(48): PDOStatement->execute()
+#1 /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php(13): CitasModel->obtenerCitasPorEspecialista(6)
+#2 {main}
+  thrown in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php on line 48
+[04-Jun-2025 22:33:12 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'u.nombres AS especialista_nombre,
+                u.apellidos AS especialist...' at line 7 in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php:48
+Stack trace:
+#0 /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php(48): PDOStatement->execute()
+#1 /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php(13): CitasModel->obtenerCitasPorEspecialista(6)
+#2 {main}
+  thrown in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php on line 48
+[04-Jun-2025 22:33:19 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'u.nombres AS especialista_nombre,
+                u.apellidos AS especialist...' at line 7 in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php:48
+Stack trace:
+#0 /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php(48): PDOStatement->execute()
+#1 /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php(13): CitasModel->obtenerCitasPorEspecialista(6)
+#2 {main}
+  thrown in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php on line 48
+[04-Jun-2025 22:33:26 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'u.nombres AS especialista_nombre,
+                u.apellidos AS especialist...' at line 7 in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php:48
+Stack trace:
+#0 /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php(48): PDOStatement->execute()
+#1 /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php(13): CitasModel->obtenerCitasPorEspecialista(6)
+#2 {main}
+  thrown in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php on line 48
+[04-Jun-2025 22:33:26 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'u.nombres AS especialista_nombre,
+                u.apellidos AS especialist...' at line 7 in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php:48
+Stack trace:
+#0 /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php(48): PDOStatement->execute()
+#1 /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php(13): CitasModel->obtenerCitasPorEspecialista(6)
+#2 {main}
+  thrown in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php on line 48
+[04-Jun-2025 22:33:26 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'u.nombres AS especialista_nombre,
+                u.apellidos AS especialist...' at line 7 in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php:48
+Stack trace:
+#0 /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php(48): PDOStatement->execute()
+#1 /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php(13): CitasModel->obtenerCitasPorEspecialista(6)
+#2 {main}
+  thrown in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php on line 48
+[04-Jun-2025 22:33:40 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'u.nombres AS especialista_nombre,
+                u.apellidos AS especialist...' at line 7 in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php:48
+Stack trace:
+#0 /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php(48): PDOStatement->execute()
+#1 /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php(13): CitasModel->obtenerCitasPorEspecialista(6)
+#2 {main}
+  thrown in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php on line 48
+[04-Jun-2025 22:34:56 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'u.nombres AS especialista_nombre,
+                u.apellidos AS especialist...' at line 7 in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php:48
+Stack trace:
+#0 /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php(48): PDOStatement->execute()
+#1 /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php(13): CitasModel->obtenerCitasPorEspecialista(6)
+#2 {main}
+  thrown in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php on line 48
+[04-Jun-2025 22:35:04 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'u.nombres AS especialista_nombre,
+                u.apellidos AS especialist...' at line 7 in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php:48
+Stack trace:
+#0 /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php(48): PDOStatement->execute()
+#1 /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php(13): CitasModel->obtenerCitasPorEspecialista(6)
+#2 {main}
+  thrown in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php on line 48
+[04-Jun-2025 22:35:04 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'u.nombres AS especialista_nombre,
+                u.apellidos AS especialist...' at line 7 in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php:48
+Stack trace:
+#0 /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php(48): PDOStatement->execute()
+#1 /home/neuroeduca/public_html/SistemaClinico/controllers/Citas/CitasController.php(13): CitasModel->obtenerCitasPorEspecialista(6)
+#2 {main}
+  thrown in /home/neuroeduca/public_html/SistemaClinico/models/Citas/CitasModel.php on line 48

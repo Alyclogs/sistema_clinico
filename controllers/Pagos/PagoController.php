@@ -18,6 +18,34 @@ try {
     exit;
         break;
         
+        case 'create':
+    $idsCitas = !empty($_POST['ids_citas']) ? explode(',', $_POST['ids_citas']) : [];
+    $costoTotal = !empty($_POST['importexpagar']) ? floatval($_POST['importexpagar']) : null;
+    $vuelto = isset($_POST['vuelto']) ? floatval($_POST['vuelto']) : 0.00;
+    $deuda = !empty($_POST['deudaxpagar']) ? floatval($_POST['deudaxpagar']) : null;
+
+    $idPaciente = !empty($_POST['id_paciente']) ? $_POST['id_paciente'] : null;
+    $idModalidad = !empty($_POST['modalidad-pago']) ? $_POST['modalidad-pago'] : null;
+    $idUsuario = !empty($_POST['idUsuario']) ? $_POST['idUsuario'] : null;
+    $idOpcion = !empty($_POST['opcion-pago']) ? $_POST['opcion-pago'] : null;
+    $codigo = !empty($_POST['codigo']) ? $_POST['codigo'] : null;
+     $codigovoucher = !empty($_POST['codigo-voucher']) ? $_POST['codigo-voucher'] : null;
+   
+    if (!$idPaciente || !$idModalidad || !$idOpcion || empty($idsCitas) || $costoTotal === null) {
+        $mensaje = 'Faltan datos obligatorios para registrar el pago.';
+        break;
+    }
+
+ 
+    $success = $modelo->guardarPagos($idsCitas, $costoTotal, $vuelto, $idPaciente, $idModalidad, $idOpcion, $idUsuario, $deuda , $codigo, $codigovoucher);
+
+    $mensaje = $success ? 'Pago registrado correctamente.' : 'Error al registrar el pago.';
+    break;
+
+
+            
+            
+        
     }
   
   

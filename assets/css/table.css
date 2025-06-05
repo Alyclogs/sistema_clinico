@@ -6,8 +6,13 @@ body {
   color: rgb(93, 109, 132);
   height: 100%;
   width: 100%;
-  overflow: hidden;
+
   position: relative;
+
+  background-image: url("http://localhost/SistemaClinico/assets/img/nube-abajo.png");
+  background-position: bottom right;
+  background-repeat: no-repeat;
+  background-size: 567px;
 }
 
 .body-bg-img {
@@ -89,13 +94,7 @@ body {
 }
 .page-content-header {
   padding: 20px 25px;
-  min-height: 100vh;
-
-  background-image: url("http://localhost/SistemaClinico/assets/img/nube-abajo.png");
-  background-position: bottom right;
-  background-repeat: no-repeat;
-  background-size: 567px;
-  background-color: #f9fbfc;
+  margin: 0px;
 }
 
 .page-content-header h2 {
@@ -111,16 +110,16 @@ body {
 .input-group .form-control.search-control {
   border-left: none;
   font-size: 14px;
-  color: #76869e33;
+  color: #59636d;
   background-color: transparent;
-  font-weight: 600;
+  font-weight: 700;
   border: none;
 }
 
 .input-group .form-control.search-control::placeholder {
   font-size: 14px;
-  color: #76869e33;
-  font-weight: 600;
+  color: #59636d;
+  font-weight: 700;
 }
 
 .input-group .form-control.search-control:focus {
@@ -270,6 +269,16 @@ body {
 .badge {
   font-size: 0.8em;
   padding: 0.5em 0.75em;
+}
+
+.modal-content {
+  padding: 30px;
+}
+
+.modal-footer {
+  background-color: transparent;
+  border: none;
+  padding: 0;
 }
 
 .avatar-iniciales {

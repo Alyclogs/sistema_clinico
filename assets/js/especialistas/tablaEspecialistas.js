@@ -18,7 +18,7 @@ function getInitials(nombre, apellido) {
 
 function fetchUsers() {
     $.get(baseurl + "controllers/Especialistas/EspecialistaController.php?action=read", function (data) {
-         console.log("Especialistas recibidos:", data);
+        console.log("Especialistas recibidos:", data);
         let html = '';
         data.forEach(function (especialista) {
             const color = stringToColor(especialista.nom_especialista + especialista.ape_especialista);
@@ -41,10 +41,10 @@ function fetchUsers() {
 
         $(".td-botones").each(function () {
             var id = $(this).data('id');
-              var nombre = $(this).data('nombre');
+            var nombre = $(this).data('nombre');
             $.get(baseurl + 'assets/js/especialistas/botonesEspecialista.html', function (btnHtml) {
                 btnHtml = btnHtml.replace(/\$\{IDUSUARIO\}/g, id);
-                  btnHtml = btnHtml.replace(/\$\{NOMBREUSUARIO\}/g, nombre);
+                btnHtml = btnHtml.replace(/\$\{NOMBREUSUARIO\}/g, nombre);
                 $(this).html(btnHtml);
             }.bind(this));
         });
@@ -53,8 +53,8 @@ function fetchUsers() {
 
 $(document).ready(function () {
     fetchUsers();
-    
-      $('#inputBuscarUsuario').on('input', function() {
+
+    $('#inputBuscarUsuario').on('input', function () {
         const filtro = $(this).val().trim();
         if (filtro.length > 2) {
             buscarUsuarios(filtro);
@@ -62,7 +62,7 @@ $(document).ready(function () {
             fetchUsers(); // si borró todo, recarga la tabla completa
         }
     });
-    
+
     const usuarioModal = new bootstrap.Modal(document.getElementById('usuarioModal'));
 
     // Abrir modal para AGREGAR usuario
@@ -85,60 +85,60 @@ $(document).ready(function () {
     });
 
     // Guardar usuario (Agregar o Editar)
-        $(document).on('click', '#btnGuardarUsuario', function () {
-            const formUsuario = $('#formUsuario');
-            if (formUsuario[0].checkValidity()) {
-                const formData = formUsuario.serialize();
-                const userId = $('#idUsuario').val();
-                let url, action;
-                if (userId) {
-                    url = baseurl + 'controllers/Especialistas/EspecialistaController.php?action=update&id=' + userId;
-                    action = 'update';
-                } else {
-                    url = baseurl + 'controllers/Especialistas/EspecialistaController.php?action=create';
-                    action = 'create';
-                }
-                $.ajax({
-                    type: 'POST',
-                    url: url,
-                    data: formData,
-                    dataType: 'json',
-                    success: function (response) {
-                        var mensaje = document.getElementById('mensaje');
-                        mensaje.textContent = '';
-                        mensaje.textContent = response.message;
-                        mensaje.className = 'my-3 ' + response.success ? 'alert alert-success' : 'alert alert-danger';
-                        mensaje.hidden = false;
-                       
-                         setTimeout(function () {
-        usuarioModal.hide();
-        mensaje.hidden = true;
-
-        // ✅ Redirección si fue exitoso
-        if (response.success) {
-            window.location.href = baseurl + 'views/Clinica/especialistas/index.php';
-        }
-    }, 1000);
-                    },
-                    error: function (jqXHR, textStatus, errorThrown) {
-                        console.error('Error en la solicitud AJAX:', textStatus, errorThrown);
-                        console.error('Respuesta del servidor:', jqXHR.responseText);
-                    }
-                });
+    $(document).on('click', '#btnGuardarUsuario', function () {
+        const formUsuario = $('#formUsuario');
+        if (formUsuario[0].checkValidity()) {
+            const formData = formUsuario.serialize();
+            const userId = $('#idUsuario').val();
+            let url, action;
+            if (userId) {
+                url = baseurl + 'controllers/Especialistas/EspecialistaController.php?action=update&id=' + userId;
+                action = 'update';
             } else {
-                formUsuario[0].reportValidity();
+                url = baseurl + 'controllers/Especialistas/EspecialistaController.php?action=create';
+                action = 'create';
             }
-        });
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: formData,
+                dataType: 'json',
+                success: function (response) {
+                    var mensaje = document.getElementById('mensaje');
+                    mensaje.textContent = '';
+                    mensaje.textContent = response.message;
+                    mensaje.className = 'my-3 ' + response.success ? 'alert alert-success' : 'alert alert-danger';
+                    mensaje.hidden = false;
+
+                    setTimeout(function () {
+                        usuarioModal.hide();
+                        mensaje.hidden = true;
+
+                        // ✅ Redirección si fue exitoso
+                        if (response.success) {
+                            window.location.href = baseurl + 'views/Clinica/especialistas/index.php';
+                        }
+                    }, 1000);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error('Error en la solicitud AJAX:', textStatus, errorThrown);
+                    console.error('Respuesta del servidor:', jqXHR.responseText);
+                }
+            });
+        } else {
+            formUsuario[0].reportValidity();
+        }
+    });
 
     // Eliminar usuario 
     $('#tablaUsuariosBody').on('click', '.btn-delete', function () {
         const userId = $(this).data('id');
         const nombreUsuario = $(this).data('nombre');
-         if (confirm(`¿Está seguro de que desea eliminar del sistema a ${nombreUsuario}?`)) {
+        if (confirm(`¿Está seguro de que desea eliminar del sistema a ${nombreUsuario}?`)) {
             $.ajax({
                 type: 'POST',
                 url: baseurl + 'controllers/Users/UserController.php?action=delete&id=' + userId,
-                  data: { idUsuario: userId },
+                data: { idUsuario: userId },
                 dataType: 'json',
                 success: function (response) {
                     alert(response.message);

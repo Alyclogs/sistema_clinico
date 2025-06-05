@@ -1,0 +1,14 @@
+[04-Jun-2025 22:37:01 UTC] PHP Fatal error:  Uncaught ArgumentCountError: Too few arguments to function UsuarioModel::guardarUsuario(), 9 passed in /home/neuroeduca/public_html/SistemaClinico/models/Pacientes/PacienteModel.php on line 59 and exactly 10 expected in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php:184
+Stack trace:
+#0 /home/neuroeduca/public_html/SistemaClinico/models/Pacientes/PacienteModel.php(59): UsuarioModel->guardarUsuario('SFDA', 'ASFD', '234321123', '123456789', 'capedu4@gmail.c...', '1', '4', 'sasfd', '$2y$10$3psIoP8p...')
+#1 /home/neuroeduca/public_html/SistemaClinico/controllers/Pacientes/PacienteController.php(22): PacientesModel->crearPaciente(Array)
+#2 {main}
+  thrown in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 184
+[04-Jun-2025 22:46:30 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 190
+[04-Jun-2025 22:46:30 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 191
+[04-Jun-2025 22:46:30 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 196
+[04-Jun-2025 22:46:30 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 197
+[04-Jun-2025 22:50:35 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 190
+[04-Jun-2025 22:50:35 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 191
+[04-Jun-2025 22:50:35 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 196
+[04-Jun-2025 22:50:35 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 197

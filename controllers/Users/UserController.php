@@ -19,20 +19,25 @@ try {
             exit;
 
         case 'delete':
-            $id = $_POST['idUsuario']; // <-- cambio aquí
-            if (!is_numeric($id)) {
-                throw new Exception('Error: ID inválido.');
-            }
-            $success = $modelo->eliminarUsuario($id);
-            $mensaje = $success ? 'Usuario eliminado correctamente.' : 'Error al eliminar el usuario.';
-            break;
+    $id = $_POST['idUsuario']; // <-- cambio aquí
+    if (!is_numeric($id)) {
+        throw new Exception('Error: ID inválido.');
+    }
+    $success = $modelo->eliminarUsuario($id);
+    $mensaje = $success ? 'Usuario eliminado correctamente.' : 'Error al eliminar el usuario.';
+    break;
+    
+    case 'buscar':
+         $filtro = $_GET['filtro'] ?? '';
+    $usuarios = $modelo->buscarUsuarios($filtro);
+    echo json_encode($usuarios);
+    exit;
+        break;
+        
+        
+        
+        
 
-        case 'buscar':
-            $filtro = $_GET['filtro'] ?? '';
-            $usuarios = $modelo->buscarUsuarios($filtro);
-            echo json_encode($usuarios);
-            exit;
-            break;
 
         case 'update':
             $id = $_POST['idUsuario'];
@@ -54,34 +59,48 @@ try {
             $mensaje = $success ? 'Usuario actualizado correctamente.' : 'Error al actualizar el usuario.';
             break;
 
-        case 'create':
-            $usuario = strtolower(trim($_POST['usuario']));
-            $password = $_POST['password'];
+       case 'create':
+    try {
+        $usuario = strtolower(trim($_POST['usuario']));
+        $password = $_POST['password'];
 
-            if ($modelo->existeUsuario($usuario)) {
-                throw new Exception('Error: El nombre de usuario ya existe.');
-            }
+        // Validaciones
+        if ($modelo->existeUsuario($usuario)) {
+            throw new Exception('Error: El nombre de usuario ya existe.');
+        }
 
-            if (!preg_match('/^\d{8}$/', $password)) {
-                throw new Exception('Error: La contraseña debe tener exactamente 8 dígitos numéricos.');
-            }
+        if (!preg_match('/^\d{8}$/', $password)) {
+            throw new Exception('Error: La contraseña debe tener exactamente 8 dígitos numéricos.');
+        }
 
-            $nombres = ucwords($_POST['nombres']);
-            $apellidos = ucwords($_POST['apellidos']);
-            $dni = $_POST['dni'];
-            $telefono = !empty($_POST['telefono']) ? $_POST['telefono'] : null;
-            $correo = !empty($_POST['correo']) ? $_POST['correo'] : null;
-            $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-            $idrol = $_POST['idRol'];
-            $idestado = 1;
+        // Procesamiento
+        $nombres = ucwords($_POST['nombres']);
+        $apellidos = ucwords($_POST['apellidos']);
+        $dni = $_POST['dni'];
+        $telefono = !empty($_POST['telefono']) ? $_POST['telefono'] : null;
+        $correo = !empty($_POST['correo']) ? $_POST['correo'] : null;
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+        $idrol = $_POST['idRol'];
+        $idestado = 1;
+              $sexo =  $_POST['sexo'];
 
-            $success = $modelo->guardarUsuario($nombres, $apellidos, $dni, $telefono, $correo, $idestado, $idrol, $usuario, $passwordHash);
-            $mensaje = $success ? 'Registro exitoso.' : 'Error al registrar el usuario.';
-            break;
+        $success = $modelo->guardarUsuario($nombres, $apellidos, $dni, $telefono, $correo, $idestado, $idrol, $usuario, $passwordHash, $sexo);
+        $mensaje = $success ? 'Registro exitoso.' : 'Error al registrar el usuario.';
+
+        // Respuesta en JSON
+        echo json_encode(['success' => $success, 'message' => $mensaje]);
+         exit;
+    } catch (Exception $e) {
+        // Respuesta de error
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+         exit;
+    }
+    break;
 
         default:
             throw new Exception('Error: Acción no válida.');
     }
+
 } catch (Exception $e) {
     $mensaje = $e->getMessage();
     $success = false;

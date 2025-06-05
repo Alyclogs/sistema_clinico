@@ -1,0 +1,13 @@
+[04-Jun-2025 21:22:07 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at /home/neuroeduca/public_html/SistemaClinico/controllers/Users/UserController.php:93) in /home/neuroeduca/public_html/SistemaClinico/controllers/Users/UserController.php on line 107
+[04-Jun-2025 22:47:37 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 190
+[04-Jun-2025 22:47:37 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 191
+[04-Jun-2025 22:47:37 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 196
+[04-Jun-2025 22:47:37 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 197
+[04-Jun-2025 22:48:05 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 190
+[04-Jun-2025 22:48:05 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 191
+[04-Jun-2025 22:48:05 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 196
+[04-Jun-2025 22:48:05 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 197
+[04-Jun-2025 22:49:40 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 190
+[04-Jun-2025 22:49:40 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 191
+[04-Jun-2025 22:49:40 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 196
+[04-Jun-2025 22:49:40 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 197

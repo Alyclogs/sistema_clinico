@@ -990,7 +990,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function addCitaEvent(cita) {
         const horaIni = formatearHora12h(cita.hora_inicio.slice(0, 5));
         const horaFin = formatearHora12h(cita.hora_fin.slice(0, 5));
-        const nombreCompleto = `${cita.paciente_nombres} ${cita.paciente_apellidos}`;
+        const nombreCompleto = `${cita.especialista_nombre} ${cita.especialista_apellidos}`;
         const estado = `cita-${estadosCita[cita.idestado]}`;
 
         calendar.addEvent({

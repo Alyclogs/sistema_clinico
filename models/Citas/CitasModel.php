@@ -17,6 +17,7 @@ class CitasModel
                 p.apellidos AS paciente_apellidos, 
                 p.dni AS paciente_dni, 
                 p.fecha_nacimiento AS paciente_fecha_nacimiento,
+                p.foto AS paciente_foto,
                 u.nombres AS especialista_nombre,
                 u.apellidos AS especialista_apellidos
             FROM citas c
@@ -34,8 +35,9 @@ class CitasModel
         p.apellidos AS paciente_apellidos,
         p.dni AS paciente_dni,
         p.fecha_nacimiento AS paciente_fecha_nacimiento,
+        p.foto AS paciente_foto,
         u.nombres AS especialista_nombre,
-        u.apellidos AS especialista_apellidos
+        u.apellidos AS especialista_apellidos,
         FROM citas c INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
         INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
         INNER JOIN usuarios u ON e.idusuario = u.idusuario

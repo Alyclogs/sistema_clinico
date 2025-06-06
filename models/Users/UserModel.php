@@ -2,11 +2,9 @@
 // Importa la clase PDO
 require_once __DIR__ . '/../../config/database.php';
 
-
 class UsuarioModel
 {
-
-    private $baseurl = "http://localhost/SistemaClinico/";
+    private $baseurl = "https://neuroeduca.edu.pe/SistemaClinico/";
     public function verificarUsuario($usuario, $password)
     {
         try {
@@ -192,7 +190,6 @@ ORDER BY u.idUsuario DESC;
         $imagenesMujeres = [
             $baseurl . "assets/img/area2mujer.png",
             $baseurl . "assets/img/area1mujer.png",
-
         ];
 
         $imagenesHombres = [

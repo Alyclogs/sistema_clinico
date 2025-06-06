@@ -11,11 +11,11 @@ $pacienteModel = new PacientesModel();
     <div class="row mt-4">
         <div class="col-md-6 mb-3">
             <label for="nombres" class="form-label">Nombres<span>*</span></label>
-            <input type="text" class="form-control" id="nombres" name="nombres" required>
+            <input type="text" class="form-control" id="nombres" name="nombres" required pattern="[A-Za-z\s]+" title="Solo se permiten letras y espacios">
         </div>
         <div class="col-md-6 mb-3">
             <label for="apellidos" class="form-label">Apellidos<span>*</span></label>
-            <input type="text" class="form-control" id="apellidos" name="apellidos" required>
+            <input type="text" class="form-control" id="apellidos" name="apellidos" required pattern="[A-Za-z\s]+" title="Solo se permiten letras y espacios">
         </div>
     </div>
     <div class="row">
@@ -23,22 +23,27 @@ $pacienteModel = new PacientesModel();
             <label for="dni" class="form-label">DNI<span>*</span></label>
             <input type="text" class="form-control" id="dni" name="dni" required maxlength="8" pattern="\d{8}" title="El DNI debe tener exactamente 8 dígitos">
         </div>
+
         <div class="col-md-6 mb-3">
-            <label for="fechanac" class="form-label">Fecha de nacimiento<span>*</span></label>
-            <input type="date" class="form-control" id="fechanac" name="fechanac" required>
-        </div>
-    </div>
-    <div class="row mb-4">
-        <div class="col-md-6 mb-3">
-            <label for="sexoUsuario" class="form-label">Sexo<span>*</span></label>
-            <select class="form-select" id="sexoUsuario" name="sexo" required>
+
+            <label for="sexo" class="form-label">Sexo<span>*</span></label>
+            <select class="form-select" id="sexoUsuario" name="sexopaciente" required>
                 <option value="" disabled>Seleccione</option>
                 <option value="F">Femenino</option>
                 <option value="M">Masculino</option>
             </select>
         </div>
-    </div>
 
+
+
+
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <label for="fechanac" class="form-label">Fecha de nacimiento<span>*</span></label>
+            <input type="date" class="form-control" id="fechanac" name="fechanac" required>
+        </div>
+    </div>
     <span class="title-span mt-4">Datos de los padres</span>
     <div class="row mt-4">
         <div class="col-md-6 mb-3">
@@ -53,9 +58,22 @@ $pacienteModel = new PacientesModel();
     <div class="row">
         <div class="col-md-6 mb-3">
             <label for="dniPadre" class="form-label">DNI<span>*</span></label>
-            <input type="text" class="form-control" id="dniPadre" name="dniPadre" required maxlength="8" pattern="\d{8}" title="El DNI debe tener exactamente 8 dígitos">
+            <input type="text" class="form-control" id="dniPadre" name="dniPadre" maxlength="8" pattern="[0-9]{8}" title="El DNI debe tener exactamente 8 dígitos">
         </div>
         <div class="col-md-6 mb-3">
+            <label for="telefonoPadre" class="form-label">Teléfono</label>
+            <input type="tel" class="form-control" id="telefonoPadre" name="telefonoPadre" maxlength="9" pattern="[0-9]{9}" title="El teléfono debe tener exactamente 9 dígitos">
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="correoPadre" class="form-label">Correo</label>
+            <input type="email" class="form-control" id="correoPadre" name="correoPadre">
+        </div>
+
+        <div class="col-md-6 mb-3">
+
             <label for="sexo" class="form-label">Sexo<span>*</span></label>
             <select class="form-select" id="sexoUsuario" name="sexo" required>
                 <option value="" disabled>Seleccione</option>
@@ -63,22 +81,20 @@ $pacienteModel = new PacientesModel();
                 <option value="M">Masculino</option>
             </select>
         </div>
+
+
     </div>
 
     <div class="row">
         <div class="col-md-6 mb-3">
-            <label for="telefonoPadre" class="form-label">Teléfono<span>*</span></label>
-            <input type="tel" class="form-control" id="telefonoPadre" name="telefonoPadre">
-        </div>
-        <div class="col-md-6 mb-3">
-            <label for="correoPadre" class="form-label">Correo</label>
-            <input type="email" class="form-control" id="correoPadre" name="correoPadre">
+            <label for="parentezco" class="form-label">Parentezco</label>
+            <input type="text" class="form-control" id="parentezco" name="parentezco">
         </div>
     </div>
 
 
-    <input type="hidden" class="form-control" id="usuario" name="usuario">
-    <input type="hidden" class="form-control" name="password" id="password" maxlength="8">
+    <input type="hidden" id="usuario" name="usuario">
+    <input type="hidden" name="password" id="password" maxlength="8">
 </form>
 
 <script>

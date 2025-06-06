@@ -44,7 +44,7 @@ $idusuario = $_SESSION['idusuario'];
                                 <div class="page-header w-100 d-flex justify-content-between align-items-center my-3">
                                     <div class="filtros d-flex align-items-center">
                                         <label for="filtro-area" class="filtro-title">Área</label>
-                                        <select class="form-select filtro" id="filtro-area">
+                                        <select class="form-select filtro filtro-not-selected" id="filtro-area">
                                             <option value="" disabled selected>Seleccionar</option>
                                             <?php
                                             foreach ($areas as $area) {
@@ -56,11 +56,11 @@ $idusuario = $_SESSION['idusuario'];
                                             ?>
                                         </select>
                                         <label for="filtro-subarea" class="filtro-title">Subárea </label>
-                                        <select class="form-select filtro" id="filtro-subarea" disabled>
+                                        <select class="form-select filtro filtro-not-selected" id="filtro-subarea" disabled>
                                             <option value="" disabled selected>Seleccionar</option>
                                         </select>
                                         <label for="filtro-especialista" class="filtro-title">Especialista</label>
-                                        <select class="form-select filtro" id="filtro-especialista" disabled>
+                                        <select class="form-select filtro filtro-not-selected" id="filtro-especialista" disabled>
                                             <option value="" disabled selected>Seleccionar</option>
                                         </select>
                                     </div>
@@ -189,9 +189,6 @@ $idusuario = $_SESSION['idusuario'];
                 </div>
             </div>
         </div>
-    </div>
-    <div class="mensaje-alert">
-        <div id="mensajeFlotante" class="my-3"></div>
     </div>
 </body>
 

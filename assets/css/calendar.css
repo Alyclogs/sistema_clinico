@@ -15,26 +15,35 @@ body {
   position: relative;
 }
 
-.filtro {
-  width: 140px;
-}
-
 .filtros {
   display: flex;
   gap: 20px;
 }
 
-.filtro-title {
-  font-weight: bold;
+.filtros select {
+  width: 150px;
+}
+
+.filtros select option {
   color: #76869e;
 }
 
 .filtro {
   border: none;
+  width: 140px;
   background-color: #76869e10;
   font-weight: 700;
   color: #76869e;
   font-size: 14px;
+}
+
+.filtro-not-selected {
+  color: #76869e65;
+}
+
+.filtro-title {
+  font-weight: bold;
+  color: #76869e;
 }
 
 .btn-calendario {
@@ -107,10 +116,6 @@ body {
   align-items: center;
   padding: 1rem;
   gap: 1rem;
-}
-
-.filtros select {
-  width: 150px;
 }
 
 #calendar {

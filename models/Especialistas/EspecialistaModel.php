@@ -25,26 +25,17 @@ class EspecialistaModel
         }
     }
 
-  public function obtenerAreas()
-{
-    $sql = "SELECT * FROM areas";
-    
-    $stmt = $this->db->query($sql);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+    public function obtenerAreas()
+    {
+        $sql = "SELECT * FROM areas";
 
-public function obtenerSubareas()
-{
-    $sql = "SELECT * FROM subareas";
-    $stmt = $this->db->query($sql);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
-
-
-  public function obtenerEspecialistas()
-{
-    $sql = "SELECT 
+    public function obtenerEspecialistas()
+    {
+        $sql = "SELECT 
                 e.*, 
                 u.nombres AS nom_especialista, 
                 u.apellidos AS ape_especialista,
@@ -57,14 +48,14 @@ public function obtenerSubareas()
             INNER JOIN usuarios u ON e.idusuario = u.idusuario
             INNER JOIN areas a ON e.idarea = a.idarea
             LEFT JOIN subareas sa ON e.idsubarea = sa.idsubarea";
-    
-    $stmt = $this->db->query($sql);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
 
-public function obtenerEspecialistaPorId($idespecialista)
-{
-    $sql = "SELECT 
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function obtenerEspecialistaPorId($idespecialista)
+    {
+        $sql = "SELECT 
                 e.*, 
                 u.nombres AS nom_especialista, 
                 u.apellidos AS ape_especialista,
@@ -80,12 +71,12 @@ public function obtenerEspecialistaPorId($idespecialista)
             LEFT JOIN subareas sa ON e.idsubarea = sa.idsubarea
             WHERE e.idespecialista = :idespecialista";
 
-    $stmt = $this->db->prepare($sql);
-    $stmt->bindParam(':idespecialista', $idespecialista, PDO::PARAM_INT);
-    $stmt->execute();
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':idespecialista', $idespecialista, PDO::PARAM_INT);
+        $stmt->execute();
 
-    return $stmt->fetch(PDO::FETCH_ASSOC);
-}
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 
     public function obtenerEspecialistaPorAreaySubarea($idarea, $idsubarea)
     {
@@ -96,7 +87,7 @@ public function obtenerEspecialistaPorId($idespecialista)
         $stmt->bindParam(':idarea', $idarea, PDO::PARAM_INT);
         $stmt->bindParam(':idsubarea', $idsubarea, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function guardarEspecialista($idusuario, $idarea, $idsubarea)

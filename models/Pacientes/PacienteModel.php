@@ -43,6 +43,7 @@ class PacientesModel
 
     public function crearPaciente($data)
     {
+        $baseurl = $this->baseurl;
         $usuarioModel = new UsuarioModel();
         $usuario_id = $usuarioModel->guardarUsuario($data['nombrePadre'], $data['apellidosPadre'], $data['dniPadre'], $data['telefonoPadre'], $data['correoPadre'], '1', '4', $data['usuario'], password_hash($data['password'], PASSWORD_DEFAULT), $data['sexo']);;
 
@@ -50,35 +51,33 @@ class PacientesModel
             throw new Exception("Error al crear el usuario");
         }
 
-        $baseurl = $this->baseurl;
         $imagenesMujeres = [
-            $baseurl . "assets/img/area2mujer.png",
-            $baseurl . "assets/img/area1mujer.png",
-
+            $baseurl . "assets/img/niña2.png",
+            $baseurl . "assets/img/niña1.png",
         ];
 
         $imagenesHombres = [
-            $baseurl . "assets/img/area2hombre.png",
-            $baseurl . "assets/img/area1hombre.png",
+            $baseurl . "assets/img/niño1.png",
+            $baseurl . "assets/img/niño2.png",
         ];
 
         // Seleccionar imagen aleatoria seg��n sexo
-        if (strtolower($data['sexo']) === 'F') {
-            $foto = $imagenesMujeres[array_rand($imagenesMujeres)];
+        if (strtoupper($data['sexopaciente']) === 'F') {
+            $fotoPaciente = $imagenesMujeres[array_rand($imagenesMujeres)];
         } else {
-            $foto = $imagenesHombres[array_rand($imagenesHombres)];
+            $fotoPaciente = $imagenesHombres[array_rand($imagenesHombres)];
         }
 
-        $sql = "INSERT INTO pacientes (idusuario, nombres, apellidos, dni, fecha_nacimiento) 
-                VALUES (:idusuario, :nombres, :apellidos, :dni, :fecha_nacimiento, :sexo, :foto, :parentezco)";
+        $sql = "INSERT INTO pacientes (idusuario, nombres, apellidos, dni, fecha_nacimiento,sexo,foto,parentezco) 
+                VALUES (:idusuario, :nombres, :apellidos, :dni, :fecha_nacimiento, :sexo, :fotopaciente, :parentezco)";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':idusuario', $usuario_id, PDO::PARAM_INT);
         $stmt->bindParam(':nombres', $data['nombres']);
         $stmt->bindParam(':apellidos', $data['apellidos']);
         $stmt->bindParam(':dni', $data['dni']);
         $stmt->bindParam(':fecha_nacimiento', $data['fechanac']);
-        $stmt->bindParam(':sexo', $data['sexo']);
-        $stmt->bindParam(':foto', $foto);
+        $stmt->bindParam(':sexo', $data['sexopaciente']);
+        $stmt->bindParam(':fotopaciente', $fotoPaciente);
         $stmt->bindParam(':parentezco', $data['parentezco']);
 
         $result = $stmt->execute();

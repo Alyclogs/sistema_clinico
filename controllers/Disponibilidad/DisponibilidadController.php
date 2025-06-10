@@ -12,8 +12,10 @@ switch ($action) {
             $idespecialista = intval($_GET['idespecialista']);
             $result = $model->obtenerPorEspecialista($idespecialista);
             echo json_encode($result);
+            return;
         } else {
             echo json_encode([]);
+            return;
         }
         break;
     default:

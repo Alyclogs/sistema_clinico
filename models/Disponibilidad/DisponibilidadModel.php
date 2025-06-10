@@ -11,10 +11,14 @@ class DisponibilidadModel
 
     public function obtenerPorEspecialista($idespecialista)
     {
-        $sql = "SELECT * FROM disponibilidad WHERE idespecialista = :idespecialista";
+        $sql = "SELECT d.*
+        FROM disponibilidad d
+        WHERE d.idespecialista = :idespecialista
+          AND d.activo = 1
+          AND CURRENT_DATE BETWEEN d.fechainicio AND d.fechafin";
+
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':idespecialista', $idespecialista, PDO::PARAM_INT);
-        $stmt->execute();
+        $stmt->execute([':idespecialista' => $idespecialista]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

@@ -20,16 +20,11 @@ if ($action === "read") {
       echo json_encode($especialistas);
       exit;
     }
-    if ($idarea !== '') {
-      $especialistas = $modelo->obtenerEspecialistaPorArea($idarea);
-      echo json_encode($especialistas);
-      exit;
-    }
     $especialistas = $modelo->obtenerEspecialistas();
     echo json_encode($especialistas);
     exit;
   } catch (Exception $e) {
-    $mensaje = $e;
+    echo json_encode(['error' => 'Error al obtener especialistas: ' . $e]);
   }
 } elseif ($action === "delete") {
   $id = $_GET['idEspecialista'];

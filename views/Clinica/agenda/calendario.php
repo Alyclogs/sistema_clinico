@@ -2,13 +2,16 @@
 session_start();
 require_once __DIR__ . '/../../../models/Areas/AreaModel.php';
 require_once __DIR__ . '/../../../models/Subareas/SubareaModel.php';
+require_once __DIR__ . '/../../../models/Servicios/ServicioModel.php';
 require_once __DIR__ . '/../../../models/Especialistas/EspecialistaModel.php';
 
 $areamodel = new AreaModel();
 $subareamodel = new SubareaModel();
 $especialistamodel = new EspecialistaModel();
+$serviciomodel = new ServicioModel();
 $base_url = 'http://localhost/SistemaClinico/';
 $areas = $areamodel->obtenerareas();
+$servicios = $serviciomodel->obtenerservicios();
 if (!isset($_SESSION['usuario']) || !isset($_SESSION['rol'])) {
     header("Location: " . $base_url . "views/login.php");
     exit();
@@ -43,6 +46,19 @@ $idusuario = $_SESSION['idusuario'];
                             <div class="calendar-toolbar" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem;">
                                 <div class="page-header w-100 d-flex justify-content-between align-items-center my-3">
                                     <div class="filtros d-flex align-items-center">
+                                        <label for="filtro-servicio" class="filtro-title">Servicio</label>
+                                        <select class="form-select filtro filtro-not-selected" id="filtro-servicio" style="background-color: #ff7e00; color: #fff">
+                                            <?php
+                                            foreach ($servicios as $servicio) {
+                                                $selected = $servicio['servicio'] == 'CONSULTA' ? 'selected' : '';
+                                            ?>
+                                                <option value="<?php echo $servicio['idservicio'] ?>" <?php echo $selected ?> style="font-weight: bold; color: #fff">
+                                                    <?php echo $servicio['servicio'] ?>
+                                                </option>
+                                            <?php
+                                            }
+                                            ?>
+                                        </select>
                                         <label for="filtro-area" class="filtro-title">Área</label>
                                         <select class="form-select filtro filtro-not-selected" id="filtro-area">
                                             <option value="" disabled selected>Seleccionar</option>
@@ -55,7 +71,7 @@ $idusuario = $_SESSION['idusuario'];
                                             }
                                             ?>
                                         </select>
-                                        <label for="filtro-subarea" class="filtro-title">Subárea </label>
+                                        <label for="filtro-subarea" class="filtro-title" id="filtro-subarea-title">Subárea </label>
                                         <select class="form-select filtro filtro-not-selected" id="filtro-subarea" disabled>
                                             <option value="" disabled selected>Seleccionar</option>
                                         </select>

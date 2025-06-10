@@ -386,12 +386,16 @@ function buscarCitas(filtro) {
 
 
                                 const totalCita = parseFloat($('#importexpagar').val());
+                                const montoCita = parseFloat($('#monto').val());
                                 const totalFormateado = totalCita.toFixed(2);
-                                $('#total-sub-total').text(':' + totalFormateado);
+                                const totalFormateado2 = montoCita.toFixed(2);
+
+
+                                $('#total-sub-total').text(':' + totalFormateado2);
                                 $('#total-venta').text(':' + totalFormateado);
 
-                                const totalEnLetras = numeroALetrasSoles(totalCita);
-                                $('#oracion-precio').text(':' + totalEnLetras);
+                                const totalEnLetras = numeroALetrasSoles(montoCita);
+                                $('#oracion-precio').text(totalEnLetras);
 
                                 const fechaHoraPeru = obtenerFechaHoraPeruFormateada();
                                 $('#cajero-fecha').text('FECHA: ' + fechaHoraPeru);
@@ -402,6 +406,9 @@ function buscarCitas(filtro) {
 
                                 const codigoTicket = $('#codigo-voucher').val();
                                 $('#codigo-voucher-ticket').text(codigoTicket);
+
+                                const vueltoTicket = $('#vuelto').val();
+                                $('#total-vuelto').text(vueltoTicket);
 
                                 const detalleSubareas = $('#detalle-subareas').val();
                                 const resumenContainer = $('#resumen-impresion');

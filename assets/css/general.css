@@ -169,3 +169,32 @@ body {
   border: none;
   margin: 0 !important;
 }
+
+.svg-x-end{
+    display: flex
+;
+    justify-content: flex-end;
+}
+
+.svg-x{
+    width:20px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

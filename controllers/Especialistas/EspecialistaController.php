@@ -4,28 +4,43 @@ require_once __DIR__ . '/../../models/Especialistas/EspecialistaModel.php';
 $modelo = new EspecialistaModel();
 $mensaje = '';
 $action = $_GET['action'];
-$idarea = $_GET['idarea'];
-$idsubarea = $_GET['idsubarea'];
+$idservicio = $_GET['idservicio'] ?? '';
+$idarea = $_GET['idarea'] ?? '';
+$idsubarea = $_GET['idsubarea'] ?? '';
 
 if ($action === "read") {
-    if ($idarea != null && $idsubarea != null) {
-        $especialistas = $modelo->obtenerEspecialistaPorAreaySubarea($idarea, $idsubarea);
-        echo json_encode($especialistas);
-        exit;
+  try {
+    if ($idservicio !== '' && $idarea !== '' && $idsubarea !== '') {
+      $especialistas = $modelo->obtenerEspecialistaPorAreaySubareayServicio($idarea, $idsubarea, $idservicio);
+      echo json_encode($especialistas);
+      exit;
+    }
+    if ($idservicio !== '' && $idarea !== '') {
+      $especialistas = $modelo->obtenerEspecialistaPorAreayServicio($idarea, $idservicio);
+      echo json_encode($especialistas);
+      exit;
+    }
+    if ($idarea !== '') {
+      $especialistas = $modelo->obtenerEspecialistaPorArea($idarea);
+      echo json_encode($especialistas);
+      exit;
     }
     $especialistas = $modelo->obtenerEspecialistas();
     echo json_encode($especialistas);
     exit;
+  } catch (Exception $e) {
+    $mensaje = $e;
+  }
 } elseif ($action === "delete") {
-    $id = $_GET['idEspecialista'];
-    if (is_numeric($id)) {
-        $resultado = $modelo->eliminarEspecialista($id);
-        $mensaje = $resultado ? 'Especialista eliminado correctamente.' : 'Error al eliminar el especialista.';
-    } else {
-        $mensaje = 'Error: ID inválido.';
-    }
+  $id = $_GET['idEspecialista'];
+  if (is_numeric($id)) {
+    $resultado = $modelo->eliminarEspecialista($id);
+    $mensaje = $resultado ? 'Especialista eliminado correctamente.' : 'Error al eliminar el especialista.';
+  } else {
+    $mensaje = 'Error: ID inválido.';
+  }
 } elseif ($action === "update") {
-    /*
+  /*
     $id = $_POST['idEspecialista'];
     $nombres = ucwords($_POST['nombres']);
     $apellidos = ucwords($_POST['apellidos']);
@@ -45,46 +60,82 @@ if ($action === "read") {
     }
         */
 } elseif ($action === "create") {
-
-    
-    $especialista = $_POST['especialista'];
+  try {
+    $especialista = strtolower(trim($_POST['especialista']));
     $password = $_POST['password'];
-    $especialista = strtolower(trim($especialista));
 
     if ($modelo->existeEspecialista($especialista)) {
-        $mensaje = 'Error: El nombre de especialista ya existe.';
+      throw new Exception('Error: El nombre de usuario ya existe.');
     } elseif (!preg_match('/^\d{8}$/', $password)) {
-        $mensaje = 'Error: La contraseña debe tener exactamente 8 dígitos numéricos.';
+      throw new Exception('Error: La contraseña debe tener exactamente 8 dígitos numéricos.');
     } else {
-       $nombres     = ucwords($_POST['nombres']);
-$apellidos   = ucwords($_POST['apellidos']);
-$dni         = $_POST['dni'];
-$telefono    = $_POST['telefono'];
-$correo      = $_POST['correo'];
-$usuario     = strtolower($_POST['especialista']); // o cualquier valor válido
-$password    = $_POST['password'];
-$passwordHash = password_hash($password, PASSWORD_DEFAULT);
+      $nombres      = ucwords($_POST['nombres']);
+      $apellidos    = ucwords($_POST['apellidos']);
+      $dni          = $_POST['dni'];
+      $telefono     = $_POST['telefono'];
+      $correo       = $_POST['correo'];
+      $usuario      = $especialista;
+      $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+      $idrol        = 3;
+      $idestado     = 1;
+      $sexo         = $_POST['sexo'];
 
-$idarea      = $_POST['idArea'];
-$idsubarea   = $_POST['idSubArea'];
-$idrol       = 3; // ejemplo
-$idestado    = 1; // activo
+      // ✅ Eliminar servicios duplicados
+      $_POST['idServicio'] = array_unique($_POST['idServicio']);
 
-$resultado = $modelo->guardarEspecialista(
-    $nombres, $apellidos, $dni, $telefono, $correo,
-    $idestado, $idrol, $usuario, $passwordHash,
-    $idarea, $idsubarea
-);
+      // 🔄 Reconstruir array de especialidades correctamente
+      $especialidades = [];
 
-        $mensaje = $resultado ? 'Registro exitoso.' : 'Error al registrar el especialista.';
+      foreach ($_POST['idServicio'] as $idservicio) {
+        $idarea   = $_POST['idArea'][$idservicio] ?? null;
+        $subareas = $_POST['idSubArea'][$idservicio] ?? [];
+
+        // Si no hay subáreas (ej. Evaluación), igual se guarda el área sola
+        if (empty($subareas)) {
+          $especialidades[] = [
+            'idservicio' => $idservicio,
+            'idarea'     => $idarea,
+            'idsubarea'  => null
+          ];
+        } else {
+          foreach ($subareas as $idsubarea) {
+            $especialidades[] = [
+              'idservicio' => $idservicio,
+              'idarea'     => $idarea,
+              'idsubarea'  => $idsubarea
+            ];
+          }
+        }
+      }
+
+      // 🧠 Guardar en base de datos
+      $resultado = $modelo->guardarEspecialista(
+        $nombres,
+        $apellidos,
+        $dni,
+        $telefono,
+        $correo,
+        $idestado,
+        $idrol,
+        $usuario,
+        $passwordHash,
+        $sexo,
+        $especialidades
+      );
+
+      echo json_encode(['success' => true, 'message' => 'Especialista creado exitosamente.']);
+      exit;
     }
-        
+  } catch (Exception $e) {
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    exit;
+  }
 } else {
-    $mensaje = 'Error: Acción no válida.';
+  $mensaje = 'Error: Acción no válida.';
 }
 
 header('Content-Type: application/json');
 echo json_encode([
-    'success' => strpos($mensaje, 'Error') === false,
-    'message' => $mensaje
+  'success' => strpos($mensaje, 'Error') === false,
+  'message' => $mensaje
 ]);

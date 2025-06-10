@@ -17,18 +17,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['nombre']      = $datosUsuario['nombres'] . ' ' . $datosUsuario['apellidos'];
         $_SESSION['rol']         = $datosUsuario['nombre_rol'];
 
-
-        header("Location: " . $base_url . "views/Clinica/usuarios/index.php");
+        
+    header("Location: " . $base_url . "views/Clinica/usuarios/index.php");
 
         exit;
     } else {
         // Error de login
         $_SESSION['error_login'] = 'Usuario o contraseña incorrectos.';
-        header("Location: " . $base_url . "views/login.php");
+       header("Location: " . $base_url . "views/login.php");
         exit;
     }
 } else {
     // Si acceden directamente sin POST
-    header("Location: " . $base_url . "views/login.php");
+  header("Location: " . $base_url . "views/login.php");
     exit;
 }

@@ -214,24 +214,14 @@ body {
   text-align: center;
 }
 
-.btn-edit {
-  border: 0.5px solid #f07e0b !important;
+.table-button:hover {
+  border-color: #f07e0b;
 }
 
-.btn-edit:hover {
-  background: #f07e0b;
-}
-
-.btn-edit:hover .st05 {
-  fill: #fff;
-}
-
-.btn-delete:hover {
-  background: #76869e;
-}
-
-.btn-delete:hover .st007 {
-  fill: #fff;
+.table-button:hover .st05pencil,
+.table-button:hover .st007,
+.table-button:hover .cls-disponibilidad {
+  fill: #f07e0b;
 }
 
 .table-button svg {
@@ -242,10 +232,6 @@ body {
   width: 15px;
 }
 
-.table-button:hover {
-  border: 0.5px solid rgb(93, 109, 132);
-}
-
 .table-button.btn-add {
   border: 0.5px solid rgb(240, 126, 11);
 }
@@ -254,16 +240,12 @@ body {
   border: 0.5px solid rgb(230, 118, 6);
 }
 
-.table-button:hover .st004 {
-  fill: rgb(230, 118, 6);
-}
-
 .table-correo {
   color: #76869e;
   background-color: #76869e10;
   border-radius: 25px;
   padding: 5px;
-  width: 250px !important;
+  width: 350px !important;
 }
 
 .badge {

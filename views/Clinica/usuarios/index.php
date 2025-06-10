@@ -3,16 +3,6 @@ require_once __DIR__ . '/../../../models/Users/UserModel.php';
 session_start();
 
 $base_url = 'http://localhost/SistemaClinico/';
-if (!isset($_SESSION['usuario']) || !isset($_SESSION['rol'])) {
-    header("Location: " . $base_url . "views/login.php");
-    exit();
-}
-
-if ($_SESSION['rol'] !== 'SuperUsuario') {
-    // Puedes redirigir al inicio, o mostrar un mensaje de acceso denegado
-    header("Location: " . $base_url . "views/login.php");
-    exit();
-}
 
 $userModel = new UsuarioModel();
 $roles = $userModel->obtenerRoles();
@@ -47,9 +37,7 @@ $estados = $userModel->obtenerEstados();
 
             <div class="lado-derecho">
 
-                <div class="mensaje-alert">
-                    <div id="mensaje-usuarios" class="my-3"></div>
-                </div>
+
 
                 <?php include '../../../sections/header.php'; ?>
                 <div class="col page-container">
@@ -156,6 +144,27 @@ $estados = $userModel->obtenerEstados();
 
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
+                <div class="svg-x-end">
+                    <div class="svg-x" data-bs-dismiss="modal">
+
+                        <svg id="" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13.15 12.89">
+                            <defs>
+                                <style>
+                                    .cls-equis {
+                                        fill: none;
+                                        stroke: #76869e;
+                                        stroke-linecap: round;
+                                        stroke-miterlimit: 10;
+                                        stroke-width: 2px;
+                                    }
+                                </style>
+                            </defs>
+                            <line class="cls-equis" x1="1.39" y1="1" x2="12.15" y2="11.76" />
+                            <line class="cls-equis" x1="11.76" y1="1.13" x2="1" y2="11.89" />
+                        </svg>
+                    </div>
+                </div>
+
                 <div class="modal-body" id="usuarioModalBody">
                 </div>
                 <div class="modal-footer justify-content-left">

@@ -63,7 +63,7 @@ INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
 INNER JOIN usuarios ua ON p.idusuario = ua.idusuario  -- Apoderado del paciente
 
 INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
-INNER JOIN usuarios ue ON e.idusuario = ue.idusuario  -- Datos del especialista
+INNER JOIN usuarios ue ON c.idregistrador = ue.idusuario  -- Datos del especialista
 INNER JOIN areas a ON e.idarea = a.idarea
 LEFT JOIN subareas sa ON e.idsubarea = sa.idsubarea
 
@@ -167,7 +167,7 @@ WHERE 1
     }
 
 
-    public function guardarPagos($idsCitas, $costoTotal, $vuelto, $idPaciente, $idModalidad, $idOpcion, $idusuario, $deuda, $codigo, $codigo_voucher, $fecha = null)
+    public function guardarPagos($idsCitas, $costoTotal, $idPaciente, $idModalidad, $idOpcion, $idusuario, $codigo, $codigo_voucher, $fecha = null)
     {
         $pdo = connectDatabase();
         date_default_timezone_set('America/Lima');
@@ -178,8 +178,8 @@ WHERE 1
 
             // 1. Insertar un solo pago
             $stmtPago = $pdo->prepare("
-            INSERT INTO pagos (fecha_pago, idmodalidad, idopcion, importe, idusuario, vuelto, deuda, codigo, codigo_voucher)
-            VALUES (:fecha_pago, :idmodalidad, :idopcion, :importe, :idusuario, :vuelto, :deuda , :codigo , :codigo_voucher)
+            INSERT INTO pagos (fecha_pago, idmodalidad, idopcion, importe, idusuario, codigo, codigo_voucher)
+            VALUES (:fecha_pago, :idmodalidad, :idopcion, :importe, :idusuario, :codigo , :codigo_voucher)
         ");
 
             $stmtPago->execute([
@@ -188,8 +188,7 @@ WHERE 1
                 'idopcion'    => $idOpcion,
                 'importe'     => $costoTotal,
                 'idusuario'   => $idusuario,
-                'vuelto'      => $vuelto,
-                'deuda'      => $deuda,
+
                 'codigo' => $codigo,
                 'codigo_voucher' => $codigo_voucher,
             ]);

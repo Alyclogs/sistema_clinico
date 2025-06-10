@@ -1,11 +1,13 @@
 const calendarEl = document.getElementById('calendar');
 const baseurl = "http://localhost/SistemaClinico/";
+var selectedservicio = "1";
 var selectedarea = "";
 var selectedsubarea = "";
 var selectedespecialista = "";
 let lastEspecialista = null;
 let horariosPorEspecialista = {};
 let horariosSeleccionados = [];
+let servicioSeleccionado = 'CONSULTA';
 let especialistaSeleccionado = '';
 let disponibilidadEspecialista = [];
 let citasGlobales = [];
@@ -189,7 +191,7 @@ const calendar = new FullCalendar.Calendar(calendarEl, {
     slotDuration: '00:30:00',
     slotLabelInterval: '00:30:00',
     slotMinTime: '09:00:00',
-    slotMaxTime: '17:30:00',
+    slotMaxTime: '18:00:00',
     selectable: true,
     //nowIndicator: true,
     editable: true,
@@ -285,7 +287,7 @@ const miniCalendar = new FullCalendar.Calendar(miniCalendarEl, {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-    refrescarCitas();
+    refrescarCitas(null, '1');
     //refrescarCitas(false);
 
     updateCalendarDateRange(calendar);
@@ -302,7 +304,6 @@ document.addEventListener('DOMContentLoaded', function () {
         $.get(baseurl + `controllers/Subareas/SubareaController.php?action=read&idarea=${idArea}`, function (data) {
             let html = '';
             const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
-            console.log('Subareas: ', parsedData);
             if (parsedData) {
                 if (Array.isArray(parsedData)) {
                     parsedData.forEach(function (subarea) {
@@ -314,19 +315,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 $("#filtro-subarea").prop("disabled", false);
                 $("#filtro-subarea").append(html);
             }
+        }).fail(function (xhr, status, error) {
+            mostrarMensajeFlotante('Error al agendar cita: ' + xhr.responseText);
         });
     }
 
-    function buscarEspecialistaPorAreaySubarea(idArea, idSubarea) {
+    function buscarEspecialistas() {
         $("#filtro-especialista")
             .empty()
             .append('<option value="" disabled selected>Seleccionar</option>')
             .prop("disabled", true);
 
-        $.get(baseurl + `controllers/Especialistas/EspecialistaController.php?action=read&idarea=${idArea}&idsubarea=${idSubarea}`, function (data) {
+        $.get(baseurl + `controllers/Especialistas/EspecialistaController.php?action=read&idarea=${selectedarea}&idservicio=${selectedservicio}${selectedsubarea ? `&idsubarea=${selectedsubarea}` : ''}`, function (data) {
             const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
             const especialistas = Array.isArray(parsedData) ? parsedData : [parsedData];
 
+            if (especialistas.length === 0) {
+                mostrarMensajeFlotante('No hay especialistas');
+            }
             const promesas = especialistas.map(especialista => {
                 return obtenerDisponibilidadEspecialista(especialista.idespecialista).then(disponibilidad => {
                     if (disponibilidad.length === 0) {
@@ -339,7 +345,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     // Tiene disponibilidad, calculamos
-                    return obtenerCitasEspecialista(especialista.idespecialista).then(citas => {
+                    return obtenerCitas(especialista.idespecialista).then(citas => {
                         const resultados = calcularDisponibilidadPorEspecialista(disponibilidad, citas);
                         return resultados.map(r => ({
                             ...r,
@@ -347,7 +353,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         }));
                     });
                 });
-            });
+            })
 
             Promise.all(promesas).then(respuestas => {
                 let todos = [];
@@ -374,22 +380,48 @@ document.addEventListener('DOMContentLoaded', function () {
                 $("#filtro-especialista")
                     .html('<option value="" disabled selected>Seleccionar</option>' + html)
                     .prop("disabled", false);
+            }).catch(e => {
+                mostrarMensajeFlotante('Error al buscar especialistas: ' + e.message);
             });
         });
     }
 
+    $('#filtro-servicio').change(function () {
+        $(this).removeClass('filtro-not-selected');
+        $("#filtro-area").val("");
+        $("#filtro-subarea").val("");
+        $("#filtro-especialista").val("");
+        const val = $(this).val().trim();
+        const servicio = $(this).find('option:selected').text().trim();
+
+        if (val) selectedservicio = val;
+        if (servicio) servicioSeleccionado = servicio;
+        if (servicio === 'EVALUACION') {
+            $("#filtro-subarea").hide();
+            $("#filtro-subarea-title").hide();
+        } else {
+            $("#filtro-subarea").show();
+            $("#filtro-subarea-title").show();
+        }
+        refrescarCitas();
+    });
+
     $("#filtro-area").change(function () {
         $(this).removeClass('filtro-not-selected');
         $("#filtro-subarea").val("");
+        $("#filtro-especialista").val("");
         selectedarea = $(this).val();
         buscarSubareaPorArea(selectedarea);
+        buscarEspecialistas();
+        refrescarCitas();
     });
 
     $("#filtro-subarea").change(function () {
         $(this).removeClass('filtro-not-selected');
         $("#filtro-especialista").val("");
         selectedsubarea = $(this).val();
-        buscarEspecialistaPorAreaySubarea(selectedarea, selectedsubarea);
+        buscarEspecialistas();
+        refrescarCitas();
     })
 
     //Cambio de horario segun la disponibilidad del especialista
@@ -405,7 +437,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     mostrarMensajeFlotante("Especialista sin disponibilidad");
                 }
             });
-            refrescarCitas(selectedespecialista);
+            refrescarCitas();
             actualizarEventosVisuales(true);
             lastEspecialista = selectedespecialista;
         } else {
@@ -480,7 +512,7 @@ document.addEventListener('DOMContentLoaded', function () {
             horariosSeleccionados.push({ fecha, horaIni, horaFin, hora, idespecialista: selectedespecialista, especialistaSeleccionado: especialistaSeleccionado });
             renderHorariosSeleccionados();
             actualizarEventosVisuales();
-            refrescarCitas(selectedespecialista);
+            refrescarCitas();
         }
     });
 
@@ -622,7 +654,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 }
 
                                 // Si está disponible, verificar citas
-                                return obtenerCitasEspecialista(horariosSeleccionados[idxEditando].idespecialista);
+                                return obtenerCitas(horariosSeleccionados[idxEditando].idespecialista);
                             })
                             .then(function (citasEspecialista) {
                                 const cit = citasEspecialista.find(d => d.fecha === fecha && d.hora_inicio === hora);
@@ -779,6 +811,7 @@ document.addEventListener('DOMContentLoaded', function () {
             window.location.href = baseurl + `views/Clinica/pagos/index.php?filtro=${dni}`
         }
         if (e.target.closest('#btnReservar')) {
+            console.log('Boton reservar clickeado');
             if (!selectedespecialista) {
                 mostrarMensajeFlotante('Debe seleccionar un especialista primero');
                 return;
@@ -813,25 +846,28 @@ document.addEventListener('DOMContentLoaded', function () {
             const fecha = h.fecha;
 
             const data = {
-                idusuario: idUsuario,
+                idregistrador: idUsuario,
                 idpaciente: idPaciente,
                 idespecialista: h.idespecialista,
                 hora_inicio: horaInicio,
                 hora_fin: horaFin,
                 fecha: fecha,
-                idestado: idestado
+                idestado: idestado,
+                idservicio: selectedservicio
             };
             $.post(baseurl + 'controllers/Citas/CitasController.php?action=create', { data: JSON.stringify(data) }, function (response) {
                 if (response.success) {
-                    $('#modalCita').modal('hide');
                     horariosSeleccionados = [];
                     renderHorariosSeleccionados();
-                    refrescarCitas(selectedespecialista);
+                    refrescarCitas();
                     actualizarEventosVisuales(false);
                 } else {
                     mostrarMensajeFlotante('Error al agendar la cita: ' + response.error + '\n' + response.message);
                 }
-            }, 'json');
+            }, 'json')
+                .fail(function (xhr, status, error) {
+                    mostrarMensajeFlotante('Error al agendar cita: ' + xhr.responseText);
+                });
         });
     }
 
@@ -908,12 +944,17 @@ document.addEventListener('DOMContentLoaded', function () {
         return $.get(baseurl + `controllers/Disponibilidad/DisponibilidadController.php?action=read&idespecialista=${idespecialista}`);
     }
 
-    function obtenerCitasEspecialista(idespecialista) {
-        return $.get(baseurl + `controllers/Citas/CitasController.php?action=read&idespecialista=${idespecialista}`);
-    }
+    function obtenerCitas(idservicio, idespecialista, idarea, idsubarea) {
+        const params = new URLSearchParams({ action: 'read' });
 
-    function obtenerCitas() {
-        return $.get(baseurl + `controllers/Citas/CitasController.php?action=read`);
+        if (idservicio) params.append('idservicio', idservicio);
+        if (idespecialista) params.append('idespecialista', idespecialista);
+        if (idarea) params.append('idarea', idarea);
+        if (idsubarea) params.append('idsubarea', idsubarea);
+
+        const url = baseurl + 'controllers/Citas/CitasController.php?' + params.toString();
+        console.log(url);
+        return $.get(url);
     }
 
     function actualizarEventosVisuales(render = true) {
@@ -936,18 +977,16 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function refrescarCitas(idespecialista) {
-        if (idespecialista != null && idespecialista !== '') {
-            obtenerCitasEspecialista(idespecialista).then(function (citas) {
-                citasGlobales = citas;
-                procesarYMostrarCitas(citas);
-            }).catch(e => console.log(e));
-        } else {
-            obtenerCitas().then(function (citas) {
-                citasGlobales = citas;
-                procesarYMostrarCitas(citas);
-            }).catch(e => console.log(e));;
-        }
+    function refrescarCitas() {
+        console.log('Buscando citas por servicio: ', selectedservicio, ' y especialista: ', selectedespecialista);
+        obtenerCitas(selectedservicio, selectedespecialista, selectedarea, selectedsubarea).then(function (citas) {
+            console.log(`Citas: `, citas);
+            citasGlobales = citas;
+            procesarYMostrarCitas(citas);
+        }).catch(e => {
+            console.log(e);
+            mostrarMensajeFlotante("Error al cargar citas");
+        });
     }
 
     function procesarYMostrarCitas(citas) {
@@ -1079,11 +1118,14 @@ document.addEventListener('DOMContentLoaded', function () {
         };
         const bh = disponibilidadEspecialista.map(d => {
             const start = d.horainicio.slice(0, 5);
+            /*
             // Suma 30 minutos a la hora de fin para que el sombreado NO incluya la hora de fin
             let [h, m] = d.horafin.slice(0, 5).split(':');
             let date = new Date(2000, 0, 1, parseInt(h), parseInt(m));
             date.setMinutes(date.getMinutes() + 30);
             const end = date.toTimeString().slice(0, 5);
+            */
+            const end = d.horafin.slice(0, 5);
             return {
                 daysOfWeek: [diasMap[d.fecha]],
                 startTime: start,
@@ -1206,9 +1248,8 @@ document.addEventListener('DOMContentLoaded', function () {
         div.id = 'mensajeFlotante';
         div.className = 'mensaje-alert';
         mensaje = document.createElement('div');
-        mensaje.className = 'my-3 ' + (exito ? 'alert-success' : 'alert-danger');
+        mensaje.className = 'my-3 alert ' + (exito ? 'alert-success' : 'alert-danger');
         mensaje.textContent = msg;
-        mensaje.style.padding = '12px 28px'
         div.appendChild(mensaje);
         document.body.appendChild(div);
         setTimeout(() => {
@@ -1255,4 +1296,4 @@ calendar.setOption('eventContent', function (arg) {
         return { html: arg.event.title };
     }
     // ...otros casos si es necesario...
-});
+});     

@@ -3,7 +3,6 @@ $base_url = 'http://localhost/SistemaClinico/';
 $current_url = "https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 
 // Supongamos que el rol está guardado en la sesión
-
 $rol_usuario = $_SESSION['rol'] ?? ''; // Si no hay rol, cadena vacía
 
 // Controlar la clase 'active' para un enlace específico

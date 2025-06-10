@@ -16,6 +16,29 @@ function getInitials(nombre, apellido) {
     return (n + a).toUpperCase();
 }
 
+
+function mostrarMensajeFlotante(msg, exito = false) {
+    let div = document.getElementById('mensajeFlotante');
+    if (div) div.remove();
+    div = document.createElement('div');
+    div.id = 'mensajeFlotante';
+    div.className = exito ? 'alert-success' : 'alert-danger';
+    div.textContent = msg;
+    Object.assign(div.style, {
+        position: 'fixed',
+        top: '30px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        padding: '12px 28px',
+        zIndex: 9999,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+    });
+    document.body.appendChild(div);
+    setTimeout(() => {
+        div.remove();
+    }, 2200);
+}
+
 function fetchUsers() {
     $.get(baseurl + "controllers/Users/UserController.php?action=read", function (data) {
         let html = '';
@@ -85,10 +108,12 @@ $(document).ready(function () {
     // Guardar usuario (Agregar o Editar)
     $(document).on('click', '#btnGuardarUsuario', function () {
         const formUsuario = $('#formUsuario');
+
         if (formUsuario[0].checkValidity()) {
             const formData = formUsuario.serialize();
             const userId = $('#idUsuario').val();
             let url, action;
+
             if (userId) {
                 url = baseurl + 'controllers/Users/UserController.php?action=update&id=' + userId;
                 action = 'update';
@@ -96,23 +121,19 @@ $(document).ready(function () {
                 url = baseurl + 'controllers/Users/UserController.php?action=create';
                 action = 'create';
             }
+
             $.ajax({
                 type: 'POST',
                 url: url,
                 data: formData,
                 dataType: 'json',
                 success: function (response) {
-                    var mensaje = document.getElementById('mensaje-usuarios');
-                    mensaje.textContent = '';
-                    mensaje.textContent = response.message;
-                    mensaje.className = 'my-3 ' + (response.success ? 'alert alert-success' : 'alert alert-danger');
-                    mensaje.hidden = false;
+                    // ✅ Mostrar mensaje flotante
+                    mostrarMensajeFlotante(response.message, response.success);
 
+                    // ✅ Cerrar modal y redirigir si fue exitoso
                     setTimeout(function () {
                         usuarioModal.hide();
-                        mensaje.hidden = true;
-
-                        // ✅ Redirección si fue exitoso
                         if (response.success) {
                             window.location.href = baseurl + 'views/Clinica/usuarios/index.php';
                         }
@@ -121,17 +142,24 @@ $(document).ready(function () {
                 error: function (jqXHR, textStatus, errorThrown) {
                     console.error('Error en la solicitud AJAX:', textStatus, errorThrown);
                     console.error('Respuesta del servidor:', jqXHR.responseText);
+
+                    // ❌ Mostrar error flotante
+                    mostrarMensajeFlotante('Ocurrió un error inesperado. Intenta de nuevo.', false);
                 }
             });
         } else {
+            // ✅ Validación nativa del formulario
             formUsuario[0].reportValidity();
         }
     });
+
+
 
     // Eliminar usuario 
     $('#tablaUsuariosBody').on('click', '.btn-delete', function () {
         const userId = $(this).data('id');
         const nombreUsuario = $(this).data('nombre');
+
         if (confirm(`¿Está seguro de que desea eliminar del sistema a ${nombreUsuario}?`)) {
             $.ajax({
                 type: 'POST',
@@ -139,16 +167,27 @@ $(document).ready(function () {
                 data: { idUsuario: userId },
                 dataType: 'json',
                 success: function (response) {
-                    alert(response.message);
-                    fetchUsers();
+                    // ✅ Mostrar mensaje flotante
+                    mostrarMensajeFlotante(response.message, response.success);
+
+                    // ✅ Recargar la lista de usuarios si fue exitoso
+                    if (response.success) {
+                        setTimeout(() => {
+                            fetchUsers();
+                        }, 1000);
+                    }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     console.error('Error en la solicitud AJAX:', textStatus, errorThrown);
                     console.error('Respuesta del servidor:', jqXHR.responseText);
+
+                    // ❌ Mostrar mensaje flotante de error
+                    mostrarMensajeFlotante('No se pudo eliminar el usuario. Intenta nuevamente.', false);
                 }
             });
         }
     });
+
 });
 
 function buscarUsuarios(filtro) {

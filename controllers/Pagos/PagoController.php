@@ -20,9 +20,9 @@ try {
         
         case 'create':
     $idsCitas = !empty($_POST['ids_citas']) ? explode(',', $_POST['ids_citas']) : [];
-    $costoTotal = !empty($_POST['importexpagar']) ? floatval($_POST['importexpagar']) : null;
-    $vuelto = isset($_POST['vuelto']) ? floatval($_POST['vuelto']) : 0.00;
-    $deuda = !empty($_POST['deudaxpagar']) ? floatval($_POST['deudaxpagar']) : null;
+    $costoTotal = !empty($_POST['monto']) ? floatval($_POST['monto']) : null;
+  
+
 
     $idPaciente = !empty($_POST['id_paciente']) ? $_POST['id_paciente'] : null;
     $idModalidad = !empty($_POST['modalidad-pago']) ? $_POST['modalidad-pago'] : null;
@@ -37,7 +37,7 @@ try {
     }
 
  
-    $success = $modelo->guardarPagos($idsCitas, $costoTotal, $vuelto, $idPaciente, $idModalidad, $idOpcion, $idUsuario, $deuda , $codigo, $codigovoucher);
+    $success = $modelo->guardarPagos($idsCitas, $costoTotal, $idPaciente, $idModalidad, $idOpcion, $idUsuario , $codigo, $codigovoucher);
 
     $mensaje = $success ? 'Pago registrado correctamente.' : 'Error al registrar el pago.';
     break;

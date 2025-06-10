@@ -4,8 +4,9 @@ $especialistaModel = new EspecialistaModel();
 $areas = $especialistaModel->obtenerAreas();
 
 
-$subareas = $especialistaModel->obtenerSubareas(); // obtiene todas
+$subareas = $especialistaModel->obtenersubareas(); // obtiene todas
 $subareasAgrupadas = [];
+$servicios = $especialistaModel->obtenerServicios();
 
 foreach ($subareas as $sub) {
     $subareasAgrupadas[$sub['idarea']][] = $sub;
@@ -49,37 +50,55 @@ if ($id) {
             <label for="dni" class="form-label">DNI<span>*</span></label>
             <input type="text" class="form-control" id="dni" name="dni" required maxlength="8" pattern="\d{8}" title="El DNI debe tener exactamente 8 dígitos" value="<?php echo $usuario ? htmlspecialchars($usuario['dni_especialista']) : ''; ?>">
         </div>
-        <div class="col-md-6 mb-3">
-            <label for="telefono" class="form-label">Teléfono</label>
-            <input type="tel" class="form-control" id="telefono" name="telefono"  maxlength="9" pattern="[0-9]{9}" title="El teléfono debe tener exactamente 9 dígitos" value="<?php echo $usuario ? htmlspecialchars($usuario['telefono_especialista']) : ''; ?>">
+        
+          <div class="col-md-6 mb-3">
+           <label for="sexo" class="form-label">Sexo<span>*</span></label>
+            <select class="form-select" id="sexoUsuario" name="sexo" required>
+                  <option value="" disabled>Seleccione</option>
+                <option value="F">Femenino</option>
+                  <option value="M">Masculino</option>
+                </select>
         </div>
+        
+        
+        
+      
     </div>
     
        <div class="row">
+             <div class="col-md-6 mb-3">
+            <label for="telefono" class="form-label">Teléfono</label>
+            <input type="tel" class="form-control" id="telefono" name="telefono"  maxlength="9" pattern="[0-9]{9}" title="El teléfono debe tener exactamente 9 dígitos" value="<?php echo $usuario ? htmlspecialchars($usuario['telefono_especialista']) : ''; ?>">
+        </div>
+        
      <div class="col-md-6 mb-3">
         <label for="correo" class="form-label">Correo Electrónico</label>
         <input type="email" class="form-control" id="correo" name="correo"  value="<?php echo $usuario ? htmlspecialchars($usuario['correo_especialista']) : ''; ?>">
-    </div>
-     <div class="col-md-6 mb-3">
-            <label for="areaUsuario" class="form-label">Área<span>*</span></label>
-            <select class="form-select" id="areaUsuario" name="idArea" required onchange="cargarSubareas()">
-                <option value="" disabled <?php echo !$usuario ? 'selected' : ''; ?>>Seleccione una área</option>
-                <?php foreach ($areas as $area) { ?>
-                    <option value="<?php echo htmlspecialchars($area['idarea']) ?>" <?php if ($usuario && $usuario['idarea'] == $area['idarea']) echo 'selected'; ?>><?php echo htmlspecialchars($area['area']) ?></option>
-                <?php } ?>
-            </select>
-        </div>
-    </div>
+    </div> </div>
     
-<div class="row" id="subareaContainer" style="<?php echo $usuario ? 'display:block;' : 'display:none;'; ?>">
-         <div class="col-md-6 mb-3">
-              <label for="especialidadUsuario">Especialidad<span>*</span></label>
-    <select class="form-select" id="especialidadUsuario" name="idSubArea" required>
-        <option value="">Seleccione una subárea</option>
-    </select>
-        </div>
-    </div>
     
+   
+<div class="row">
+  <div class="col-md-6 mb-3">
+    <label>Servicios<span>*</span></label><br>
+    <?php foreach ($servicios as $servicio) { ?>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox"
+               name="idServicio[]" 
+               id="servicio_<?php echo $servicio['idservicio']; ?>" 
+               value="<?php echo htmlspecialchars($servicio['idservicio']); ?>"
+               onchange="toggleAreaRow(this)">
+        <label class="form-check-label" for="servicio_<?php echo $servicio['idservicio']; ?>">
+          <?php echo htmlspecialchars($servicio['servicio']); ?>
+        </label>
+      </div>
+    <?php } ?>
+  </div>
+
+  <div class="col-md-6 mb-3" id="areasContainer">
+    <!-- Aquí se cargarán dinámicamente los selects de áreas + subáreas por servicio -->
+  </div>
+</div>
 
     
     
@@ -115,39 +134,110 @@ if ($id) {
    
 </form>
 <script>
-    const subareasPorArea = <?php echo json_encode($subareasAgrupadas); ?>;
-    const subareaActual = <?php echo $usuario ? (int)$usuario['idsubarea'] : 'null'; ?>;
-    const areaActual = <?php echo $usuario ? (int)$usuario['idarea'] : 'null'; ?>;
+const subareasPorArea = <?php echo json_encode($subareasAgrupadas); ?>;
+const areas = <?php echo json_encode($areas); ?>;
 
-    function cargarSubareas() {
-        const areaId = document.getElementById('areaUsuario').value;
-        const subareaSelect = document.getElementById('especialidadUsuario');
-        const subareaContainer = document.getElementById('subareaContainer');
+function toggleAreaRow(checkbox) {
+  const container = document.getElementById('areasContainer');
+  const servicioId = checkbox.value;
+  const existingDiv = document.getElementById('areaRow_' + servicioId);
 
-        subareaSelect.innerHTML = '<option value="">Seleccione una subárea</option>';
+  if (checkbox.checked) {
+    if (!existingDiv) {
+      const divRow = document.createElement('div');
+      divRow.className = 'mb-4 border p-3 rounded';
+      divRow.id = 'areaRow_' + servicioId;
 
-        if (subareasPorArea[areaId]) {
-            subareasPorArea[areaId].forEach(sub => {
-                const opt = document.createElement('option');
-                opt.value = sub.idsubarea;
-                opt.textContent = sub.subarea;
-                if (sub.idsubarea == subareaActual && areaId == areaActual) {
-                    opt.selected = true;
-                }
-                subareaSelect.appendChild(opt);
-            });
-            subareaContainer.style.display = 'block';
-        } else {
-            subareaContainer.style.display = 'none';
-        }
+      // Etiqueta servicio
+      const labelServicio = document.createElement('label');
+      labelServicio.className = 'form-label fw-bold';
+      labelServicio.textContent = `Área y Especialidades para servicio: ${checkbox.nextElementSibling.textContent}`;
+      divRow.appendChild(labelServicio);
+
+      // input hidden para idServicio[]
+      const inputServicio = document.createElement('input');
+      inputServicio.type = 'hidden';
+      inputServicio.name = 'idServicio[]';
+      inputServicio.value = servicioId;
+      divRow.appendChild(inputServicio);
+
+      // Select área con name idArea[servicioId]
+      const selectArea = document.createElement('select');
+      selectArea.className = 'form-select mt-2';
+      selectArea.name = `idArea[${servicioId}]`; // 💡 CLAVE
+      selectArea.required = true;
+      selectArea.onchange = function () { cargarSubareas(this, servicioId); };
+
+      const optionDefault = document.createElement('option');
+      optionDefault.value = '';
+      optionDefault.textContent = 'Seleccione una área';
+      optionDefault.disabled = true;
+      optionDefault.selected = true;
+      selectArea.appendChild(optionDefault);
+
+      areas.forEach(area => {
+        const opt = document.createElement('option');
+        opt.value = area.idarea;
+        opt.textContent = area.area;
+        selectArea.appendChild(opt);
+      });
+
+      divRow.appendChild(selectArea);
+
+      // Contenedor subáreas
+      const subareaContainer = document.createElement('div');
+      subareaContainer.id = 'subareasContainer_' + servicioId;
+      subareaContainer.className = 'mt-3';
+      divRow.appendChild(subareaContainer);
+
+      container.appendChild(divRow);
     }
+  } else {
+    if (existingDiv) {
+      container.removeChild(existingDiv);
+    }
+  }
+}
 
-    // Ejecutar al cargar la página si ya hay usuario
-    window.addEventListener('DOMContentLoaded', () => {
-        if (areaActual) {
-            cargarSubareas();
-        }
+function cargarSubareas(select, servicioId) {
+  const areaId = select.value;
+  const subareaCont = document.getElementById('subareasContainer_' + servicioId);
+  subareaCont.innerHTML = '';
+
+  // Para servicio 2 no mostrar subáreas
+  if (parseInt(servicioId) === 2) {
+    return;
+  }
+
+  if (subareasPorArea[areaId]) {
+    const label = document.createElement('label');
+    label.className = 'form-label';
+    label.textContent = 'Especialidades (puede seleccionar más de una):';
+    subareaCont.appendChild(label);
+
+    subareasPorArea[areaId].forEach(sub => {
+      const divCheck = document.createElement('div');
+      divCheck.className = 'form-check';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'form-check-input';
+      checkbox.name = `idSubArea[${servicioId}][]`; // 💡 CLAVE
+      checkbox.id = `subarea_${servicioId}_${sub.idsubarea}`;
+      checkbox.value = sub.idsubarea;
+
+      const labelCheck = document.createElement('label');
+      labelCheck.className = 'form-check-label';
+      labelCheck.htmlFor = checkbox.id;
+      labelCheck.textContent = sub.subarea;
+
+      divCheck.appendChild(checkbox);
+      divCheck.appendChild(labelCheck);
+
+      subareaCont.appendChild(divCheck);
     });
+  }
+}
 </script>
 
 <script>

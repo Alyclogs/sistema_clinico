@@ -37,6 +37,12 @@ body {
   font-size: 14px;
 }
 
+.service-color {
+  width: 8px;
+  height: 8px;
+  border-radius: 0.2rem;
+}
+
 .filtro-not-selected {
   color: #76869e65;
 }

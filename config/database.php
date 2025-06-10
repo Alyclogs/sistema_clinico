@@ -1,11 +1,10 @@
 <?php
 define('DB_HOST', 'localhost');
-define('DB_USER', 'root'); // Cambia 'tu_usuario' al nombre de usuario de tu base de datos
-define('DB_PASS', ''); // Cambia 'tu_contraseña' a tu contraseña de
-define('DB_NAME', 'sistema_clinico');
+define('DB_USER', 'neuroeduca_admindatabase'); // Cambia 'tu_usuario' al nombre de usuario de tu base de datos
+define('DB_PASS', 'oAuyHiR~OKbt'); // Cambia 'tu_contraseña' a tu contraseña de
+define('DB_NAME', 'neuroeduca_sistema_clinico');
 
-function connectDatabase()
-{
+function connectDatabase() {
     try {
         // Usar charset utf8mb4 para mejor soporte de caracteres
         $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
@@ -21,15 +20,13 @@ function connectDatabase()
     }
 }
 
-function isDatabaseConnected($pdo)
-{
+function isDatabaseConnected($pdo) {
     // Aquí podrías hacer un simple query para verificar conexión si quieres, 
     // pero para simplificar dejamos así:
     return $pdo !== null;
 }
 
-function closeDatabase(&$pdo)
-{
+function closeDatabase(&$pdo) {
     // Se pasa por referencia para modificar el valor original y cerrar la conexión
     $pdo = null;
 }
@@ -46,3 +43,4 @@ try {
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
 }
+?>

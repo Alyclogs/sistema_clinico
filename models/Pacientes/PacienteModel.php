@@ -17,9 +17,9 @@ class PacientesModel
                 idpaciente,
                 nombres,
                 apellidos,
+                foto,
                 dni,
-                fecha_nacimiento,
-                foto
+                fecha_nacimiento
             FROM pacientes";
 
         // Si se envía un filtro, lo agregamos
@@ -41,6 +41,20 @@ class PacientesModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function crearCita($data)
+    {
+        $sql = "INSERT INTO citas (idpaciente, idespecialista, idusuario, fecha, hora_inicio, hora_fin) 
+                VALUES (:idpaciente, :idespecialista, :idusuario, :fecha, :hora_inicio, :hora_fin)";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':idpaciente', $data['idpaciente'], PDO::PARAM_INT);
+        $stmt->bindParam(':idespecialista', $data['idespecialista'], PDO::PARAM_INT);
+        $stmt->bindParam(':idusuario', $data['idusuario'], PDO::PARAM_INT);
+        $stmt->bindParam(':fecha', $data['fecha']);
+        $stmt->bindParam(':hora_inicio', $data['hora_inicio']);
+        $stmt->bindParam(':hora_fin', $data['hora_fin']);
+
+        return $stmt->execute();
+    }
     public function crearPaciente($data)
     {
         $baseurl = $this->baseurl;
@@ -51,9 +65,11 @@ class PacientesModel
             throw new Exception("Error al crear el usuario");
         }
 
+
         $imagenesMujeres = [
             $baseurl . "assets/img/niña2.png",
             $baseurl . "assets/img/niña1.png",
+
         ];
 
         $imagenesHombres = [
@@ -62,7 +78,7 @@ class PacientesModel
         ];
 
         // Seleccionar imagen aleatoria seg��n sexo
-        if (strtoupper($data['sexopaciente']) === 'F') {
+        if (strtolower($data['sexopaciente']) === 'F') {
             $fotoPaciente = $imagenesMujeres[array_rand($imagenesMujeres)];
         } else {
             $fotoPaciente = $imagenesHombres[array_rand($imagenesHombres)];

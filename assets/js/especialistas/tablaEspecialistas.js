@@ -15,26 +15,48 @@ function getInitials(nombre, apellido) {
     let a = apellido ? apellido.trim()[0] : '';
     return (n + a).toUpperCase();
 }
-
+function mostrarMensajeFlotante(msg, exito = false) {
+    let div = document.getElementById('mensajeFlotante');
+    if (div) div.remove();
+    div = document.createElement('div');
+    div.id = 'mensajeFlotante';
+    div.className = exito ? 'alert-success' : 'alert-danger';
+    div.textContent = msg;
+    Object.assign(div.style, {
+        position: 'fixed',
+        top: '30px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        padding: '12px 28px',
+        zIndex: 9999,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+    });
+    document.body.appendChild(div);
+    setTimeout(() => {
+        div.remove();
+    }, 2200);
+}
 function fetchUsers() {
     $.get(baseurl + "controllers/Especialistas/EspecialistaController.php?action=read", function (data) {
-        console.log("Especialistas recibidos:", data);
         let html = '';
         data.forEach(function (especialista) {
-            const color = stringToColor(especialista.nom_especialista + especialista.ape_especialista);
-            const initials = getInitials(especialista.nom_especialista, especialista.ape_especialista);
+            const color = stringToColor(especialista.nombres + especialista.apellidos);
+            const initials = getInitials(especialista.nombres, especialista.apellidos);
             html += `<tr>
                         <td style="display:flex;align-items:center;gap:8px;border:none">
                             <div class="avatar-iniciales" style="background:${color};"><span>${initials}</span></div>
-                            <b>${especialista.nom_especialista} ${especialista.ape_especialista}</b>
+                            <b>${especialista.nombres} ${especialista.apellidos}</b>
                         </td>
-                        <td>${especialista.dni_especialista}</td>
-                        <td>${especialista.telefono_especialista}</td>
-                        <td><div class="table-correo">${especialista.correo_especialista}</td>
-                        <td>${especialista.nombre_area}</td>
-                            <td>${especialista.nombre_subarea}</td>
-                         <td class="td-botones" data-id="${especialista.idespecialista}" data-nombre="${especialista.nom_especialista}"></td>
-                         
+                        <td>${especialista.dni}</td>
+                        <td>${especialista.telefono}</td>
+                        <td><div class="table-correo">${especialista.correo}</div></td>
+                        <td>
+                            ${especialista.especialidades.map(e => e.nombre_area).join(', ')}
+                        </td>
+                        <td>
+                            ${especialista.especialidades.map(e => e.nombre_subarea ? e.nombre_subarea : '-').join(', ')}
+                        </td>
+                        <td class="td-botones" data-id="${especialista.idespecialista}" data-nombre="${especialista.nombres}"></td>
                     </tr>`;
         });
         $("#tablaEspecialistasBody").html(html);
@@ -52,6 +74,24 @@ function fetchUsers() {
 }
 
 $(document).ready(function () {
+    const horarioModal = new bootstrap.Modal(document.getElementById('horarioModal'));
+
+    // Delegación de evento por si el botón se carga dinámicamente
+    $(document).on('click', '.btn-horario', function () {
+
+        $.get('formHorario.php')
+            .done(function (formHtml) {
+                console.log("Contenido recibido:", formHtml);
+                $('#horarioModalBody').html(formHtml);
+                horarioModal.show();
+            })
+            .fail(function () {
+                alert("Error cargando el formulario.");
+            });
+    });
+});
+
+$(document).ready(function () {
     fetchUsers();
 
     $('#inputBuscarUsuario').on('input', function () {
@@ -65,6 +105,8 @@ $(document).ready(function () {
 
     const usuarioModal = new bootstrap.Modal(document.getElementById('usuarioModal'));
 
+
+
     // Abrir modal para AGREGAR usuario
     $('.btn-add-user').on('click', function () {
         $('#usuarioModalLabel').text('Agregar Nuevo Usuario');
@@ -73,6 +115,8 @@ $(document).ready(function () {
             $('#usuarioModal').modal('show');
         });
     });
+
+
 
     // Abrir modal para EDITAR usuario
     $('#tablaEspecialistasBody').on('click', '.btn-edit', function () {
@@ -104,15 +148,11 @@ $(document).ready(function () {
                 data: formData,
                 dataType: 'json',
                 success: function (response) {
-                    var mensaje = document.getElementById('mensaje');
-                    mensaje.textContent = '';
-                    mensaje.textContent = response.message;
-                    mensaje.className = 'my-3 ' + response.success ? 'alert alert-success' : 'alert alert-danger';
-                    mensaje.hidden = false;
+                    mostrarMensajeFlotante(response.message, response.success);
 
                     setTimeout(function () {
                         usuarioModal.hide();
-                        mensaje.hidden = true;
+
 
                         // ✅ Redirección si fue exitoso
                         if (response.success) {

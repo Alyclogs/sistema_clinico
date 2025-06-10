@@ -12,3 +12,5 @@ Stack trace:
 [04-Jun-2025 22:50:35 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 191
 [04-Jun-2025 22:50:35 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 196
 [04-Jun-2025 22:50:35 UTC] PHP Warning:  Undefined variable $baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Users/UserModel.php on line 197
+[05-Jun-2025 21:16:47 UTC] PHP Warning:  Undefined property: PacientesModel::$baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Pacientes/PacienteModel.php on line 65
+[05-Jun-2025 21:26:44 UTC] PHP Warning:  Undefined property: PacientesModel::$baseurl in /home/neuroeduca/public_html/SistemaClinico/models/Pacientes/PacienteModel.php on line 58

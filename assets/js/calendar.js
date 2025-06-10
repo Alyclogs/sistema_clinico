@@ -203,13 +203,6 @@ const calendar = new FullCalendar.Calendar(calendarEl, {
         minute: '2-digit',
         hour12: false // usa true si quieres formato AM/PM
     },
-
-    hiddenDays: [0],
-    slotLabelFormat: {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false // usa true si quieres formato AM/PM
-    },
     dayHeaderFormat: {
         weekday: 'long',
         day: '2-digit',
@@ -326,6 +319,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .append('<option value="" disabled selected>Seleccionar</option>')
             .prop("disabled", true);
 
+        console.log(baseurl + `controllers/Especialistas/EspecialistaController.php?action=read&idarea=${selectedarea}&idservicio=${selectedservicio}${selectedsubarea ? `&idsubarea=${selectedsubarea}` : ''}`);
         $.get(baseurl + `controllers/Especialistas/EspecialistaController.php?action=read&idarea=${selectedarea}&idservicio=${selectedservicio}${selectedsubarea ? `&idsubarea=${selectedsubarea}` : ''}`, function (data) {
             const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
             const especialistas = Array.isArray(parsedData) ? parsedData : [parsedData];
@@ -391,6 +385,9 @@ document.addEventListener('DOMContentLoaded', function () {
         $("#filtro-area").val("");
         $("#filtro-subarea").val("");
         $("#filtro-especialista").val("");
+        selectedarea = '';
+        selectedsubarea = '';
+        selectedespecialista = '';
         const val = $(this).val().trim();
         const servicio = $(this).find('option:selected').text().trim();
 
@@ -410,6 +407,9 @@ document.addEventListener('DOMContentLoaded', function () {
         $(this).removeClass('filtro-not-selected');
         $("#filtro-subarea").val("");
         $("#filtro-especialista").val("");
+        selectedsubarea = '';
+        selectedespecialista = '';
+        especialistaSeleccionado = '';
         selectedarea = $(this).val();
         buscarSubareaPorArea(selectedarea);
         buscarEspecialistas();
@@ -419,6 +419,7 @@ document.addEventListener('DOMContentLoaded', function () {
     $("#filtro-subarea").change(function () {
         $(this).removeClass('filtro-not-selected');
         $("#filtro-especialista").val("");
+        selectedespecialista = '';
         selectedsubarea = $(this).val();
         buscarEspecialistas();
         refrescarCitas();
@@ -440,12 +441,6 @@ document.addEventListener('DOMContentLoaded', function () {
             refrescarCitas();
             actualizarEventosVisuales(true);
             lastEspecialista = selectedespecialista;
-        } else {
-            mostrarMensajeFlotante('Debe seleccionar un especialista primero');
-            calendar.setOption('businessHours', []);
-            actualizarEventosVisuales(false);
-            refrescarCitas();
-            lastEspecialista = null;
         }
         // NO modificar la lista del modal ni horariosSeleccionados
     });
@@ -627,7 +622,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const dias = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
 
                     if (fecha && hora) {
-                        if (hora >= '13:00' && hora < '14:00') {
+                        if ((hora >= '13:00' && hora < '14:00') || (hora < '9:00' && hora > '17:00')) {
                             mostrarMensajeFlotante('Horario fuera de disponibilidad');
                             return;
                         }
@@ -654,7 +649,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 }
 
                                 // Si está disponible, verificar citas
-                                return obtenerCitas(horariosSeleccionados[idxEditando].idespecialista);
+                                return obtenerCitas(selectedservicio, horariosSeleccionados[idxEditando].idespecialista, selectedarea, selectedsubarea);
                             })
                             .then(function (citasEspecialista) {
                                 const cit = citasEspecialista.find(d => d.fecha === fecha && d.hora_inicio === hora);
@@ -670,9 +665,14 @@ document.addEventListener('DOMContentLoaded', function () {
                                 horariosSeleccionados[idxActual].horaIni = horaIni;
                                 horariosSeleccionados[idxActual].horaFin = horaFin;
                                 horariosSeleccionados[idxActual].hora = hora;
+                                console.log(
+                                    "Horario actualizado:",
+                                    horariosSeleccionados[idxActual]
+                                );
 
                                 idxEditando = null;
                                 renderHorariosSeleccionados();
+                                actualizarEventosVisuales();
                                 refrescarCitas();
 
                                 // Remover elemento de edición correctamente
@@ -866,6 +866,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }, 'json')
                 .fail(function (xhr, status, error) {
+                    console.log(error);
                     mostrarMensajeFlotante('Error al agendar cita: ' + xhr.responseText);
                 });
         });

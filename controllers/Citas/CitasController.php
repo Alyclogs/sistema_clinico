@@ -9,10 +9,6 @@ $model = new CitasModel();
 switch ($action) {
     case 'read':
         try {
-            if (!isset($_GET['idservicio'])) {
-                echo json_encode(['error' => 'Error: Debe indicar el id del servicio']);
-                return;
-            }
             if (isset($_GET['idespecialista'])) {
                 if (isset($_GET['idarea'])) {
                     if (isset($_GET['idsubarea'])) {
@@ -25,9 +21,15 @@ switch ($action) {
                         return;
                     }
                 } else {
-                    $result = $model->obtenerCitasPorEspecialista($_GET['idespecialista'], $_GET['idservicio']);
-                    echo json_encode($result);
-                    return;
+                    if (isset($_GET['idservicio'])) {
+                        $result = $model->obtenerCitasPorEspecialistayServicio($_GET['idespecialista'], $_GET['idservicio']);
+                        echo json_encode($result);
+                        return;
+                    } else {
+                        $result = $model->obtenerCitasPorEspecialista($_GET['idespecialista']);
+                        echo json_encode($result);
+                        return;
+                    }
                 }
             } else {
                 if (isset($_GET['idarea'])) {

@@ -11,11 +11,40 @@ class DisponibilidadModel
 
     public function obtenerPorEspecialista($idespecialista)
     {
-        $sql = "SELECT d.*
-        FROM disponibilidad d
-        WHERE d.idespecialista = :idespecialista
-          AND d.activo = 1
-          AND CURRENT_DATE BETWEEN d.fechainicio AND d.fechafin";
+        $sql = "SELECT 
+        d.idespecialista,
+        d.fechainicio,
+        d.fechafin,
+        d.dia,
+        d.mes,
+        d.year,
+        d.horainicio,
+        d.horafin,
+        d.refrigerio_horainicio,
+        d.refrigerio_horafin,
+        NULL AS estado,
+        0 AS es_excepcion
+    FROM disponibilidad d
+    WHERE d.idespecialista = :idespecialista
+
+    UNION ALL
+
+    SELECT 
+        dx.idespecialista,
+        dx.fechainicio,
+        dx.fechafin,
+        dx.dia,
+        dx.mes,
+        dx.year,
+        dx.horainicio,
+        dx.horafin,
+        dx.refrigerio_horainicio,
+        dx.refrigerio_horafin,
+        dx.estado,
+        1 AS es_excepcion
+    FROM disponibilidad_excepciones dx
+    WHERE dx.idespecialista = :idespecialista
+    ";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':idespecialista' => $idespecialista]);

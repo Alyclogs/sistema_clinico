@@ -7,6 +7,8 @@ var selectedespecialista = "";
 let lastEspecialista = null;
 let horariosPorEspecialista = {};
 let horariosSeleccionados = [];
+let servicioDuracion = 30;   // valor por defecto
+let subareaDuracion = 30;
 let servicioSeleccionado = 'CONSULTA';
 let especialistaSeleccionado = '';
 let disponibilidadEspecialista = [];
@@ -280,6 +282,7 @@ const miniCalendar = new FullCalendar.Calendar(miniCalendarEl, {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
+    obtenerServicios();
     refrescarCitas();
     //refrescarCitas(false);
 
@@ -289,6 +292,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     calendar.on('datesSet', function () {
         updateCalendarDateRange(calendar);
+        actualizarBusinessHours();
     });
 
     function buscarSubareaPorArea(idArea) {
@@ -300,16 +304,17 @@ document.addEventListener('DOMContentLoaded', function () {
             if (parsedData) {
                 if (Array.isArray(parsedData)) {
                     parsedData.forEach(function (subarea) {
-                        html += `<option value="${subarea.idsubarea}">${subarea.subarea}</option>`;
+                        html += `<option value="${subarea.idsubarea}" data-duracion="${subarea.duracion}">${subarea.subarea}</option>`;
                     });
                 } else {
-                    html += `<option value="${parsedData.idsubarea}">${parsedData.subarea}</option>`;
+                    html += `<option value="${subarea.idsubarea}" data-duracion="${subarea.duracion}">${subarea.subarea}</option>`;
                 }
                 $("#filtro-subarea").prop("disabled", false);
                 $("#filtro-subarea").append(html);
             }
         }).fail(function (xhr, status, error) {
-            mostrarMensajeFlotante('Error al agendar cita: ' + xhr.responseText);
+            console.log(error);
+            mostrarMensajeFlotante('Error al buscar subáreas');
         });
     }
 
@@ -319,7 +324,6 @@ document.addEventListener('DOMContentLoaded', function () {
             .append('<option value="" disabled selected>Seleccionar</option>')
             .prop("disabled", true);
 
-        console.log(baseurl + `controllers/Especialistas/EspecialistaController.php?action=read&idarea=${selectedarea}&idservicio=${selectedservicio}${selectedsubarea ? `&idsubarea=${selectedsubarea}` : ''}`);
         $.get(baseurl + `controllers/Especialistas/EspecialistaController.php?action=read&idarea=${selectedarea}&idservicio=${selectedservicio}${selectedsubarea ? `&idsubarea=${selectedsubarea}` : ''}`, function (data) {
             const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
             const especialistas = Array.isArray(parsedData) ? parsedData : [parsedData];
@@ -345,8 +349,8 @@ document.addEventListener('DOMContentLoaded', function () {
                             ...r,
                             nombre: `${especialista.nom_especialista} ${especialista.ape_especialista}`
                         }));
-                    });
-                });
+                    }).catch(e => console.log('Error al buscar citas: ', e));
+                }).catch(e => console.log('Error al obtener disponibilidad especialista: ', e));
             })
 
             Promise.all(promesas).then(respuestas => {
@@ -362,13 +366,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Ordenar: los con disponibilidad primero, los sin disponibilidad al final
                 todos.sort((a, b) => b.minutos_disponibles - a.minutos_disponibles);
-                console.log(todos);
 
                 let html = '';
                 todos.forEach(e => {
-                    html += `<option value="${e.idespecialista}">
-                    ${e.nombre}
-                </option>`;
+                    html += `<option value="${e.idespecialista}">${e.nombre}</option>`;
                 });
 
                 $("#filtro-especialista")
@@ -378,6 +379,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log(e);
                 mostrarMensajeFlotante('Error al buscar especialistas');
             });
+        }).fail(function (xhr, status, error) {
+            console.log(error, xhr.responseText);
+            mostrarMensajeFlotante('Error al buscar especialistas');
         });
     }
 
@@ -389,8 +393,13 @@ document.addEventListener('DOMContentLoaded', function () {
         selectedarea = '';
         selectedsubarea = '';
         selectedespecialista = '';
+        subareaDuracion = 0;
         const val = $(this).val().trim();
         const servicio = $(this).find('option:selected').text().trim();
+        servicioDuracion = parseInt(
+            $(this).find('option:selected').data('duracion'),
+            10
+        ) || 30;
 
         if (val) selectedservicio = val;
         if (servicio) servicioSeleccionado = servicio;
@@ -401,6 +410,7 @@ document.addEventListener('DOMContentLoaded', function () {
             $("#filtro-subarea").show();
             $("#filtro-subarea-title").show();
         }
+        actualizarEventosVisuales(true);
         refrescarCitas();
     });
 
@@ -411,9 +421,11 @@ document.addEventListener('DOMContentLoaded', function () {
         selectedsubarea = '';
         selectedespecialista = '';
         especialistaSeleccionado = '';
+        //subareaDuracion = 30;
         selectedarea = $(this).val();
         buscarSubareaPorArea(selectedarea);
-        buscarEspecialistas();
+        if (servicioSeleccionado === 'EVALUACION') buscarEspecialistas();
+        actualizarEventosVisuales();
         refrescarCitas();
     });
 
@@ -422,7 +434,12 @@ document.addEventListener('DOMContentLoaded', function () {
         $("#filtro-especialista").val("");
         selectedespecialista = '';
         selectedsubarea = $(this).val();
+        subareaDuracion = parseInt(
+            $(this).find('option:selected').data('duracion'),
+            10
+        ) || 30;
         buscarEspecialistas();
+        actualizarEventosVisuales();
         refrescarCitas();
     })
 
@@ -432,6 +449,10 @@ document.addEventListener('DOMContentLoaded', function () {
         selectedespecialista = $(this).val();
         especialistaSeleccionado = $(this).find('option:selected').text();
         if (selectedespecialista) {
+            selectedservicio = '';
+            selectedarea = '';
+            selectedsubarea = '';
+            servicioSeleccionado = '';
             actualizarDisponibilidadEspecialista();
             refrescarCitas();
             actualizarEventosVisuales(true);
@@ -457,55 +478,85 @@ document.addEventListener('DOMContentLoaded', function () {
     calendar.setOption('selectMinDistance', 1);
     calendar.setOption('selectLongPressDelay', 99999); // Desactiva selección por arrastre
     calendar.setOption('select', function (info) {
-        const diffMs = info.end - info.start;
-        if (diffMs !== 30 * 60 * 1000) {
-            mostrarMensajeFlotante('Solo puedes seleccionar un horario de 30 minutos a la vez');
-            calendar.unselect();
+        // 0) Calcular datos básicos
+        const durMin = subareaDuracion || servicioDuracion || 30;
+        const startDate = info.start;
+        const pad = n => String(n).padStart(2, '0');
+        const fecha = startDate.toISOString().slice(0, 10); // "YYYY-MM-DD"
+        const horaInicioRaw = `${pad(startDate.getHours())}:${pad(startDate.getMinutes())}`;
+        const horaFinRaw = (() => {
+            const end = new Date(startDate.getTime() + durMin * 60000);
+            return `${pad(end.getHours())}:${pad(end.getMinutes())}`;
+        })();
+
+        // 1) Si ya existe ese bloque, lo removemos:
+        const idxExist = horariosSeleccionados.findIndex(h =>
+            h.idespecialista === selectedespecialista &&
+            h.fecha === fecha &&
+            h.horaInicioRaw === horaInicioRaw
+        );
+        if (idxExist >= 0) {
+            eliminarHorario(idxExist);
             return;
         }
-        const [fecha, horaFull] = info.startStr.split('T');
-        const hora = horaFull.substring(0, 5);
-        const diaSemana = info.start
-            .toLocaleDateString('es-ES', { weekday: 'long' })
-            .toLowerCase();
 
+        // 2) Validar que hay especialista
         if (!selectedespecialista) {
             mostrarMensajeFlotante('Debe seleccionar un especialista primero');
             return;
         }
 
-        // bloqueos totales
+        // 3) Día de la semana y disponibilidad
+        const diaSemana = startDate
+            .toLocaleDateString('es-ES', { weekday: 'long' })
+            .toLowerCase();
+
+        // 3.1) Bloqueos totales
         if (disponibilidadEspecialista.some(d =>
-            d.es_excepcion && d.estado === 'sin disponibilidad' &&
+            d.es_excepcion &&
+            d.estado === 'sin disponibilidad' &&
             d.dia === diaSemana &&
-            fecha >= d.fechainicio && fecha <= d.fechafin
+            fecha >= d.fechainicio &&
+            fecha <= d.fechafin
         )) {
             mostrarMensajeFlotante('Este día no tiene disponibilidad');
             return;
         }
 
-        // excepciones de cambio
+        // 3.2) Excepciones de cambio
         const excepciones = disponibilidadEspecialista.filter(d =>
-            d.es_excepcion && d.estado === 'cambio de horario' &&
+            d.es_excepcion &&
+            d.estado === 'cambio de horario' &&
             d.dia === diaSemana &&
-            fecha >= d.fechainicio && fecha <= d.fechafin
+            fecha >= d.fechainicio &&
+            fecha <= d.fechafin
         );
 
-        // candidatos finales
+        // 3.3) Candidatos (excepción o regular)
         const candidatos = excepciones.length
             ? excepciones
             : disponibilidadEspecialista.filter(d =>
-                !d.es_excepcion && d.dia === diaSemana &&
-                fecha >= d.fechainicio && fecha <= d.fechafin
+                !d.es_excepcion &&
+                d.dia === diaSemana &&
+                fecha >= d.fechainicio &&
+                fecha <= d.fechafin
             );
 
+        // 4) Validar que [horaInicioRaw, horaFinRaw) quepa en alguno
         let disponible = false;
         candidatos.forEach(d => {
-            const horaSel = hora.length === 5 ? hora + ':00' : hora;
+            const labIni = d.horainicio.slice(0, 5);
+            const labFin = d.horafin.slice(0, 5);
+            const refIni = d.refrigerio_horainicio.slice(0, 5);
+            const refFin = d.refrigerio_horafin.slice(0, 5);
+
             if (
-                horaSel >= d.horainicio && horaSel < d.horafin &&
-                !(horaSel >= d.refrigerio_horainicio && horaSel < d.refrigerio_horafin)
-            ) disponible = true;
+                horaInicioRaw >= labIni &&
+                horaFinRaw <= labFin &&
+                !(horaInicioRaw < refFin && horaFinRaw > refIni)
+            ) {
+                disponible = true;
+            }
         });
 
         if (!disponible) {
@@ -513,19 +564,24 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        const horaIni = formatearHora12h(hora);
-        const horaFin = formatearHora12h(sumar30Minutos(hora));
-
+        // 5) Agregar nuevo bloque al array
         horariosSeleccionados.push({
-            fecha, horaIni, horaFin, hora,
+            fecha,
+            horaInicioRaw,
+            horaFinRaw,
+            horaIni: formatearHora12h(horaInicioRaw),
+            horaFin: formatearHora12h(horaFinRaw),
             idespecialista: selectedespecialista,
             idservicio: selectedservicio,
-            especialistaSeleccionado
+            especialistaSeleccionado,
         });
+
+        // 6) Refrescar UI
         renderHorariosSeleccionados();
         actualizarEventosVisuales();
-        refrescarCitas();
+        //refrescarCitas();
     });
+
 
     // --- GESTIÓN DE HORARIOS SELECCIONADOS  ---
     var idxEditando = null; // Índice del horario que se está editando
@@ -628,160 +684,107 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.addEventListener('click', function (e) {
         if (e.target.closest('.btn-editar-horario')) {
-            if (e.target.closest('.btn-editar-horario')) {
-                const idx = parseInt(e.target.closest('.btn-editar-horario').dataset.idx);
+            const btn = e.target.closest('.btn-editar-horario');
+            if (!btn) return;
+            const idx = parseInt(btn.dataset.idx, 10);
+            const h = horariosSeleccionados[idx];
+            const durMin = subareaDuracion || servicioDuracion || 30;
 
-                // Si ya está editando este mismo, al hacer clic de nuevo, actualiza
-                if (idxEditando === idx) {
-                    let fecha = document.getElementById('nuevoHorarioFecha').value;
-                    let hora = document.getElementById('nuevoHorarioHora').value;
-                    const dias = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-
-                    if (fecha && hora) {
-                        if ((hora >= '13:00' && hora < '14:00') || (hora < '9:00' && hora > '17:00')) {
-                            mostrarMensajeFlotante('Horario fuera de disponibilidad');
-                            return;
-                        }
-
-                        let horaIni = formatearHora12h(hora);
-                        let horaFin = formatearHora12h(sumar30Minutos(hora));
-
-                        // Verificar disponibilidad primero, luego citas
-                        obtenerDisponibilidadEspecialista(horariosSeleccionados[idxEditando].idespecialista)
-                            .then(function (disponibilidadEspecialista) {
-                                let fechaSel = new Date(horariosSeleccionados[idxEditando].fecha);
-                                const nombreDia = dias[fechaSel.getDay()];
-                                let disponible = false;
-
-                                const disp = disponibilidadEspecialista.find(d => d.fecha === nombreDia);
-                                if (disp) {
-                                    const horaSel = (hora.length === 5 ? hora + ':00' : hora);
-                                    disponible = (horaSel >= disp.horainicio && horaSel <= disp.horafin);
-                                }
-
-                                if (!disponible) {
-                                    mostrarMensajeFlotante('Horario fuera de disponibilidad');
-                                    return Promise.reject('No disponible');
-                                }
-
-                                // Si está disponible, verificar citas
-                                return obtenerCitas(selectedservicio, horariosSeleccionados[idxEditando].idespecialista, selectedarea, selectedsubarea);
-                            })
-                            .then(function (citasEspecialista) {
-                                const cit = citasEspecialista.find(d => d.fecha === fecha && d.hora_inicio === hora);
-
-                                if (cit) {
-                                    mostrarMensajeFlotante('Horario fuera de disponibilidad');
-                                    return;
-                                }
-
-                                // Actualizar horario si todo está bien
-                                const idxActual = idxEditando; // Guardar antes de establecer a null
-                                horariosSeleccionados[idxActual].fecha = fecha;
-                                horariosSeleccionados[idxActual].horaIni = horaIni;
-                                horariosSeleccionados[idxActual].horaFin = horaFin;
-                                horariosSeleccionados[idxActual].hora = hora;
-                                console.log(
-                                    "Horario actualizado:",
-                                    horariosSeleccionados[idxActual]
-                                );
-
-                                idxEditando = null;
-                                renderHorariosSeleccionados();
-                                actualizarEventosVisuales();
-                                refrescarCitas();
-
-                                // Remover elemento de edición correctamente
-                                const elementoEdicion = document.querySelector(`.horario-chip[data-idx="${idxActual}"] .agregar-horario`);
-                                if (elementoEdicion) {
-                                    elementoEdicion.remove();
-                                }
-                            })
-                            .catch(function (error) {
-                                console.log('Error en verificación:', error);
-                            });
-                    } else {
-                        mostrarMensajeFlotante('Ingrese una fecha y una hora válidos');
-                        return;
-                    }
-                } else {
-                    // Si es otro, inicia edición
-                    idxEditando = idx;
-                    renderHorariosSeleccionados();
-                    const h = horariosSeleccionados[idx];
-                    let agregarHorario = document.querySelector('.agregar-horario');
-
-                    if (!agregarHorario) {
-                        agregarHorario = document.createElement('div');
-                        agregarHorario.className = 'agregar-horario';
-                        agregarHorario.innerHTML = `<div class="calendario">
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="12.34px"
-     height="12.34px" viewBox="0 0 12.34 12.34" style="overflow:visible;enable-background:new 0 0 12.34 12.34;"
-     xml:space="preserve">
-<style type="text/css">
-    .st008{fill:#76869E;}
-</style>
-<defs>
-</defs>
-<g>
-    <g>
-        <g>
-            <g>
-                <rect x="5.69" y="5.54" class="st008" width="0.96" height="0.96"/>
-                <path class="st008" d="M10.9,0.96h-0.58V0H9.35v0.96H2.99V0H2.03v0.96H1.45C0.65,0.96,0,1.61,0,2.41v8.49
-                    c0,0.8,0.65,1.45,1.45,1.45h3.21h0.07h1.68c-0.33-0.28-0.62-0.6-0.86-0.96H4.73H4.65H1.45c-0.27,0-0.48-0.22-0.48-0.48V4.53
-                    h10.41V5.5v0.05v0c0.36,0.24,0.69,0.53,0.96,0.86V5.54V5.5V2.41C12.34,1.61,11.7,0.96,10.9,0.96z M11.38,3.57H0.96V2.41
-                    c0-0.27,0.22-0.48,0.48-0.48h0.58v0.96h0.96V1.93h6.36v0.96h0.96V1.93h0.58c0.27,0,0.48,0.22,0.48,0.48V3.57z"/>
-                <path class="st008" d="M9.08,5.84c-1.79,0-3.25,1.46-3.25,3.25s1.46,3.25,3.25,3.25s3.25-1.46,3.25-3.25S10.88,5.84,9.08,5.84z
-                     M9.08,11.38c-1.26,0-2.29-1.03-2.29-2.29S7.82,6.8,9.08,6.8s2.29,1.03,2.29,2.29S10.34,11.38,9.08,11.38z"/>
-                <polygon class="st008" points="9.55,7.47 8.58,7.47 8.58,9.57 10.37,9.57 10.37,8.61 9.55,8.61 				"/>
-                <rect x="3.76" y="7.47" class="st008" width="0.96" height="0.96"/>
-                <rect x="1.83" y="7.47" class="st008" width="0.96" height="0.96"/>
-                <rect x="1.83" y="5.54" class="st008" width="0.96" height="0.96"/>
-                <rect x="1.83" y="9.4" class="st008" width="0.96" height="0.96"/>
-                <rect x="3.76" y="5.54" class="st008" width="0.96" height="0.96"/>
-                <rect x="3.76" y="9.4" class="st008" width="0.96" height="0.96"/>
-            </g>
-        </g>
-    </g>
-</g>
-</svg>
-                    <input type="date" id="nuevoHorarioFecha" />
-                </div>
-                <div class="reloj">
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="12.07px"
-     height="12.07px" viewBox="0 0 12.07 12.07" style="overflow:visible;enable-background:new 0 0 12.07 12.07;"
-     xml:space="preserve">
-<style type="text/css">
-    .st009{fill:#76869E;}
-</style>
-<defs>
-</defs>
-<g id="Layer_2_1_">
-    <path class="st009" d="M6.04,12.07C2.7,12.07,0,9.37,0,6.04S2.7,0,6.04,0s6.04,2.7,6.04,6.04S9.37,12.07,6.04,12.07z M6.04,0.93
-        c-2.82,0-5.11,2.29-5.11,5.11s2.29,5.11,5.11,5.11s5.11-2.29,5.11-5.11S8.86,0.93,6.04,0.93z"/>
-    <path class="st009" d="M8.48,9.06c-0.12,0-0.24-0.05-0.33-0.13L5.6,6.37C5.51,6.28,5.46,6.16,5.46,6.04V2.32
-        c0-0.26,0.21-0.46,0.46-0.46c0.26,0,0.46,0.21,0.46,0.46v3.52l2.42,2.41c0.18,0.18,0.18,0.47,0,0.66c0,0,0,0,0,0
-        C8.72,9.01,8.61,9.06,8.48,9.06z"/>
-</g>
-</svg>
-                    <input type="time" id="nuevoHorarioHora" />
-                </div>
-                <button id="btnAgregarHorario" class="btn-icon">
-                    <i class="fas fa-plus"></i>
-                </button>`;
-
-                        const citaChip = document.querySelector(`.horario-chip[data-idx="${idx}"]`);
-                        citaChip.appendChild(agregarHorario);
-                        agregarHorario.style.display = 'flex';
-                        document.getElementById('nuevoHorarioFecha').value = h.fecha;
-                        document.getElementById('nuevoHorarioHora').value = h.hora;
-                        document.getElementById('btnAgregarHorario').style.display = 'none';
-                    } else {
-                        agregarHorario.style.display = 'none';
-                    }
+            // ——— GUARDAR CAMBIOS ———
+            if (idxEditando === idx) {
+                const fechaVal = document.getElementById('nuevoHorarioFecha').value;
+                const horaVal = document.getElementById('nuevoHorarioHora').value;
+                if (!fechaVal || !horaVal) {
+                    mostrarMensajeFlotante('Ingrese fecha y hora válidas');
+                    return;
                 }
+
+                // Construir rangos seleccionados
+                const selStart = buildDate(fechaVal, horaVal);
+                const selEnd = new Date(selStart.getTime() + durMin * 60000);
+
+                // Día de la semana
+                const diaSemana = selStart
+                    .toLocaleDateString('es-ES', { weekday: 'long' })
+                    .toLowerCase();
+
+                // Filtrar disponibilidad aplicable
+                const disponibles = disponibilidadEspecialista
+                    .filter(d =>
+                        d.dia === diaSemana &&
+                        fechaVal >= d.fechainicio &&
+                        fechaVal <= d.fechafin
+                    )
+                    .filter(d => {
+                        if (d.es_excepcion) {
+                            if (d.estado === 'sin disponibilidad') return false;
+                            if (d.estado === 'cambio de horario') return true;
+                        }
+                        return true; // los regulares
+                    });
+
+                // Validar encaje dentro de jornada y no sobre almuerzo
+                let ok = disponibles.some(d => {
+                    const workStart = buildDate(fechaVal, d.horainicio.slice(0, 5));
+                    const workEnd = buildDate(fechaVal, d.horafin.slice(0, 5));
+                    const lunchStart = buildDate(fechaVal, d.refrigerio_horainicio.slice(0, 5));
+                    const lunchEnd = buildDate(fechaVal, d.refrigerio_horafin.slice(0, 5));
+                    return (
+                        selStart >= workStart &&
+                        selEnd <= workEnd &&
+                        !(selStart < lunchEnd && selEnd > lunchStart)
+                    );
+                });
+
+                if (!ok) {
+                    mostrarMensajeFlotante('Horario fuera de disponibilidad');
+                    return;
+                }
+
+                // Verificar choque con citas
+                obtenerCitas(selectedservicio, h.idespecialista, selectedarea, selectedsubarea)
+                    .then(citas => {
+                        if (citas.some(c => c.fecha === fechaVal && c.hora_inicio === horaVal)) {
+                            mostrarMensajeFlotante('Este horario ya está reservado');
+                            throw 'ocupado';
+                        }
+                        // Actualizar el array
+                        h.fecha = fechaVal;
+                        h.horaInicioRaw = horaVal;
+                        h.horaFinRaw = selEnd.toTimeString().slice(0, 5);
+                        h.horaIni = formatearHora12h(horaVal);
+                        h.horaFin = formatearHora12h(h.horaFinRaw);
+
+                        // Salir de edición y refrescar
+                        idxEditando = null;
+                        renderHorariosSeleccionados();
+                        actualizarEventosVisuales();
+                        refrescarCitas();
+                    })
+                    .catch(err => {
+                        if (err !== 'ocupado') console.error(err);
+                    });
+
+                return;
             }
+
+            // ——— INICIAR EDICIÓN ———
+            idxEditando = idx;
+            renderHorariosSeleccionados();
+
+            // Selecciona el formulario base oculto
+            const editarOriginal = document.querySelector('.agregar-horario');
+            const editarDiv = editarOriginal.cloneNode(true);
+            editarDiv.style.display = 'flex';
+
+            // Asegúrate de quitar otros formularios del chip
+            const chip = document.querySelector(`.horario-chip[data-idx="${idx}"]`);
+            chip.querySelector('.agregar-horario')?.remove();
+            chip.appendChild(editarDiv);
+
+            // Prefill con los valores existentes
+            document.getElementById('nuevoHorarioFecha').value = h.fecha;
+            document.getElementById('nuevoHorarioHora').value = h.horaInicioRaw;
         }
         if (e.target.closest(".paciente-item")) {
             const pacienteItem = e.target.closest(".paciente-item");
@@ -797,8 +800,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 //$('.avatar-iniciales').css('background-color', stringToColor(nombreCompleto));
                 $('.paciente-cita').attr('data-id', idPaciente);
                 $('#pacienteSelFoto').attr('src', pacienteActual.foto);
-                $('.paciente-nombre').text(`${pacienteActual.nombres} ${pacienteActual.apellidos}`);
-                $('.pacientesel-dni').text(`DNI: ${pacienteActual.dni}`);
+                $('.paciente-nombre').text(`${pacienteActual.nombres} ${pacienteActual.apellidos} `);
+                $('.pacientesel-dni').text(`DNI: ${pacienteActual.dni} `);
                 $('.pacientesel-edad').text(`Edad: ${edad} años`);
                 $('.paciente-detalles span').css('color', '#76869E');
 
@@ -824,10 +827,9 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             agendarCita('3');
             const dni = $('.pacientesel-dni').text().replace('DNI:', '').trim();
-            window.location.href = baseurl + `views/Clinica/pagos/index.php?filtro=${dni}`
+            window.location.href = baseurl + `views / Clinica / pagos / index.php ? filtro = ${dni} `
         }
         if (e.target.closest('#btnReservar')) {
-            console.log('Boton reservar clickeado');
             if (!selectedespecialista) {
                 mostrarMensajeFlotante('Debe seleccionar un especialista primero');
                 return;
@@ -857,8 +859,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const idPaciente = document.getElementById('pacienteCita')?.dataset.id;
 
         horariosSeleccionados.forEach(h => {
-            const horaInicio = h.hora;
-            const horaFin = sumar30Minutos(horaInicio);
+            const horaInicio = h.horaInicioRaw;
+            const horaFin = h.horaFinRaw;
             const fecha = h.fecha;
 
             const data = {
@@ -876,7 +878,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     horariosSeleccionados = [];
                     renderHorariosSeleccionados();
                     refrescarCitas();
-                    actualizarEventosVisuales(false);
+                    actualizarEventosVisuales();
                 } else {
                     mostrarMensajeFlotante('Error al agendar la cita: ' + response.error + '\n' + response.message);
                 }
@@ -920,7 +922,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             usuarioModal.hide();
                             // ✅ Redirección si fue exitoso
                             //$('.avatar-iniciales').text(getInitials(formDataObj['nombres'], formDataObj['apellidos']));
-                            //$('.avatar-iniciales').css('background-color', stringToColor(`${formDataObj['nombres']} ${formDataObj['apellidos']}`));
+                            //$('.avatar-iniciales').css('background-color', stringToColor(`${ formDataObj['nombres'] } ${ formDataObj['apellidos'] } `));
                             buscarPacientes(formDataObj['dni']).then(pacientes => {
                                 const pacienteActual = pacientes[0];
                                 const edad = calcularEdad(pacienteActual.fecha_nacimiento);
@@ -929,8 +931,8 @@ document.addEventListener('DOMContentLoaded', function () {
                                 //$('.avatar-iniciales').css('background-color', stringToColor(nombreCompleto));
                                 $('.paciente-cita').attr('data-id', response.paciente_id);
                                 $('#pacienteSelFoto').attr('src', pacienteActual.foto);
-                                $('.paciente-nombre').text(`${pacienteActual.nombres} ${pacienteActual.apellidos}`);
-                                $('.pacientesel-dni').text(`DNI: ${pacienteActual.dni}`);
+                                $('.paciente-nombre').text(`${pacienteActual.nombres} ${pacienteActual.apellidos} `);
+                                $('.pacientesel-dni').text(`DNI: ${pacienteActual.dni} `);
                                 $('.pacientesel-edad').text(`Edad: ${edad} años`);
                                 $('.paciente-detalles span').css('color', '#76869E');
 
@@ -958,6 +960,23 @@ document.addEventListener('DOMContentLoaded', function () {
         actualizarEventosVisuales();
     };
 
+    function obtenerServicios() {
+        $.get(baseurl + 'controllers/Servicios/ServicioController.php?action=read', function (data) {
+            const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+            let html = '';
+            parsed.forEach(s => {
+                html += `<option value="${s.idservicio}" data-duracion="${s.duracion}">${s.servicio}</option>`;
+            });
+            $('#filtro-servicio')
+                .empty()
+                .append(html)
+                .prop('disabled', false);
+        }).fail(function (xhr, status, error) {
+            console.log(error);
+            mostrarMensajeFlotante('Error al obtener servicios');
+        });
+    }
+
     function obtenerDisponibilidadEspecialista(idespecialista) {
         return $.get(baseurl + `controllers/Disponibilidad/DisponibilidadController.php?action=read&idespecialista=${idespecialista}`);
     }
@@ -975,56 +994,59 @@ document.addEventListener('DOMContentLoaded', function () {
         return $.get(url);
     }
 
+    // ——— 2) actualizarEventosVisuales: usa horaInicioRaw / horaFinRaw ———
     function actualizarEventosVisuales(render = true) {
-        // Limpia todos los eventos visuales previos
+        // 1) Limpia sólo los eventos del tipo 'seleccionado'
         calendar.getEvents().forEach(ev => {
-            if (ev.extendedProps && ev.extendedProps.tipo === 'seleccionado') ev.remove();
+            if (ev.extendedProps && ev.extendedProps.tipo === 'seleccionado') {
+                ev.remove();
+            }
         });
         if (!render) return;
-        // Solo muestra los horarios seleccionados del especialista activo
-        horariosSeleccionados.filter(h => h.idespecialista === selectedespecialista).forEach(h => {
-            calendar.addEvent({
-                title: `<span class='fc-slot-check'></span>
-                        <span class='fc-slot-horario'>${h.horaIni} - ${h.horaFin}</span>`,
-                start: h.fecha + 'T' + h.hora + ':00',
-                end: h.fecha + 'T' + sumar30Minutos(h.hora) + ':00',
-                display: 'background',
-                classNames: ['fc-slot-custom-content'],
-                extendedProps: { tipo: 'seleccionado' }
+
+        // 2) Añade cada bloque con su horaInicioRaw/horaFinRaw exacta
+        horariosSeleccionados
+            .filter(h => h.idespecialista === selectedespecialista)
+            .forEach(h => {
+                calendar.addEvent({
+                    title: `<span class="fc-slot-horario">${h.horaIni} - ${h.horaFin}</span>`,
+                    start: `${h.fecha}T${h.horaInicioRaw}`,
+                    end: `${h.fecha}T${h.horaFinRaw}`,
+                    display: 'background',
+                    classNames: ['fc-slot-custom-content'],
+                    extendedProps: { tipo: 'seleccionado' }
+                });
             });
-        });
     }
 
-    function refrescarCitas() {
-        obtenerCitas(selectedservicio, selectedespecialista, selectedarea, selectedsubarea).then(function (citas) {
-            console.log(`Citas: `, citas);
-            citasGlobales = citas;
-            procesarYMostrarCitas(citas);
-        }).catch(e => {
-            console.log(e);
-            mostrarMensajeFlotante("Error al cargar citas");
-        });
+    function refrescarCitas(idservicio, idespecialista, idarea, idsubarea) {
+        // 2) Llamar con los cuatro parámetros en orden
+        obtenerCitas(idservicio ?? selectedservicio, idespecialista ?? selectedespecialista, idarea ?? selectedarea, idsubarea ?? selectedsubarea)
+            .then(function (citas) {
+                citasGlobales = citas;
+                procesarYMostrarCitas(citas);
+            })
+            .catch((e) => {
+                console.log(e);
+                mostrarMensajeFlotante("Error al cargar citas");
+            });
     }
 
     function procesarYMostrarCitas(citas) {
-        // Elimina eventos de citas anteriores
+        // 1) Eliminar citas previas
         calendar.getEvents().forEach(ev => {
-            if (ev.extendedProps && ev.extendedProps.tipo === 'cita-existente') ev.remove();
+            if (ev.extendedProps?.tipo === 'cita-existente') {
+                ev.remove();
+            }
         });
-
-        // Agrupa las citas por fecha y hora
+        // 2) Agrupar
         const citasAgrupadas = agruparCitasPorHorario(citas);
-
-        // Procesa cada grupo de citas
-        Object.keys(citasAgrupadas).forEach(clave => {
-            const gruposCitas = citasAgrupadas[clave];
-
-            if (gruposCitas.length === 1) {
-                // Una sola cita: mostrar normal
-                addCitaEvent(gruposCitas[0]);
+        // 3) Añadir
+        Object.values(citasAgrupadas).forEach(grupo => {
+            if (grupo.length === 1) {
+                addCitaEvent(grupo[0]);
             } else {
-                // Múltiples citas: mostrar como cuadrados
-                addMultiplesCitasEvent(gruposCitas, clave);
+                addMultiplesCitasEvent(grupo);
             }
         });
     }
@@ -1044,25 +1066,28 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function addCitaEvent(cita) {
-        const horaIni = formatearHora12h(cita.hora_inicio.slice(0, 5));
-        const horaFin = formatearHora12h(cita.hora_fin.slice(0, 5));
-        const nombreCompleto = `${cita.especialista_nombre} ${cita.especialista_apellidos}`;
-        const estado = `cita-${estadosCita[cita.idestado]}`;
+        const pad = n => String(n).padStart(2, '0');
+        // recortamos a HH:mm
+        const horaIniRaw = cita.hora_inicio.slice(0, 5);
+        const horaFinRaw = cita.hora_fin.slice(0, 5);
+
+        const horaIni = formatearHora12h(horaIniRaw);
+        const horaFin = formatearHora12h(horaFinRaw);
+        const nombre = `${cita.especialista_nombre} ${cita.especialista_apellidos}`;
+        const cssEstado = `cita-${estadosCita[cita.idestado]}`;
 
         calendar.addEvent({
-            title: `
-<div class="evento-contenedor">
-  <div class="nombre-arriba"><strong>${nombreCompleto}</strong></div>
-  <div class="svg-horario">
-    <span class='mi-check-clase'>
-      ${getSVGCita(estado)}
-    </span>
-    <span class="horario-agendado">Horario: ${horaIni} - ${horaFin}</span>
-  </div>
-</div>`,
-            start: `${cita.fecha}T${cita.hora_inicio}`,
-            end: `${cita.fecha}T${cita.hora_fin}`,
-            classNames: ['fc-slot-custom-content', 'cita-agendada-evento', estado],
+            title: `<div class="evento-contenedor">
+        <div class="nombre-arriba"><strong>${nombre}</strong></div>
+        <div class="svg-horario">
+          <span class='mi-check-clase'>${getSVGCita(cssEstado)}</span>
+          <span class="horario-agendado">${horaIni} - ${horaFin}</span>
+        </div>
+      </div>`,
+            start: `${cita.fecha}T${horaIniRaw}`,
+            end: `${cita.fecha}T${horaFinRaw}`,
+            // NO background para que se muestre como evento normal
+            classNames: ['fc-slot-custom-content', 'cita-agendada-evento', cssEstado],
             extendedProps: {
                 cita: cita,
                 tipo: 'cita-existente',
@@ -1071,34 +1096,25 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function addMultiplesCitasEvent(citas, clave) {
-        const primeraCita = citas[0];
+    function addMultiplesCitasEvent(citas) {
+        const primera = citas[0];
+        const pad = n => String(n).padStart(2, '0');
+        const ini = primera.hora_inicio.slice(0, 5);
+        const fin = primera.hora_fin.slice(0, 5);
 
-        // Genera los cuadrados de colores
-        const cuadrados = citas.map((cita, index) => {
+        const cuadrados = citas.map(cita => {
             const estado = estadosCita[cita.idestado];
-            const colorClass = getColorClassByEstado(estado);
-
-            return `<div class="cita-cuadrado ${colorClass}" 
-                     data-cita-id="${cita.idcita}">
-                </div>`;
+            return `<div class="cita-cuadrado ${getColorClassByEstado(estado)}"></div>`;
         }).join('');
 
-        const contenidoHTML = `
-    <div class="cuadrados-container">
-        ${cuadrados}
-    </div>`;
+        const contenido = `<div class="cuadrados-container">${cuadrados}</div>`;
 
         calendar.addEvent({
-            title: contenidoHTML,
-            start: `${primeraCita.fecha}T${primeraCita.hora_inicio}`,
-            end: `${primeraCita.fecha}T${primeraCita.hora_fin}`,
+            title: contenido,
+            start: `${primera.fecha}T${ini}`,
+            end: `${primera.fecha}T${fin}`,
             classNames: ['fc-slot-custom-content', 'multiples-citas-evento'],
-            extendedProps: {
-                tipo: 'cita-existente',
-                multiple: true,
-                citas: citas
-            }
+            extendedProps: { tipo: 'cita-existente', multiple: true }
         });
     }
 
@@ -1132,6 +1148,9 @@ document.addEventListener('DOMContentLoaded', function () {
         d.setDate(d.getDate() + 1);
         return dateToDateStr(d);
     }
+    function buildDate(fechaStr, horaStr) {
+        return new Date(`${fechaStr}T${horaStr}:00`);
+    }
 
     // 1. Carga y normalización de la disponibilidad
     function actualizarDisponibilidadEspecialista() {
@@ -1140,9 +1159,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 disponibilidadEspecialista = data.map(d => ({
                     ...d,
                     es_excepcion: d.es_excepcion === '1',
-                    estado: d.estado ? d.estado.trim().toLowerCase() : null
+                    estado: d.estado ? d.estado.trim().toLowerCase() : null,
+                    dia: d.dia.toLowerCase()
                 }));
-                console.log("Disponibilidad normalizada", disponibilidadEspecialista);
                 actualizarBusinessHours();
                 if (!disponibilidadEspecialista.length) {
                     mostrarMensajeFlotante("Especialista sin disponibilidad");
@@ -1151,46 +1170,43 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function actualizarBusinessHours() {
-        const diasMap = { domingo: 0, lunes: 1, martes: 2, miércoles: 3, jueves: 4, viernes: 5, sábado: 6 };
+        const diasMap = {
+            domingo: 0, lunes: 1, martes: 2, miércoles: 3,
+            jueves: 4, viernes: 5, sábado: 6
+        };
         const bh = [];
 
-        // separar regulares y excepciones de cambio
+        // 1. Separar registros
         const regulares = disponibilidadEspecialista.filter(d => !d.es_excepcion);
-        const excepcionesCambio = disponibilidadEspecialista.filter(d =>
-            d.es_excepcion && d.estado === 'cambio de horario'
-        );
+        const cambios = disponibilidadEspecialista.filter(d => d.es_excepcion && d.estado === 'cambio de horario');
+        const bloqueosTotales = disponibilidadEspecialista.filter(d => d.es_excepcion && d.estado === 'sin disponibilidad');
 
-        // agrupar excepciones por día
-        const excPorDia = {};
-        excepcionesCambio.forEach(exc => {
-            excPorDia[exc.dia] = excPorDia[exc.dia] || [];
-            excPorDia[exc.dia].push(exc);
+        // 2. Agrupar excepciones por día
+        const bloqueosPorDia = {};
+        bloqueosTotales.forEach(d => {
+            (bloqueosPorDia[d.dia] = bloqueosPorDia[d.dia] || []).push(d);
+        });
+        const cambiosPorDia = {};
+        cambios.forEach(d => {
+            (cambiosPorDia[d.dia] = cambiosPorDia[d.dia] || []).push(d);
         });
 
-        // para cada disponibilidad regular, “resta” las ventanas de excepción
+        // 3. Construir franjas “regulares” descontando ambos tipos de excepción
         regulares.forEach(d => {
-            let segments = [{ start: d.fechainicio, end: d.fechafin }];
+            let segmentos = [{ start: d.fechainicio, end: d.fechafin }];
 
-            (excPorDia[d.dia] || []).forEach(exc => {
-                segments = segments.flatMap(seg => {
-                    if (seg.end < exc.fechainicio || seg.start > exc.fechafin) {
-                        return [seg];
-                    }
-                    const out = [];
-                    // antes de la excepción
-                    if (seg.start < exc.fechainicio) {
-                        out.push({ start: seg.start, end: dayBefore(exc.fechainicio) });
-                    }
-                    // después de la excepción
-                    if (seg.end > exc.fechafin) {
-                        out.push({ start: dayAfter(exc.fechafin), end: seg.end });
-                    }
-                    return out;
-                });
+            // restar bloqueos totales
+            (bloqueosPorDia[d.dia] || []).forEach(exc => {
+                segmentos = segmentos.flatMap(seg => recortarSegmento(seg, exc.fechainicio, exc.fechafin));
             });
 
-            // agrega cada segmento resultante como businessHours
-            segments.forEach(seg => {
+            // restar cambios de horario
+            (cambiosPorDia[d.dia] || []).forEach(exc => {
+                segmentos = segmentos.flatMap(seg => recortarSegmento(seg, exc.fechainicio, exc.fechafin));
+            });
+
+            // añadir cada segmento resultante
+            segmentos.forEach(seg => {
                 bh.push({
                     daysOfWeek: [diasMap[d.dia]],
                     startTime: d.horainicio.slice(0, 5),
@@ -1201,8 +1217,8 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
 
-        // ahora agrega la franja excepcional (14:00–17:00) sólo del 01 al 07 de junio
-        excepcionesCambio.forEach(d => {
+        // 4. Añadir las franjas de cambio de horario tal cual
+        cambios.forEach(d => {
             bh.push({
                 daysOfWeek: [diasMap[d.dia]],
                 startTime: d.horainicio.slice(0, 5),
@@ -1212,13 +1228,29 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
 
-        // aplica
+        // 5. Aplicar y refrescar almuerzo
         calendar.setOption("businessHours", bh.length ? bh : {
             daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
             startTime: '00:00',
             endTime: '00:00'
         });
         resaltarBloqueoAlmuerzo();
+    }
+
+    // Función helper para recortar un segmento {start,end} con un intervalo [a,b]
+    function recortarSegmento(seg, a, b) {
+        if (seg.end < a || seg.start > b) {
+            // no solapan
+            return [seg];
+        }
+        const out = [];
+        if (seg.start < a) {
+            out.push({ start: seg.start, end: dayBefore(a) });
+        }
+        if (seg.end > b) {
+            out.push({ start: dayAfter(b), end: seg.end });
+        }
+        return out;
     }
 
     function calcularDisponibilidadPorEspecialista(disponibilidades, citas) {
@@ -1262,38 +1294,62 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 3. Generación de “bloqueos” de refrigerio
     function generarEventosRefrigerio() {
-        const diasMap = { domingo: 0, lunes: 1, martes: 2, miércoles: 3, jueves: 4, viernes: 5, sábado: 6 };
         const eventos = [];
-        const fechasBloqueadas = new Set();
+        const viewStart = calendar.view.activeStart;
+        const viewEnd = calendar.view.activeEnd;
 
+        // 1) Recolectar fechas con bloqueo total para ese día de la semana
+        const fechasBloqueadas = new Set();
+        disponibilidadEspecialista
+            .filter(d => d.es_excepcion && d.estado === 'sin disponibilidad')
+            .forEach(d => {
+                const inicio = dateStrToDate(d.fechainicio);
+                const fin = dateStrToDate(d.fechafin);
+                let fecha = new Date(inicio);
+                while (fecha <= fin) {
+                    const diaName = fecha
+                        .toLocaleDateString('es-ES', { weekday: 'long' })
+                        .toLowerCase();
+                    if (diaName === d.dia) {
+                        fechasBloqueadas.add(dateToDateStr(fecha));
+                    }
+                    fecha.setDate(fecha.getDate() + 1);
+                }
+            });
+
+        // 2) Generar el sombreado de refrigerio
         disponibilidadEspecialista.forEach(d => {
             if (!d.refrigerio_horainicio || !d.refrigerio_horafin) return;
+
+            // convertir rangos de fecha
             const inicio = dateStrToDate(d.fechainicio);
             const fin = dateStrToDate(d.fechafin);
-            let fecha = new Date(calendar.view.activeStart);
+            let fecha = new Date(viewStart);
 
-            while (fecha <= calendar.view.activeEnd) {
-                const nombreDia = fecha
+            // recortar tiempo a HH:mm
+            const reIni = d.refrigerio_horainicio.slice(0, 5);
+            const reFin = d.refrigerio_horafin.slice(0, 5);
+
+            while (fecha <= viewEnd) {
+                const diaName = fecha
                     .toLocaleDateString('es-ES', { weekday: 'long' })
                     .toLowerCase();
                 const fechaStr = dateToDateStr(fecha);
 
-                if (nombreDia === d.dia && fecha >= inicio && fecha <= fin) {
-                    if (d.es_excepcion && d.estado === 'sin disponibilidad') {
-                        fechasBloqueadas.add(fechaStr);
-                    }
-                    const omitido = fechasBloqueadas.has(fechaStr);
-                    if (
-                        (d.es_excepcion && d.estado === 'cambio de horario') ||
-                        (!d.es_excepcion && !omitido)
-                    ) {
-                        eventos.push({
-                            start: `${fechaStr}T${d.refrigerio_horainicio}`,
-                            end: `${fechaStr}T${d.refrigerio_horafin}`,
-                            display: 'background',
-                            classNames: ['fc-blocked-almuerzo']
-                        });
-                    }
+                if (
+                    diaName === d.dia &&
+                    fecha >= inicio && fecha <= fin &&
+                    !fechasBloqueadas.has(fechaStr) &&
+                    // asegurarnos que el refrigerio está dentro de la jornada
+                    reIni >= d.horainicio.slice(0, 5) &&
+                    reFin <= d.horafin.slice(0, 5)
+                ) {
+                    eventos.push({
+                        start: `${fechaStr}T${reIni}`,
+                        end: `${fechaStr}T${reFin}`,
+                        display: 'background',
+                        classNames: ['fc-blocked-almuerzo']
+                    });
                 }
                 fecha.setDate(fecha.getDate() + 1);
             }
@@ -1302,14 +1358,19 @@ document.addEventListener('DOMContentLoaded', function () {
         return eventos;
     }
 
-    // 4. Aplicar visualmente los bloqueos de refrigerio
     function resaltarBloqueoAlmuerzo() {
-        const eventosAlmuerzo = generarEventosRefrigerio();
+        // eliminar previos
         calendar.getEvents().forEach(e => {
-            if (e.extendedProps.tipo === 'almuerzo') e.remove();
+            if (e.extendedProps?.tipo === 'almuerzo') {
+                e.remove();
+            }
         });
-        eventosAlmuerzo.forEach(ev => {
-            calendar.addEvent({ ...ev, extendedProps: { tipo: 'almuerzo' } });
+        // añadir nuevos
+        generarEventosRefrigerio().forEach(ev => {
+            calendar.addEvent({
+                ...ev,
+                extendedProps: { tipo: 'almuerzo' }
+            });
         });
     }
 
@@ -1341,7 +1402,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 <span class="fecha-nac">${p.fecha_nacimiento}</span>
                                 <span class="dni">DNI: ${p.dni}</span> 
                             </div>
-                        </div>`;
+                        </div> `;
                         });
                     } else {
                         html = '<div class="paciente-item">No se encontraron pacientes</div>';
@@ -1386,7 +1447,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!document.getElementById('mensaje-flotante-css')) {
             const style = document.createElement('style');
             style.id = 'mensaje-flotante-css';
-            style.innerHTML = `#mensajeFlotante { animation: fadeInOut 2.2s; } @keyframes fadeInOut { 0%{opacity:0;} 10%{opacity:1;} 90%{opacity:1;} 100%{opacity:0;} }`;
+            style.innerHTML = `#mensajeFlotante { animation: fadeInOut 2.2s; } @keyframes fadeInOut { 0 % { opacity: 0; } 10 % { opacity: 1; } 90 % { opacity: 1; } 100 % { opacity: 0; } } `;
             document.head.appendChild(style);
         }
     })();
@@ -1401,17 +1462,17 @@ function formatearHora12h(hora24) {
     let suf = h >= 12 ? 'pm' : 'am';
     h = h % 12;
     if (h === 0) h = 12;
-    return `${h.toString().padStart(2, '0')}:${m} ${suf}`;
+    return `${h.toString().padStart(2, '0')}:${m} ${suf} `;
 }
 
 // Sumar 30 minutos a una hora en formato hh:mm
-function sumar30Minutos(hora) {
+function sumarMinutos(hora, minutos) {
     let [h, m] = hora.split(':').map(Number);
     let date = new Date(2000, 0, 1, h, m);
-    date.setMinutes(date.getMinutes() + 30);
+    date.setMinutes(date.getMinutes() + minutos);
     let nh = date.getHours().toString().padStart(2, '0');
     let nm = date.getMinutes().toString().padStart(2, '0');
-    return `${nh}:${nm}`;
+    return `${nh}:${nm} `;
 }
 
 // Personaliza el renderizado de los eventos para permitir HTML en el título

@@ -61,8 +61,7 @@ class CitasModel
         FROM citas c INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
         INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
         INNER JOIN usuarios u ON e.idespecialista = u.idusuario
-        WHERE c.idespecialista = :idespecialista
-        AND c.idservicio = :idservicio";
+        WHERE c.idespecialista = :idespecialista";
 
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':idespecialista', $idespecialista, PDO::PARAM_INT);

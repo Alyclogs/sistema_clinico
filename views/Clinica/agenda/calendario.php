@@ -48,16 +48,6 @@ $idusuario = $_SESSION['idusuario'];
                                     <div class="filtros d-flex align-items-center">
                                         <label for="filtro-servicio" class="filtro-title">Servicio</label>
                                         <select class="form-select filtro filtro-not-selected" id="filtro-servicio" style="background-color: #ff7e00; color: #fff">
-                                            <?php
-                                            foreach ($servicios as $servicio) {
-                                                $selected = $servicio['servicio'] == 'CONSULTA' ? 'selected' : '';
-                                            ?>
-                                                <option value="<?php echo $servicio['idservicio'] ?>" <?php echo $selected ?> style="font-weight: bold; color: #fff">
-                                                    <?php echo $servicio['servicio'] ?>
-                                                </option>
-                                            <?php
-                                            }
-                                            ?>
                                         </select>
                                         <label for="filtro-area" class="filtro-title">Área</label>
                                         <select class="form-select filtro filtro-not-selected" id="filtro-area">
@@ -177,6 +167,65 @@ $idusuario = $_SESSION['idusuario'];
                                     Seleccione sus citas en la agenda</div>
                                 <div class="modal-cita-body">
                                     <div id="horariosSeleccionados" class="citas-lista"></div>
+                                    <div class="agregar-horario" style="display: none;">
+                                        <div class="calendario">
+                                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="12.34px"
+                                                height="12.34px" viewBox="0 0 12.34 12.34" style="overflow:visible;enable-background:new 0 0 12.34 12.34;"
+                                                xml:space="preserve">
+                                                <style type="text/css">
+                                                    .st008 {
+                                                        fill: #76869E;
+                                                    }
+                                                </style>
+                                                <defs>
+                                                </defs>
+                                                <g>
+                                                    <g>
+                                                        <g>
+                                                            <g>
+                                                                <rect x="5.69" y="5.54" class="st008" width="0.96" height="0.96" />
+                                                                <path class="st008" d="M10.9,0.96h-0.58V0H9.35v0.96H2.99V0H2.03v0.96H1.45C0.65,0.96,0,1.61,0,2.41v8.49
+                    c0,0.8,0.65,1.45,1.45,1.45h3.21h0.07h1.68c-0.33-0.28-0.62-0.6-0.86-0.96H4.73H4.65H1.45c-0.27,0-0.48-0.22-0.48-0.48V4.53
+                    h10.41V5.5v0.05v0c0.36,0.24,0.69,0.53,0.96,0.86V5.54V5.5V2.41C12.34,1.61,11.7,0.96,10.9,0.96z M11.38,3.57H0.96V2.41
+                    c0-0.27,0.22-0.48,0.48-0.48h0.58v0.96h0.96V1.93h6.36v0.96h0.96V1.93h0.58c0.27,0,0.48,0.22,0.48,0.48V3.57z" />
+                                                                <path class="st008" d="M9.08,5.84c-1.79,0-3.25,1.46-3.25,3.25s1.46,3.25,3.25,3.25s3.25-1.46,3.25-3.25S10.88,5.84,9.08,5.84z
+                     M9.08,11.38c-1.26,0-2.29-1.03-2.29-2.29S7.82,6.8,9.08,6.8s2.29,1.03,2.29,2.29S10.34,11.38,9.08,11.38z" />
+                                                                <polygon class="st008" points="9.55,7.47 8.58,7.47 8.58,9.57 10.37,9.57 10.37,8.61 9.55,8.61 				" />
+                                                                <rect x="3.76" y="7.47" class="st008" width="0.96" height="0.96" />
+                                                                <rect x="1.83" y="7.47" class="st008" width="0.96" height="0.96" />
+                                                                <rect x="1.83" y="5.54" class="st008" width="0.96" height="0.96" />
+                                                                <rect x="1.83" y="9.4" class="st008" width="0.96" height="0.96" />
+                                                                <rect x="3.76" y="5.54" class="st008" width="0.96" height="0.96" />
+                                                                <rect x="3.76" y="9.4" class="st008" width="0.96" height="0.96" />
+                                                            </g>
+                                                        </g>
+                                                    </g>
+                                                </g>
+                                            </svg>
+                                            <input type="date" id="nuevoHorarioFecha" />
+                                        </div>
+                                        <div class="reloj">
+                                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="12.07px"
+                                                height="12.07px" viewBox="0 0 12.07 12.07" style="overflow:visible;enable-background:new 0 0 12.07 12.07;"
+                                                xml:space="preserve">
+                                                <style type="text/css">
+                                                    .st009 {
+                                                        fill: #76869E;
+                                                    }
+                                                </style>
+                                                <defs>
+                                                </defs>
+                                                <g id="Layer_2_1_">
+                                                    <path class="st009" d="M6.04,12.07C2.7,12.07,0,9.37,0,6.04S2.7,0,6.04,0s6.04,2.7,6.04,6.04S9.37,12.07,6.04,12.07z M6.04,0.93
+        c-2.82,0-5.11,2.29-5.11,5.11s2.29,5.11,5.11,5.11s5.11-2.29,5.11-5.11S8.86,0.93,6.04,0.93z" />
+                                                    <path class="st009" d="M8.48,9.06c-0.12,0-0.24-0.05-0.33-0.13L5.6,6.37C5.51,6.28,5.46,6.16,5.46,6.04V2.32
+        c0-0.26,0.21-0.46,0.46-0.46c0.26,0,0.46,0.21,0.46,0.46v3.52l2.42,2.41c0.18,0.18,0.18,0.47,0,0.66c0,0,0,0,0,0
+        C8.72,9.01,8.61,9.06,8.48,9.06z" />
+                                                </g>
+                                            </svg>
+                                            <input type="time" id="nuevoHorarioHora" />
+                                        </div>
+                                    </div>
                                     <div class="footer-modal">
                                         <button id="btnReservar" class="btn-reservar">Reservar</button>
                                         <button id="btnPagar" class="btn-pagar">Pagar</button>

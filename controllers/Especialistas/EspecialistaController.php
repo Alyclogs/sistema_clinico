@@ -3,7 +3,7 @@ require_once __DIR__ . '/../../models/Especialistas/EspecialistaModel.php';
 
 $modelo = new EspecialistaModel();
 $mensaje = '';
-$action = $_GET['action'];
+$action = $_GET['action'] ?? '';
 $idservicio = $_GET['idservicio'] ?? '';
 $idarea = $_GET['idarea'] ?? '';
 $idsubarea = $_GET['idsubarea'] ?? '';

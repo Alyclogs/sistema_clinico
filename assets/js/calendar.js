@@ -449,7 +449,7 @@ document.addEventListener('DOMContentLoaded', function () {
         selectedespecialista = $(this).val();
         especialistaSeleccionado = $(this).find('option:selected').text();
         if (selectedespecialista) {
-            selectedservicio = '';
+            //selectedservicio = '';
             selectedarea = '';
             selectedsubarea = '';
             servicioSeleccionado = '';
@@ -1021,7 +1021,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function refrescarCitas(idservicio, idespecialista, idarea, idsubarea) {
         // 2) Llamar con los cuatro parámetros en orden
-        obtenerCitas(idservicio ?? selectedservicio, idespecialista ?? selectedespecialista, idarea ?? selectedarea, idsubarea ?? selectedsubarea)
+        obtenerCitas((idespecialista || selectedespecialista ? null : idservicio ?? selectedservicio), idespecialista ?? selectedespecialista, idarea ?? selectedarea, idsubarea ?? selectedsubarea)
             .then(function (citas) {
                 citasGlobales = citas;
                 procesarYMostrarCitas(citas);

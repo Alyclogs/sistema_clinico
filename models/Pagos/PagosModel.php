@@ -15,8 +15,7 @@ class PagosModel
         try {
             $pdo = connectDatabase();
 
-            $sql = "
-SELECT 
+            $sql = "SELECT 
     ROW_NUMBER() OVER (ORDER BY c.fecha ASC, c.hora_inicio ASC) AS orden,
     c.idcita,
     c.fecha,
@@ -48,8 +47,11 @@ SELECT
     sa.idsubarea,
     sa.subarea,
 
-    -- Costo correspondiente (puede ser NULL si no hay coincidencia)
-    cs.precio AS costo,
+    -- Precio calculado: si idservicio = 1, se usa el de costos_subareas; si no, el de servicios
+    CASE 
+        WHEN c.idservicio = 1 THEN cs.precio
+        ELSE s.precio
+    END AS costo,
 
     -- Estado del pago según el idestado
     CASE 
@@ -59,24 +61,34 @@ SELECT
     END AS estado_pago
 
 FROM citas c
-INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
-INNER JOIN usuarios ua ON p.idusuario = ua.idusuario  -- Apoderado del paciente
 
+-- Paciente y apoderado
+INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
+INNER JOIN usuarios ua ON p.idusuario = ua.idusuario
+
+-- Especialista y su usuario
 INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
-INNER JOIN usuarios ue ON c.idregistrador = ue.idusuario  -- Datos del especialista
+INNER JOIN usuarios ue ON e.idespecialista = ue.idusuario
+
+-- Área y subárea
 INNER JOIN areas a ON e.idarea = a.idarea
 LEFT JOIN subareas sa ON e.idsubarea = sa.idsubarea
 
--- Join con costo según subárea y hora dentro del rango
-LEFT JOIN costos_subareas cs 
-    ON cs.idsubarea = e.idsubarea
-    AND c.hora_inicio >= cs.hora_inicio 
-    AND c.hora_inicio <= cs.hora_fin
+-- Servicio
+LEFT JOIN servicios s ON c.idservicio = s.idservicio
 
-WHERE 1
-";
+-- Costo por subárea y hora (solo para servicio 1)
+LEFT JOIN (
+    SELECT DISTINCT ON (idsubarea, hora_inicio, hora_fin)
+        idsubarea,
+        precio,
+        hora_inicio,
+        hora_fin
+    FROM costos_subareas
+) cs ON cs.idsubarea = e.idsubarea
+      AND c.hora_inicio BETWEEN cs.hora_inicio AND cs.hora_fin
 
-
+WHERE 1";
 
             // Filtro opcional
             if (!empty($filtro)) {
@@ -106,8 +118,6 @@ WHERE 1
         }
     }
 
-
-
     public function obtenerModalidades()
     {
         $sql = "SELECT * FROM modalidad_pagos";
@@ -115,7 +125,6 @@ WHERE 1
         $stmt = $this->db->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
 
     public function obtenerSiguienteCodigo()
     {

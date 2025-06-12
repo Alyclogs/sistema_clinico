@@ -100,13 +100,10 @@ function buscarCitas(filtro) {
             const centimos = partes[1];
             return `SON: ${literal.trim()} Y ${centimos}/100 SOLES`;
         }
-
         return secciones(num);
     }
 
-
     $.get(baseurl + "controllers/Pagos/PagoController.php?action=buscar&filtro=" + encodeURIComponent(filtro), function (data) {
-
 
         let html = '';
         let total = 0;
@@ -116,8 +113,6 @@ function buscarCitas(filtro) {
             const paciente = data[0];
             html += `
             <div class="info-paciente">
-            
-         
 <svg id="PAGOS" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 11.78 12.9">
   <defs>
     <style>
@@ -129,17 +124,11 @@ function buscarCitas(filtro) {
   </defs>
   <path class="cls-1" d="M5.88,1.68c-1.09,0-1.97,.88-1.97,1.96s.88,1.96,1.97,1.96,1.97-.88,1.97-1.96-.88-1.96-1.97-1.96Zm-3.65,1.96C2.23,1.63,3.86,0,5.88,0s3.65,1.63,3.65,3.64-1.63,3.64-3.65,3.64-3.65-1.63-3.65-3.64ZM10.32,12.63c-2.29-2.49-6.57-2.4-8.87,.01-.32,.34-.85,.35-1.19,.03-.34-.32-.35-.85-.03-1.19,2.93-3.07,8.33-3.24,11.32,.01,.31,.34,.29,.87-.05,1.19s-.87,.29-1.19-.05Z"/>
 </svg>
-            
-            
-            
-            
                <span> Paciente : ${paciente.paciente_dni} / ${paciente.paciente_nombres} ${paciente.paciente_apellidos}</span>
-            </div>
-        `;
+            </div>`;
         }
 
-        html += `
-    <div class="container-tabla-pagos">
+        html += `<div class="container-tabla-pagos">
         <table class="table table-pagos">
             <thead>
                 <tr>
@@ -163,17 +152,15 @@ function buscarCitas(filtro) {
             </tr>
         `;
         } else {
+            console.log(data);
             data.forEach(function (cita) {
-
 
                 let estadoClase = '';
                 let svgEstado = '';
 
                 if (cita.estado_pago === 'Cancelado') {
                     estadoClase = 'estado-cancelado';
-                    svgEstado = `
-    
-<svg id="" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13.99 13.99">
+                    svgEstado = `<svg id="" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13.99 13.99">
   <defs>
     <style>
       .cls-checkpago {
@@ -206,19 +193,15 @@ function buscarCitas(filtro) {
     </style>
   </defs>
   <path class="cls-pendiente" d="M10.89,1.17c-.9-.63-1.92-1-3.02-1.11-.06-.02-.12-.03-.18-.02-.03,0-.06,0-.09-.01-.4-.04-.79-.04-1.19,0-.08,0-.17,0-.25,.02C3.39,.48,1.48,1.99,.44,4.59c-.22,.54-.36,1.1-.37,1.69-.09,.49-.09,.98,0,1.48,0,0,0,.02,0,.02,0,.08,.01,.15,.02,.23,0,.03,.01,.07,.02,.1,0,.09-.01,.18,.05,.25-.03,.07,0,.14,.02,.2,.85,3.78,4.62,6.15,8.39,5.3,2.76-.63,4.9-2.81,5.34-5.62,.47-2.95-.57-5.33-3.02-7.06Zm-1.18,8.8c-.22,.1-.43,.05-.64-.16-.63-.63-1.27-1.26-1.9-1.9-.12-.12-.18-.13-.3,0-.64,.65-1.28,1.29-1.93,1.93-.2,.2-.43,.23-.65,.12-.21-.11-.32-.33-.28-.58,.02-.14,.11-.23,.2-.33,.63-.63,1.26-1.27,1.9-1.89,.13-.12,.12-.18,0-.3-.65-.64-1.3-1.29-1.95-1.95-.19-.19-.21-.46-.08-.67,.14-.21,.41-.3,.65-.21,.11,.04,.18,.12,.25,.19,.62,.62,1.24,1.23,1.85,1.85,.13,.13,.2,.16,.35,0,.62-.64,1.26-1.27,1.89-1.9,.16-.16,.35-.23,.56-.17,.2,.06,.32,.2,.37,.4,.01,.04,0,.08,0,.09,0,.22-.11,.35-.23,.48-.62,.62-1.24,1.25-1.87,1.86-.13,.13-.13,.19,0,.32,.64,.63,1.28,1.27,1.92,1.91,.3,.3,.23,.72-.13,.89Z"/>
-</svg>
-    `;
+</svg>`;
                 }
 
-
-
-
                 html += `
-                <tr>
+                <tr data-idcita="${cita.idcita}">
                     <td>0${cita.orden}</td>
                   
                     <td>${cita.especialista_nombres} ${cita.especialista_apellidos}</td>
-                    <td>${cita.subarea}</td>
+                    <td>${cita.subarea ?? cita.servicio + '  ' + cita.area}</td>
                    <td>${formatearFechaSimple(cita.fecha)}</td>
                  <td>${formatoHora12h(cita.hora_inicio)} - ${formatoHora12h(cita.hora_fin)}</td>
                <td class="${estadoClase}">${svgEstado}${cita.estado_pago}</td>
@@ -235,40 +218,25 @@ function buscarCitas(filtro) {
        style="${cita.estado_pago === 'Cancelado' ? 'display:none;' : ''}">
     
 </div>
-</td>
-
-                 
-                  
-                </tr>
-              
-              
-            `;
+</td>  
+                </tr>`;
             });
 
-            html += `
-        <tr class="fila-total">
+            html += `<tr class="fila-total">
             <td colspan="6" style="text-align: right;"><strong>TOTAL:</strong></td>
           <td><strong id="total-seleccionado">S/. 0.00</strong></td>
              
-        </tr>
-    `;
+        </tr>`;
         }
 
-        html += `
-            </tbody>
+        html += `</tbody>
         </table>
-        </div>
-    `;
-
-
+        </div>`;
 
         // Insertamos el resumen + tabla en el div
         $('#pagosTabla').html(html);
 
-
-
         let totalSeleccionado = 0;
-
 
         $('#pagosTabla').on('click', '.circulo-check', function () {
             const $this = $(this);
@@ -286,12 +254,7 @@ function buscarCitas(filtro) {
 
             // Actualiza el total mostrado
             $('#total-seleccionado').text(`S/. ${totalSeleccionado.toFixed(2)}`);
-
-
-
         });
-
-
 
         $('#pagosTabla').on('click', '.circulo-check', function () {
 
@@ -327,9 +290,6 @@ function buscarCitas(filtro) {
 
             if ($('.circulo-check.activo').length > 0) {
                 $('.container-medios-pago').css('display', 'block');
-
-
-
 
                 // Guardar datos en campos ocultos para enviar por POST si quieres
                 $('#ids-citas').val(citasSeleccionadas.join(','));
@@ -384,12 +344,10 @@ function buscarCitas(filtro) {
                                 const dniApoderado = $('#dni-apoderado').val();
                                 $('#dni-papa').text('DNI: ' + dniApoderado);
 
-
                                 const totalCita = parseFloat($('#importexpagar').val());
                                 const montoCita = parseFloat($('#monto').val());
                                 const totalFormateado = totalCita.toFixed(2);
                                 const totalFormateado2 = montoCita.toFixed(2);
-
 
                                 $('#total-sub-total').text(':' + totalFormateado2);
                                 $('#total-venta').text(':' + totalFormateado);
@@ -471,18 +429,11 @@ function buscarCitas(filtro) {
                 formPago[0].reportValidity();
             }
         });
-
-
-
-
-
-
     }, 'json')
         .fail(function (xhr, status, error) {
             console.error("Error al buscar citas:", error);
             console.error("Detalles:", xhr.responseText);
             $('#pagosTabla').html(`<div class="alert alert-danger">Error al cargar citas.</div>`);
         });
-
 }
 

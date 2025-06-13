@@ -26,8 +26,6 @@ imagedestroy($image);
 // Codificar imagen en base64
 $base64 = base64_encode($imageData);
 
-
-
 require_once __DIR__ . '/../../../models/Pagos/PagosModel.php';
 $pagomodel = new PagosModel();
 
@@ -40,24 +38,13 @@ foreach ($opcionesPago as $opcion) {
   $opcionesAgrupadas[$opcion['idopcion']][] = $opcion;
 }
 
-
-
 if (!isset($_SESSION['usuario']) || !isset($_SESSION['rol'])) {
   header("Location: " . $base_url . "views/login.php");
   exit();
 }
 $idusuario = $_SESSION['idusuario'];
 $nombres_caja = mb_strtoupper($_SESSION['nombre'], 'UTF-8');
-
-
-
-
 $codigoPago = $pagomodel->obtenerSiguienteCodigo(); // obtiene todas
-
-
-
-
-
 
 ?>
 

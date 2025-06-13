@@ -827,7 +827,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             agendarCita('3');
             const dni = $('.pacientesel-dni').text().replace('DNI:', '').trim();
-            window.location.href = baseurl + `views / Clinica / pagos / index.php ? filtro = ${dni} `
+            window.location.href = baseurl + `views/Clinica/pagos/index.php?filtro=${dni}`;
+
         }
         if (e.target.closest('#btnReservar')) {
             if (!selectedespecialista) {
@@ -858,6 +859,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const idUsuario = document.getElementById('idUsuario').value;
         const idPaciente = document.getElementById('pacienteCita')?.dataset.id;
 
+        // Obtener los valores seleccionados de los selectores
+        const idArea = document.getElementById('filtro-area').value || null;  // Si no hay valor seleccionado, asignar null
+        const idSubarea = document.getElementById('filtro-subarea').value || null;  // Si no hay valor seleccionado, asignar null
+
         horariosSeleccionados.forEach(h => {
             const horaInicio = h.horaInicioRaw;
             const horaFin = h.horaFinRaw;
@@ -871,8 +876,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 hora_fin: horaFin,
                 fecha: fecha,
                 idestado: idestado,
-                idservicio: h.idservicio
+                idservicio: h.idservicio,
+                idarea: idArea,
+                idsubarea: idSubarea
             };
+
+            // Mostrar los datos en la consola
+            console.log('Datos que se enviarán:', data);
+
+            // Enviar los datos con $.post
             $.post(baseurl + 'controllers/Citas/CitasController.php?action=create', { data: JSON.stringify(data) }, function (response) {
                 if (response.success) {
                     horariosSeleccionados = [];
@@ -889,6 +901,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
         });
     }
+
 
     $(document).on('click', '.btn-cancelar', function () {
         const usuarioModal = bootstrap.Modal.getInstance(document.getElementById('usuarioModal'));

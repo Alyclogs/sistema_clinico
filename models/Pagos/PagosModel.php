@@ -47,9 +47,13 @@ class PagosModel
     sa.idsubarea,
     sa.subarea,
 
-    -- Precio calculado: si idservicio = 1, se usa el de costos_subareas; si no, el de servicios
+    -- Servicio
+    s.idservicio,
+    s.servicio,
+
+    -- Costo correspondiente (puede ser NULL si no hay coincidencia)
     CASE 
-        WHEN c.idservicio = 1 THEN cs.precio
+        WHEN c.idservicio = 1 AND cs.precio IS NOT NULL THEN cs.precio
         ELSE s.precio
     END AS costo,
 
@@ -61,32 +65,21 @@ class PagosModel
     END AS estado_pago
 
 FROM citas c
-
--- Paciente y apoderado
 INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
-INNER JOIN usuarios ua ON p.idusuario = ua.idusuario
+INNER JOIN usuarios ua ON p.idusuario = ua.idusuario  -- Apoderado del paciente
 
--- Especialista y su usuario
 INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
-INNER JOIN usuarios ue ON e.idespecialista = ue.idusuario
+INNER JOIN usuarios ue ON e.idespecialista = ue.idusuario  -- Datos del especialista
+INNER JOIN areas a ON c.idarea = a.idarea
+LEFT JOIN subareas sa ON c.idsubarea = sa.idsubarea
 
--- Área y subárea
-INNER JOIN areas a ON e.idarea = a.idarea
-LEFT JOIN subareas sa ON e.idsubarea = sa.idsubarea
+-- Join con costo según subárea y hora dentro del rango
+LEFT JOIN costos_subareas cs 
+    ON cs.idsubarea = c.idsubarea
+    AND c.hora_inicio >= cs.hora_inicio 
+    AND c.hora_inicio <= cs.hora_fin
 
--- Servicio
-LEFT JOIN servicios s ON c.idservicio = s.idservicio
-
--- Costo por subárea y hora (solo para servicio 1)
-LEFT JOIN (
-    SELECT DISTINCT ON (idsubarea, hora_inicio, hora_fin)
-        idsubarea,
-        precio,
-        hora_inicio,
-        hora_fin
-    FROM costos_subareas
-) cs ON cs.idsubarea = e.idsubarea
-      AND c.hora_inicio BETWEEN cs.hora_inicio AND cs.hora_fin
+INNER JOIN servicios s ON c.idservicio = s.idservicio
 
 WHERE 1";
 

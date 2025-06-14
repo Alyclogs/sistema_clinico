@@ -64,7 +64,7 @@ function fetchUsers() {
         $(".td-botones").each(function () {
             var id = $(this).data('id');
             var nombre = $(this).data('nombre');
-            $.get(baseurl + 'assets/js/especialistas/botonesEspecialista.html', function (btnHtml) {
+            $.get(baseurl + 'components/botonesEspecialista.html', function (btnHtml) {
                 btnHtml = btnHtml.replace(/\$\{IDUSUARIO\}/g, id);
                 btnHtml = btnHtml.replace(/\$\{NOMBREUSUARIO\}/g, nombre);
                 $(this).html(btnHtml);

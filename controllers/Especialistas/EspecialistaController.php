@@ -7,6 +7,7 @@ $action = $_GET['action'] ?? '';
 $idservicio = $_GET['idservicio'] ?? '';
 $idarea = $_GET['idarea'] ?? '';
 $idsubarea = $_GET['idsubarea'] ?? '';
+$idespecialista = $_GET['idespecialista'] ?? '';
 
 if ($action === "read") {
   try {
@@ -18,6 +19,11 @@ if ($action === "read") {
     if ($idservicio !== '' && $idarea !== '') {
       $especialistas = $modelo->obtenerEspecialistaPorAreayServicio($idarea, $idservicio);
       echo json_encode($especialistas);
+      exit;
+    }
+    if ($idespecialista !== '') {
+      $especialista = $modelo->obtenerEspecialistaPorId($idespecialista);
+      echo json_encode($especialista);
       exit;
     }
     $especialistas = $modelo->obtenerEspecialistas();

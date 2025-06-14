@@ -19,7 +19,8 @@ class CitasModel
                 p.fecha_nacimiento AS paciente_fecha_nacimiento,
                 p.foto AS paciente_foto,
                 u.nombres AS especialista_nombre,
-                u.apellidos AS especialista_apellidos
+                u.apellidos AS especialista_apellidos,
+                u.foto AS especialista_foto
             FROM citas c
             INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
             INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
@@ -37,7 +38,8 @@ class CitasModel
         p.fecha_nacimiento AS paciente_fecha_nacimiento,
         p.foto AS paciente_foto,
         u.nombres AS especialista_nombre,
-        u.apellidos AS especialista_apellidos
+        u.apellidos AS especialista_apellidos,
+        u.foto AS especialista_foto
         FROM citas c INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
         INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
         INNER JOIN usuarios u ON e.idespecialista = u.idusuario
@@ -57,7 +59,8 @@ class CitasModel
         p.fecha_nacimiento AS paciente_fecha_nacimiento,
         p.foto AS paciente_foto,
         u.nombres AS especialista_nombre,
-        u.apellidos AS especialista_apellidos
+        u.apellidos AS especialista_apellidos,
+        u.foto AS especialista_foto
         FROM citas c INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
         INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
         INNER JOIN usuarios u ON e.idespecialista = u.idusuario
@@ -65,6 +68,30 @@ class CitasModel
 
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':idespecialista', $idespecialista, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function obtenerCitasPorEspecialistayfecha($idespecialista, $fecha)
+    {
+        $sql = "SELECT DISTINCT c.*,
+        p.nombres AS paciente_nombres,
+        p.apellidos AS paciente_apellidos,
+        p.dni AS paciente_dni,
+        p.fecha_nacimiento AS paciente_fecha_nacimiento,
+        p.foto AS paciente_foto,
+        u.nombres AS especialista_nombre,
+        u.apellidos AS especialista_apellidos,
+        u.foto AS especialista_foto
+        FROM citas c INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
+        INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
+        INNER JOIN usuarios u ON e.idespecialista = u.idusuario
+        WHERE c.idespecialista = :idespecialista
+        AND c.fecha = :fecha";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':idespecialista', $idespecialista, PDO::PARAM_INT);
+        $stmt->bindParam(':fecha', $fecha, PDO::PARAM_STR);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -77,7 +104,8 @@ class CitasModel
         p.fecha_nacimiento AS paciente_fecha_nacimiento,
         p.foto AS paciente_foto,
         u.nombres AS especialista_nombre,
-        u.apellidos AS especialista_apellidos
+        u.apellidos AS especialista_apellidos,
+        u.foto AS especialista_foto
         FROM citas c INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
         INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
         INNER JOIN usuarios u ON e.idespecialista = u.idusuario
@@ -99,7 +127,8 @@ class CitasModel
         p.fecha_nacimiento AS paciente_fecha_nacimiento,
         p.foto AS paciente_foto,
         u.nombres AS especialista_nombre,
-        u.apellidos AS especialista_apellidos
+        u.apellidos AS especialista_apellidos,
+        u.foto AS especialista_foto
         FROM citas c INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
         INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
         INNER JOIN usuarios u ON e.idespecialista = u.idusuario
@@ -121,7 +150,8 @@ class CitasModel
         p.fecha_nacimiento AS paciente_fecha_nacimiento,
         p.foto AS paciente_foto,
         u.nombres AS especialista_nombre,
-        u.apellidos AS especialista_apellidos
+        u.apellidos AS especialista_apellidos,
+        u.foto AS especialista_foto
         FROM citas c INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
         INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
         INNER JOIN usuarios u ON e.idespecialista = u.idusuario
@@ -145,7 +175,8 @@ class CitasModel
         p.fecha_nacimiento AS paciente_fecha_nacimiento,
         p.foto AS paciente_foto,
         u.nombres AS especialista_nombre,
-        u.apellidos AS especialista_apellidos
+        u.apellidos AS especialista_apellidos,
+        u.foto AS especialista_foto
         FROM citas c INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
         INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
         INNER JOIN usuarios u ON e.idespecialista = u.idusuario
@@ -169,7 +200,8 @@ class CitasModel
         p.fecha_nacimiento AS paciente_fecha_nacimiento,
         p.foto AS paciente_foto,
         u.nombres AS especialista_nombre,
-        u.apellidos AS especialista_apellidos
+        u.apellidos AS especialista_apellidos,
+        u.foto AS especialista_foto
         FROM citas c INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
         INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
         INNER JOIN usuarios u ON e.idespecialista = u.idusuario

@@ -8,21 +8,25 @@ $model = new CitasModel();
 
 switch ($action) {
     case 'read':
-        try {
-            if (isset($_GET['idespecialista'])) {
-                if (isset($_GET['idarea'])) {
-                    if (isset($_GET['idsubarea'])) {
-                        $result = $model->obtenerCitasPorEspecialistayAreaySubarea($_GET['idespecialista'], $_GET['idarea'], $_GET['idsubarea'], $_GET['idservicio']);
-                        echo json_encode($result);
-                        return;
-                    } else {
-                        $result = $model->obtenerCitasPorEspecialistayArea($_GET['idespecialista'], $_GET['idarea'], $_GET['idservicio']);
-                        echo json_encode($result);
-                        return;
-                    }
+        if (isset($_GET['idespecialista'])) {
+            if (isset($_GET['idarea'])) {
+                if (isset($_GET['idsubarea'])) {
+                    $result = $model->obtenerCitasPorEspecialistayAreaySubarea($_GET['idespecialista'], $_GET['idarea'], $_GET['idsubarea'], $_GET['idservicio']);
+                    echo json_encode($result);
+                    return;
                 } else {
-                    if (isset($_GET['idservicio'])) {
-                        $result = $model->obtenerCitasPorEspecialistayServicio($_GET['idespecialista'], $_GET['idservicio']);
+                    $result = $model->obtenerCitasPorEspecialistayArea($_GET['idespecialista'], $_GET['idarea'], $_GET['idservicio']);
+                    echo json_encode($result);
+                    return;
+                }
+            } else {
+                if (isset($_GET['idservicio'])) {
+                    $result = $model->obtenerCitasPorEspecialistayServicio($_GET['idespecialista'], $_GET['idservicio']);
+                    echo json_encode($result);
+                    return;
+                } else {
+                    if (isset($_GET['fecha'])) {
+                        $result = $model->obtenerCitasPorEspecialistayfecha($_GET['idespecialista'], $_GET['fecha']);
                         echo json_encode($result);
                         return;
                     } else {
@@ -31,26 +35,23 @@ switch ($action) {
                         return;
                     }
                 }
-            } else {
-                if (isset($_GET['idarea'])) {
-                    if (isset($_GET['idsubarea'])) {
-                        $result = $model->obtenerCitasPorAreaySubarea($_GET['idarea'], $_GET['idsubarea'], $_GET['idservicio']);
-                        echo json_encode($result);
-                        return;
-                    } else {
-                        $result = $model->obtenerCitasPorArea($_GET['idarea'], $_GET['idservicio']);
-                        echo json_encode($result);
-                        return;
-                    }
+            }
+        } else {
+            if (isset($_GET['idarea'])) {
+                if (isset($_GET['idsubarea'])) {
+                    $result = $model->obtenerCitasPorAreaySubarea($_GET['idarea'], $_GET['idsubarea'], $_GET['idservicio']);
+                    echo json_encode($result);
+                    return;
                 } else {
-                    $result = $model->obtenerCitasPorServicio($_GET['idservicio']);
+                    $result = $model->obtenerCitasPorArea($_GET['idarea'], $_GET['idservicio']);
                     echo json_encode($result);
                     return;
                 }
+            } else {
+                $result = $model->obtenerCitasPorServicio($_GET['idservicio']);
+                echo json_encode($result);
+                return;
             }
-        } catch (Exception $e) {
-            echo json_encode(['error' => 'Error: ' . $e]);
-            return;
         }
         break;
 

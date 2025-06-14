@@ -1,4 +1,14 @@
+import api from '../utils/api.js';
+import { mostrarMensajeFlotante } from '../utils/utils.js';
+import { formatearHora12h, horaAHoraMinutos, calcularEdad, buildDate, dateStrToDate, dateToDateStr, dayAfter, dayBefore } from '../utils/date.js';
+import { getSVGCita, mostrarTooltipCita, ocultarTooltip, estadosCita } from '../utils/cita.js';
+import { buildMiniCalendar, buildCalendar, updateCalendarDateRange } from '../utils/calendar.js';
+
 const calendarEl = document.getElementById('calendar');
+const miniCalendarEl = document.getElementById('mini-calendar');
+const calendar = buildCalendar(calendarEl);
+const miniCalendar = buildMiniCalendar(miniCalendarEl);
+
 const baseurl = "http://localhost/SistemaClinico/";
 var selectedservicio = "1";
 var selectedarea = "";
@@ -13,273 +23,6 @@ let servicioSeleccionado = 'CONSULTA';
 let especialistaSeleccionado = '';
 let disponibilidadEspecialista = [];
 let citasGlobales = [];
-let estadosCita = { '3': 'pendiente', '4': 'cancelado', '5': 'anulado' }
-
-function calcularEdad(fechaNacStr) {
-    const hoy = new Date();
-    const partes = fechaNacStr.split('-');
-    if (partes.length !== 3) return '';
-    const anio = parseInt(partes[0], 10);
-    const mes = parseInt(partes[1], 10) - 1;
-    const dia = parseInt(partes[2], 10);
-    const fechaNac = new Date(anio, mes, dia);
-    let edad = hoy.getFullYear() - fechaNac.getFullYear();
-    const m = hoy.getMonth() - fechaNac.getMonth();
-    if (m < 0 || (m === 0 && hoy.getDate() < fechaNac.getDate())) {
-        edad--;
-    }
-    return edad;
-}
-
-function getInitials(nombre, apellido) {
-    let n = nombre ? nombre.trim()[0] : '';
-    let a = apellido ? apellido.trim()[0] : '';
-    return (n + a).toUpperCase();
-}
-
-function stringToColor(str) {
-    // Simple hash to color
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const color = `hsl(${hash % 360}, 70%, 60%)`;
-    return color;
-}
-
-function horaAHoraMinutos(hora) {
-    const [h, m] = hora.split(':').map(Number);
-    return h * 60 + m;
-}
-
-function ocultarTooltip() {
-    document.querySelectorAll('.custom-tooltip-cita').forEach(el => el.remove());
-}
-
-function mostrarTooltipCita(cita, targetElement) {
-    ocultarTooltip();
-
-    const pacienteNombre = `${cita.paciente_nombres} ${cita.paciente_apellidos}`;
-    const fechaNacimiento = cita.paciente_fecha_nacimiento;
-    const edad = calcularEdad(fechaNacimiento);
-    const especialista = `${cita.especialista_nombre} ${cita.especialista_apellidos ?? ''}`;
-    const horario = `${formatearHora12h(cita.hora_inicio)} - ${formatearHora12h(cita.hora_fin)}`;
-    //const color = stringToColor(pacienteNombre);
-    //const iniciales = getInitials(cita.paciente_nombres, cita.paciente_apellidos);
-    const svgEstado = getSVGCita(`cita-${estadosCita[cita.idestado]}`);
-
-    const tooltip = document.createElement('div');
-    tooltip.className = 'custom-tooltip-cita';
-    tooltip.innerHTML = `
-    <div class="mytooltip">
-    <div class="tooltip-content">
-        <div class="tooltip-header">
-            <img class="avatar-iniciales" src="${cita.paciente_foto}">
-            <div class="datos-paciente">
-                <strong>${pacienteNombre}</strong>
-                <div class="paciente-detalles">${fechaNacimiento} - ${edad} años</div>
-                <div>DNI: ${cita.paciente_dni}</div>
-            </div>
-        </div>
-        <div class="tooltip-footer">
-            <div class="especialista"><strong>${especialista}</strong></div>
-            <div class="svg-horario">
-            ${svgEstado}
-${horario}</div>
-        </div>
-        </div>
-        <button class="btn btn-light btn-ver-cita" onclick="verCita(${cita.idcita})">Ver cita</button>
-        </div>`;
-
-    document.body.appendChild(tooltip);
-
-    const rect = targetElement.getBoundingClientRect();
-    tooltip.style.top = `${rect.top + window.scrollY - tooltip.offsetHeight - 10}px`;
-    tooltip.style.left = `${rect.left + window.scrollX}px`;
-
-    targetElement._tooltip = tooltip;
-
-    tooltip.addEventListener('mouseleave', function () {
-        setTimeout(() => {
-            ocultarTooltip();
-        }, 1000)
-    })
-}
-
-function getSVGPendiente() {
-    return `<!-- Generator: Adobe Illustrator 25.2.3, SVG Export Plug-In  -->
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="11.15px"
-	 height="11.15px" viewBox="0 0 11.15 11.15" style="overflow:visible;enable-background:new 0 0 11.15 11.15;"
-	 xml:space="preserve">
-<style type="text/css">
-	.st010{fill-rule:evenodd;clip-rule:evenodd;fill:#F07E0B;}
-	.st011{fill:#FFFFFF;}
-</style>
-<defs>
-</defs>
-<g>
-	<g>
-		<path class="st010" d="M5.57,0c3.08,0,5.57,2.5,5.57,5.57s-2.5,5.57-5.57,5.57C2.5,11.15,0,8.65,0,5.57S2.5,0,5.57,0"/>
-	</g>
-	<path class="st011" d="M7.82,8.34c-0.11,0-0.22-0.04-0.3-0.12L5.17,5.88C5.09,5.8,5.05,5.69,5.05,5.57V2.16
-		c0-0.24,0.19-0.43,0.43-0.43c0.24,0,0.43,0.19,0.43,0.43V5.4l2.22,2.22c0.17,0.17,0.17,0.44,0,0.6c0,0,0,0,0,0
-		C8.04,8.3,7.93,8.35,7.82,8.34z"/>
-</g>
-</svg>
-`;
-}
-
-function getSVGAnulado() {
-    return `<!-- Generator: Adobe Illustrator 25.2.3, SVG Export Plug-In  -->
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="11px"
-	 height="11px" viewBox="0 0 11 11" style="overflow:visible;enable-background:new 0 0 11 11;" xml:space="preserve">
-<style type="text/css">
-	.st012{fill:none;stroke:#E5252A;stroke-linecap:round;stroke-miterlimit:10;}
-</style>
-<defs>
-</defs>
-<g>
-	<g id="g327_1_" transform="translate(492,135)">
-		<path id="path329_1_" class="st012" d="M-481.5-129.5c0,2.76-2.24,5-5,5s-5-2.24-5-5c0-2.76,2.24-5,5-5S-481.5-132.26-481.5-129.5z"
-			/>
-	</g>
-	<g id="g331_1_" transform="translate(347,105)">
-		<path id="path333_1_" class="st012" d="M-342.8-98.2l2.61-2.61"/>
-	</g>
-	<g id="g335_1_" transform="translate(407,105)">
-		<path id="path337_1_" class="st012" d="M-400.2-98.2l-2.61-2.61"/>
-	</g>
-</g>
-</svg>
-`;
-}
-
-function getSVGcancelado() {
-    return `<!-- Generator: Adobe Illustrator 25.2.3, SVG Export Plug-In  -->
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="11.15px"
-	 height="11.15px" viewBox="0 0 11.15 11.15" style="overflow:visible;enable-background:new 0 0 11.15 11.15;"
-	 xml:space="preserve">
-<style type="text/css">
-	.st013{fill-rule:evenodd;clip-rule:evenodd;fill:#48B02C;}
-	.st014{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
-</style>
-<defs>
-</defs>
-<g>
-	<path class="st013" d="M5.57,0c3.08,0,5.57,2.5,5.57,5.57s-2.5,5.57-5.57,5.57C2.5,11.15,0,8.65,0,5.57S2.5,0,5.57,0"/>
-	<path class="st014" d="M3.81,8.29L1.78,6.13C1.56,5.89,1.5,5.54,1.65,5.26c0.26-0.47,0.87-0.52,1.2-0.16l1.57,1.68l2.49-2.33
-		C6.94,4.43,6.96,4.41,6.99,4.4l1.16-1.08C8.38,3.1,8.73,3.03,9.01,3.19c0.47,0.26,0.52,0.87,0.16,1.2L5.6,7.73l0,0L4.36,8.88
-		L3.81,8.29z"/>
-</g>
-</svg>
-`;
-}
-
-function getSVGCita(estado) {
-    switch (estado) {
-        case 'cita-pendiente':
-            return getSVGPendiente();
-        case 'cita-cancelado':
-            return getSVGcancelado();
-        case 'cita-anulado':
-            return getSVGAnulado();
-        default:
-            return '';
-    }
-}
-
-const calendar = new FullCalendar.Calendar(calendarEl, {
-    initialView: 'timeGridWeek',
-    slotDuration: '00:30:00',
-    slotLabelInterval: '00:30:00',
-    slotMinTime: '09:00:00',
-    slotMaxTime: '18:00:00',
-    selectable: true,
-    //nowIndicator: true,
-    editable: true,
-    locale: 'es',
-    headerToolbar: false,
-    hiddenDays: [0],
-    slotLabelFormat: {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false // usa true si quieres formato AM/PM
-    },
-    dayHeaderFormat: {
-        weekday: 'long',
-        day: '2-digit',
-        eventDidMount: function (info) {
-            // Personaliza los eventos si es necesario
-        }
-    },
-    eventClick: function (info) {
-        if (info.event.extendedProps.multiple) {
-            return false; // Prevenir comportamiento por defecto
-        }
-        console.log('Evento individual clickeado:', info.event);
-    },
-    eventMouseEnter: function (info) {
-        const event = info.event;
-
-        if (event.extendedProps.multiple && event.extendedProps.citas) {
-            const cuadrados = info.el.querySelectorAll('.cita-cuadrado');
-
-            cuadrados.forEach(cuadrado => {
-                cuadrado.addEventListener('mouseenter', function () {
-                    const citaId = this.dataset.citaId;
-                    const cita = event.extendedProps.citas.find(c => c.idcita == citaId);
-                    if (cita) {
-                        mostrarTooltipCita(cita, this);
-                    }
-                });
-
-                cuadrado.addEventListener('mouseleave', function () {
-                    setTimeout(() => {
-                        ocultarTooltip();
-                    }, 1000)
-                });
-            });
-        } else if (event.extendedProps.cita && event.classNames.includes('cita-agendada-evento')) {
-            mostrarTooltipCita(event.extendedProps.cita, info.el);
-        }
-    },
-    eventMouseLeave: function (info) {
-        setTimeout(() => {
-            ocultarTooltip();
-        }, 1500)
-    }
-});
-
-function updateCalendarDateRange(calendar) {
-    const start = calendar.view.activeStart;
-    const end = calendar.view.activeEnd;
-
-    const options = {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-    };
-    const startStr = start.toLocaleDateString('es-ES', options).toUpperCase();
-    const endStr = new Date(end - 1).toLocaleDateString('es-ES', options).toUpperCase();
-
-    document.getElementById('calendar-dates').textContent = `${startStr} - ${endStr}`;
-}
-
-const miniCalendarEl = document.getElementById('mini-calendar');
-const miniCalendar = new FullCalendar.Calendar(miniCalendarEl, {
-    initialView: 'dayGridMonth',
-    locale: 'es',
-    headerToolbar: {
-        left: 'prev',
-        center: 'title',
-        right: 'next'
-    },
-    selectable: true,
-    dateClick: function (info) {
-        calendar.gotoDate(info.dateStr);
-        updateCalendarDateRange();
-    }
-});
 
 document.addEventListener('DOMContentLoaded', function () {
     obtenerServicios();
@@ -289,11 +32,6 @@ document.addEventListener('DOMContentLoaded', function () {
     updateCalendarDateRange(calendar);
     resaltarBloqueoAlmuerzo();
     calendar.render();
-
-    calendar.on('datesSet', function () {
-        updateCalendarDateRange(calendar);
-        actualizarBusinessHours();
-    });
 
     function buscarSubareaPorArea(idArea) {
         $("#filtro-subarea").empty().append('<option value="" disabled selected>Seleccionar</option>').prop("disabled", true);
@@ -324,15 +62,17 @@ document.addEventListener('DOMContentLoaded', function () {
             .append('<option value="" disabled selected>Seleccionar</option>')
             .prop("disabled", true);
 
-        $.get(baseurl + `controllers/Especialistas/EspecialistaController.php?action=read&idarea=${selectedarea}&idservicio=${selectedservicio}${selectedsubarea ? `&idsubarea=${selectedsubarea}` : ''}`, function (data) {
+        api.obtenerEspecialistas({ idservicio: selectedservicio, idarea: selectedarea, idsubarea: selectedsubarea }).then(function (data) {
             const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
             const especialistas = Array.isArray(parsedData) ? parsedData : [parsedData];
+            console.log(especialistas);
 
             if (especialistas.length === 0) {
                 mostrarMensajeFlotante('No hay especialistas');
+                return;
             }
             const promesas = especialistas.map(especialista => {
-                return obtenerDisponibilidadEspecialista(especialista.idespecialista).then(disponibilidad => {
+                return api.obtenerDisponibilidadEspecialista(especialista.idespecialista).then(disponibilidad => {
                     if (disponibilidad.length === 0) {
                         // No tiene disponibilidad, lo incluimos con disponibilidad 0
                         return {
@@ -343,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     // Tiene disponibilidad, calculamos
-                    return obtenerCitas(especialista.idespecialista).then(citas => {
+                    return api.obtenerCitas({ idespecialista: especialista.idespecialista }).then(citas => {
                         const resultados = calcularDisponibilidadPorEspecialista(disponibilidad, citas);
                         return resultados.map(r => ({
                             ...r,
@@ -438,6 +178,7 @@ document.addEventListener('DOMContentLoaded', function () {
             $(this).find('option:selected').data('duracion'),
             10
         ) || 30;
+        console.log('Buscando especialistas por subarea');
         buscarEspecialistas();
         actualizarEventosVisuales();
         refrescarCitas();
@@ -450,8 +191,6 @@ document.addEventListener('DOMContentLoaded', function () {
         especialistaSeleccionado = $(this).find('option:selected').text();
         if (selectedespecialista) {
             //selectedservicio = '';
-            selectedarea = '';
-            selectedsubarea = '';
             servicioSeleccionado = '';
             actualizarDisponibilidadEspecialista();
             refrescarCitas();
@@ -461,22 +200,6 @@ document.addEventListener('DOMContentLoaded', function () {
         // NO modificar la lista del modal ni horariosSeleccionados
     });
 
-    document.getElementById('prev-week').addEventListener('click', function () {
-        calendar.prev();
-        updateCalendarDateRange(calendar);
-    });
-
-    document.getElementById('next-week').addEventListener('click', function () {
-        calendar.next();
-        updateCalendarDateRange(calendar);
-    });
-
-    // Selección de una sola celda a la vez (NO permite rangos)
-    calendar.setOption('selectable', true);
-    calendar.setOption('selectMirror', false);
-    //calendar.setOption('selectOverlap', false);
-    calendar.setOption('selectMinDistance', 1);
-    calendar.setOption('selectLongPressDelay', 99999); // Desactiva selección por arrastre
     calendar.setOption('select', function (info) {
         // 0) Calcular datos básicos
         const durMin = subareaDuracion || servicioDuracion || 30;
@@ -742,7 +465,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 // Verificar choque con citas
-                obtenerCitas(selectedservicio, h.idespecialista, selectedarea, selectedsubarea)
+                api.obtenerCitas({ idservicio: selectedservicio, idespecialista: h.idespecialista, idarea: selectedarea, idsubarea: selectedsubarea })
                     .then(citas => {
                         if (citas.some(c => c.fecha === fechaVal && c.hora_inicio === horaVal)) {
                             mostrarMensajeFlotante('Este horario ya está reservado');
@@ -853,6 +576,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 $('#usuarioModal').modal('show');
             });
         }
+        if (e.target.closest('#mostrarHorarios')) {
+            const intervalos = obtenerIntervalos(calendar);
+            const select = document.getElementById('mostrarHorarios');
+            select.innerHTML = "";
+            let html = '';
+
+            intervalos.forEach(opcion => {
+                html += `<div class="horario-item">
+                            <span data-time="${opcion.value}">${opcion.text}</span>
+                        </div>`
+            });
+            $('#resultadoHorarios').html(html).css('display', 'flex');
+        }
+        if (e.target.closest('.horario-item')) {
+            const horario = e.target.closest(".horario-item").querySelector('span').dataset.time;
+            document.getElementById('nuevoHorarioHora').value = horario;
+            $('#resultadoHorarios').css('display', 'none');
+        }
     });
 
     function agendarCita(idestado) {
@@ -913,7 +654,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const formUsuario = $('#formUsuario');
         if (formUsuario[0].checkValidity()) {
             const usuarioModal = bootstrap.Modal.getInstance(document.getElementById('usuarioModal'));
-            let url = baseurl + 'controllers/Pacientes/PacienteController.php?action=create';
             const formDataObj = {};
             const formDataArray = formUsuario.serializeArray();
 
@@ -921,12 +661,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 formDataObj[item.name] = item.value;
             });
 
-            $.ajax({
-                type: 'POST',
-                url: url,
-                data: { data: JSON.stringify(formDataObj) },
-                dataType: 'json',
-                success: function (response) {
+            api.agendarPaciente({
+                data: formDataObj,
+                onSuccess: (response) => {
                     let textContent = response.message ?? response.error;
                     mostrarMensajeFlotante(textContent, response.success);
 
@@ -955,12 +692,12 @@ document.addEventListener('DOMContentLoaded', function () {
                             });
                         }
                     }, 1000);
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
+                }, onError: (jqXHR, textStatus, errorThrown) => {
                     console.error('Error en la solicitud AJAX:', textStatus, errorThrown);
                     console.error('Respuesta del servidor:', jqXHR.responseText);
                 }
             });
+
         } else {
             formUsuario[0].reportValidity();
         }
@@ -974,37 +711,20 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     function obtenerServicios() {
-        $.get(baseurl + 'controllers/Servicios/ServicioController.php?action=read', function (data) {
+        api.obtenerServicios().then(function (data) {
             const parsed = typeof data === 'string' ? JSON.parse(data) : data;
             let html = '';
             parsed.forEach(s => {
-                html += `<option value="${s.idservicio}" data-duracion="${s.duracion}">${s.servicio}</option>`;
+                html += `<option value="${s.idservicio}" data-duracion="${s.duracion}" style="color: #fff !important">${s.servicio}</option>`;
             });
             $('#filtro-servicio')
                 .empty()
                 .append(html)
                 .prop('disabled', false);
         }).fail(function (xhr, status, error) {
-            console.log(error);
+            console.log(error, xhr.responseText);
             mostrarMensajeFlotante('Error al obtener servicios');
         });
-    }
-
-    function obtenerDisponibilidadEspecialista(idespecialista) {
-        return $.get(baseurl + `controllers/Disponibilidad/DisponibilidadController.php?action=read&idespecialista=${idespecialista}`);
-    }
-
-    function obtenerCitas(idservicio, idespecialista, idarea, idsubarea) {
-        const params = new URLSearchParams({ action: 'read' });
-
-        if (idservicio) params.append('idservicio', idservicio);
-        if (idespecialista) params.append('idespecialista', idespecialista);
-        if (idarea) params.append('idarea', idarea);
-        if (idsubarea) params.append('idsubarea', idsubarea);
-
-        const url = baseurl + 'controllers/Citas/CitasController.php?' + params.toString();
-        console.log(url);
-        return $.get(url);
     }
 
     // ——— 2) actualizarEventosVisuales: usa horaInicioRaw / horaFinRaw ———
@@ -1026,7 +746,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     start: `${h.fecha}T${h.horaInicioRaw}`,
                     end: `${h.fecha}T${h.horaFinRaw}`,
                     display: 'background',
-                    classNames: ['fc-slot-custom-content'],
+                    classNames: ['fc-slot-custom-content', 'horario-seleccionado'],
                     extendedProps: { tipo: 'seleccionado' }
                 });
             });
@@ -1034,7 +754,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function refrescarCitas(idservicio, idespecialista, idarea, idsubarea) {
         // 2) Llamar con los cuatro parámetros en orden
-        obtenerCitas((idespecialista || selectedespecialista ? null : idservicio ?? selectedservicio), idespecialista ?? selectedespecialista, idarea ?? selectedarea, idsubarea ?? selectedsubarea)
+        api.obtenerCitas({
+            idservicio: (idespecialista || selectedespecialista ? null : idservicio ?? selectedservicio),
+            idespecialista: idespecialista ?? selectedespecialista,
+            idarea: (idespecialista || selectedespecialista ? null : idarea ?? selectedarea),
+            idsubarea: (idespecialista || selectedespecialista ? null : idsubarea ?? selectedsubarea)
+        })
             .then(function (citas) {
                 citasGlobales = citas;
                 procesarYMostrarCitas(citas);
@@ -1052,23 +777,34 @@ document.addEventListener('DOMContentLoaded', function () {
                 ev.remove();
             }
         });
-        // 2) Agrupar
+
+        // 2) Agrupar citas con la nueva función que tiene en cuenta solapamientos
         const citasAgrupadas = agruparCitasPorHorario(citas);
-        // 3) Añadir
-        Object.values(citasAgrupadas).forEach(grupo => {
-            if (grupo.length === 1) {
-                addCitaEvent(grupo[0]);
-            } else {
-                addMultiplesCitasEvent(grupo);
-            }
-        });
+
+        // 3) Añadir citas segun vista
+        if (selectedespecialista === '') {
+            // 1) Añadir citas agrupadas
+            Object.values(citasAgrupadas).forEach((grupo) => {
+                if (grupo.length === 1) {
+                    addCitaGeneralEvent(grupo[0]);
+                } else {
+                    addMultiplesCitasEvent(grupo);
+                }
+            });
+        } else {
+            // 2) Añadir citas individuales
+            citas.forEach(cita => {
+                addCitaEvent(cita);
+            });
+        }
     }
 
     function agruparCitasPorHorario(citas) {
         const grupos = {};
 
         citas.forEach(cita => {
-            const clave = `${cita.fecha}_${cita.hora_inicio}_${cita.hora_fin}`;
+            // Agrupar citas por fecha y hora de inicio
+            const clave = `${cita.fecha}_${cita.hora_inicio}`;
             if (!grupos[clave]) {
                 grupos[clave] = [];
             }
@@ -1086,7 +822,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const horaIni = formatearHora12h(horaIniRaw);
         const horaFin = formatearHora12h(horaFinRaw);
-        const nombre = `${cita.especialista_nombre} ${cita.especialista_apellidos}`;
+        const nombre = `${cita.paciente_nombres} ${cita.paciente_apellidos}`;
         const cssEstado = `cita-${estadosCita[cita.idestado]}`;
 
         calendar.addEvent({
@@ -1109,65 +845,116 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function addMultiplesCitasEvent(citas) {
-        const primera = citas[0];
-        const pad = n => String(n).padStart(2, '0');
-        const ini = primera.hora_inicio.slice(0, 5);
-        const fin = primera.hora_fin.slice(0, 5);
+    function addCitaGeneralEvent(cita) {
+        const horaIniRaw = cita.hora_inicio.slice(0, 5);
+        const horaFinRaw = cita.hora_fin.slice(0, 5);
+        //const cssEstado = `cita-${estadosCita[cita.idestado]}`;
 
-        const cuadrados = citas.map(cita => {
-            const estado = estadosCita[cita.idestado];
-            return `<div class="cita-cuadrado ${getColorClassByEstado(estado)}"></div>`;
-        }).join('');
+        // Crear el avatar para una cita individual
+        const avatar = crearImagenEspecialista(cita);
 
-        const contenido = `<div class="cuadrados-container">${cuadrados}</div>`;
+        // Colocar el avatar dentro del título
+        const titleWithAvatar = avatar.outerHTML;
 
         calendar.addEvent({
-            title: contenido,
-            start: `${primera.fecha}T${ini}`,
-            end: `${primera.fecha}T${fin}`,
-            classNames: ['fc-slot-custom-content', 'multiples-citas-evento'],
-            extendedProps: { tipo: 'cita-existente', multiple: true }
+            title: titleWithAvatar,
+            start: `${cita.fecha}T${horaIniRaw}`,
+            end: `${cita.fecha}T${horaFinRaw}`,
+            classNames: ['fc-slot-custom-content', 'cita-agendada-evento'],
+            extendedProps: {
+                cita: cita,
+                tipo: 'cita-existente',
+                citaId: cita.idcita
+            }
         });
     }
 
-    function getColorClassByEstado(estado) {
-        const coloresEstado = {
-            'pendiente': 'cuadrado-pendiente',
-            'confirmada': 'cuadrado-confirmada',
-            'completada': 'cuadrado-completada',
-            'cancelada': 'cuadrado-cancelada',
-            'no-asistio': 'cuadrado-no-asistio',
-            'reprogramada': 'cuadrado-reprogramada'
-        };
+    function addMultiplesCitasEvent(citas) {
+        // Obtener la primera cita para usar su hora de inicio y fin
+        const primera = citas[0];
+        const ini = primera.hora_inicio.slice(0, 5);
+        const fin = primera.hora_fin.slice(0, 5);
 
-        return coloresEstado[estado] || 'cuadrado-default';
+        // Crear un stack con todos los avatares de las citas (tanto 30 min como 60 min)
+        const stack = crearStackAvatares(citas);
+
+        // Crear un solo evento para todas las citas agrupadas
+        calendar.addEvent({
+            title: stack.outerHTML,
+            start: `${primera.fecha}T${ini}`,
+            end: `${primera.fecha}T${fin}`,
+            classNames: ["fc-slot-custom-content", "multiples-citas-evento"],
+            extendedProps: {
+                tipo: "cita-existente",
+                multiple: true,
+                citas: citas,
+            },
+        });
     }
 
-    // Helpers de fechas
-    function dateStrToDate(str) {
-        return new Date(str + 'T00:00:00');
+    function crearStackAvatares(citas, maxVisible = 4) {
+        const stack = document.createElement('div');
+        stack.className = 'avatar-stack';
+
+        citas.slice(0, maxVisible).forEach(cita => {
+            const img = crearImagenEspecialista(cita);
+            stack.appendChild(img);
+        });
+
+        const extraCount = citas.length - maxVisible;
+        if (extraCount > 0) {
+            const extra = document.createElement('div');
+            extra.className = 'avatar extra';
+            extra.textContent = `+${extraCount}`;
+            stack.appendChild(extra);
+        }
+        return stack;
     }
-    function dateToDateStr(date) {
-        return date.toISOString().slice(0, 10);
+
+    function crearImagenEspecialista(cita) {
+        const img = document.createElement('img');
+        img.src = cita.especialista_foto;
+        img.className = 'avatar';
+        img.dataset.id = cita.idcita;
+        return img;
     }
-    function dayBefore(str) {
-        const d = dateStrToDate(str);
-        d.setDate(d.getDate() - 1);
-        return dateToDateStr(d);
-    }
-    function dayAfter(str) {
-        const d = dateStrToDate(str);
-        d.setDate(d.getDate() + 1);
-        return dateToDateStr(d);
-    }
-    function buildDate(fechaStr, horaStr) {
-        return new Date(`${fechaStr}T${horaStr}:00`);
+
+    function obtenerIntervalos(calendar, selectElementId) {
+        const slotMinTime = calendar?.view?.calendar?.options?.slotMinTime || "08:00:00";
+        const slotMaxTime = calendar?.view?.calendar?.options?.slotMaxTime || "18:00:00";
+        const slotLabelInterval = calendar?.view?.calendar?.options?.slotLabelInterval?.minutes || 30;
+
+        const [hInicio, mInicio] = slotMinTime.split(":").map(Number);
+        const [hFin, mFin] = slotMaxTime.split(":").map(Number);
+
+        const start = new Date();
+        start.setHours(hInicio, mInicio, 0, 0);
+
+        const end = new Date();
+        end.setHours(hFin, mFin, 0, 0);
+
+        const intervalos = [];
+
+        while (start < end) {
+            const horas = start.getHours().toString().padStart(2, "0");
+            const minutos = start.getMinutes().toString().padStart(2, "0");
+
+            const value = `${horas}:${minutos}`;
+            const text = new Intl.DateTimeFormat("es-PE", {
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true
+            }).format(start);
+
+            intervalos.push({ text, value });
+            start.setMinutes(start.getMinutes() + slotLabelInterval);
+        }
+        return intervalos;
     }
 
     // 1. Carga y normalización de la disponibilidad
     function actualizarDisponibilidadEspecialista() {
-        obtenerDisponibilidadEspecialista(selectedespecialista)
+        api.obtenerDisponibilidadEspecialista(selectedespecialista)
             .then(data => {
                 disponibilidadEspecialista = data.map(d => ({
                     ...d,
@@ -1367,7 +1154,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 fecha.setDate(fecha.getDate() + 1);
             }
         });
-
         return eventos;
     }
 
@@ -1437,61 +1223,4 @@ document.addEventListener('DOMContentLoaded', function () {
             calendarmodal.style.display = 'none';
         }
     });
-
-    // Mensaje flotante si no hay especialista seleccionado
-    function mostrarMensajeFlotante(msg, exito = false) {
-        let div = document.getElementById('mensajeFlotante');
-        if (div) div.remove();
-        div = document.createElement('div');
-        div.id = 'mensajeFlotante';
-        div.className = 'mensaje-alert';
-        mensaje = document.createElement('div');
-        mensaje.className = 'my-3 alert ' + (exito ? 'alert-success' : 'alert-danger');
-        mensaje.textContent = msg;
-        div.appendChild(mensaje);
-        document.body.appendChild(div);
-        setTimeout(() => {
-            div.remove();
-        }, 2200);
-    }
-
-    // CSS para mensaje flotante
-    (function () {
-        if (!document.getElementById('mensaje-flotante-css')) {
-            const style = document.createElement('style');
-            style.id = 'mensaje-flotante-css';
-            style.innerHTML = `#mensajeFlotante { animation: fadeInOut 2.2s; } @keyframes fadeInOut { 0 % { opacity: 0; } 10 % { opacity: 1; } 90 % { opacity: 1; } 100 % { opacity: 0; } } `;
-            document.head.appendChild(style);
-        }
-    })();
-
-});
-
-// Función para formatear hora a hh:mm a
-function formatearHora12h(hora24) {
-    if (!hora24) return '';
-    let [h, m] = hora24.split(':');
-    h = parseInt(h);
-    let suf = h >= 12 ? 'pm' : 'am';
-    h = h % 12;
-    if (h === 0) h = 12;
-    return `${h.toString().padStart(2, '0')}:${m} ${suf} `;
-}
-
-// Sumar 30 minutos a una hora en formato hh:mm
-function sumarMinutos(hora, minutos) {
-    let [h, m] = hora.split(':').map(Number);
-    let date = new Date(2000, 0, 1, h, m);
-    date.setMinutes(date.getMinutes() + minutos);
-    let nh = date.getHours().toString().padStart(2, '0');
-    let nm = date.getMinutes().toString().padStart(2, '0');
-    return `${nh}:${nm} `;
-}
-
-// Personaliza el renderizado de los eventos para permitir HTML en el título
-calendar.setOption('eventContent', function (arg) {
-    if (arg.event.classNames.includes('fc-slot-custom-content')) {
-        return { html: arg.event.title };
-    }
-    // ...otros casos si es necesario...
-});     
+});   

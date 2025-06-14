@@ -114,10 +114,11 @@ class EspecialistaModel
                 u.telefono AS telefono_especialista,
                 u.correo AS correo_especialista,
                 u.usuario AS nombre_usuario,
+                u.foto AS foto_especialista,
                 a.area AS nombre_area,
                 sa.subarea AS nombre_subarea
             FROM especialistas e
-            INNER JOIN usuarios u ON e.idusuario = u.idusuario
+            INNER JOIN usuarios u ON e.idespecialista = u.idusuario
             INNER JOIN areas a ON e.idarea = a.idarea
             LEFT JOIN subareas sa ON e.idsubarea = sa.idsubarea
             WHERE e.idespecialista = :idespecialista";
@@ -145,7 +146,15 @@ class EspecialistaModel
   public function obtenerEspecialistaPorArea($idarea)
   {
     try {
-      $sql = "SELECT e.*, u.nombres AS nom_especialista, u.apellidos AS ape_especialista FROM especialistas e
+      $sql = "SELECT e.*,
+      u.nombres AS nom_especialista,
+      u.apellidos AS ape_especialista,
+      u.dni AS dni_especialista,
+      u.telefono AS telefono_especialista,
+      u.correo AS correo_especialista,
+      u.usuario AS nombre_usuario,
+      u.foto AS foto_especialista,
+      FROM especialistas e
         INNER JOIN usuarios u ON e.idespecialista = u.idusuario
         WHERE e.idarea = :idarea";
       $stmt = $this->db->prepare($sql);
@@ -160,7 +169,15 @@ class EspecialistaModel
   public function obtenerEspecialistaPorAreayServicio($idarea, $idservicio)
   {
     try {
-      $sql = "SELECT e.*, u.nombres AS nom_especialista, u.apellidos AS ape_especialista FROM especialistas e
+      $sql = "SELECT e.*,
+      u.nombres AS nom_especialista,
+      u.apellidos AS ape_especialista,
+      u.dni AS dni_especialista,
+      u.telefono AS telefono_especialista,
+      u.correo AS correo_especialista,
+      u.usuario AS nombre_usuario,
+      u.foto AS foto_especialista,
+      FROM especialistas e
         INNER JOIN usuarios u ON e.idespecialista = u.idusuario
         WHERE e.idarea = :idarea AND e.idservicio = :idservicio";
       $stmt = $this->db->prepare($sql);

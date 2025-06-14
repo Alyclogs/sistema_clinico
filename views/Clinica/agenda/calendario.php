@@ -47,7 +47,7 @@ $idusuario = $_SESSION['idusuario'];
                                 <div class="page-header w-100 d-flex justify-content-between align-items-center my-3">
                                     <div class="filtros d-flex align-items-center">
                                         <label for="filtro-servicio" class="filtro-title">Servicio</label>
-                                        <select class="form-select filtro filtro-not-selected" id="filtro-servicio" style="background-color: #ff7e00; color: #fff">
+                                        <select class="form-select filtro filtro-not-selected" id="filtro-servicio" style="background-color: #ff7e00; color: #fff !important;">
                                         </select>
                                         <label for="filtro-area" class="filtro-title">Área</label>
                                         <select class="form-select filtro filtro-not-selected" id="filtro-area">
@@ -77,7 +77,7 @@ $idusuario = $_SESSION['idusuario'];
                                                 <div id="mini-calendar"></div>
                                             </div>
                                         </div>
-                                        <div class="calendar-nav d-flex align-items-center gap-2">
+                                        <div class="calendar-nav d-flex align-items-center gap-2" style="max-width: 220px;">
                                             <button id="prev-week" class="btn btn-light btn-sm"><!-- Generator: Adobe Illustrator 25.2.3, SVG Export Plug-In  -->
                                                 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="6.66px"
                                                     height="7.59px" viewBox="0 0 6.66 7.59" style="overflow:visible;enable-background:new 0 0 6.66 7.59;" xml:space="preserve">
@@ -92,7 +92,7 @@ $idusuario = $_SESSION['idusuario'];
 	C-0.06,3.63-0.06,3.96,0.17,4.09z" />
                                                 </svg>
                                             </button>
-                                            <div id="calendar-dates" style="font-weight: bold; min-width: 220px; text-align: center;"></div>
+                                            <div id="calendar-dates" style="font-weight: bold; text-align: center;"></div>
                                             <button id="next-week" class="btn btn-light btn-sm">
                                                 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="6.66px"
                                                     height="7.59px" viewBox="0 0 6.66 7.59" style="overflow:visible;enable-background:new 0 0 6.66 7.59;" xml:space="preserve">
@@ -223,7 +223,11 @@ $idusuario = $_SESSION['idusuario'];
         C8.72,9.01,8.61,9.06,8.48,9.06z" />
                                                 </g>
                                             </svg>
-                                            <input type="time" id="nuevoHorarioHora" />
+                                            <div class="horario-input">
+                                                <input class="horario-sel" id="nuevoHorarioHora"></input>
+                                                <i class="bi bi-caret-down-fill" id="mostrarHorarios"></i>
+                                                <div class="resultado-pacientes" id="resultadoHorarios"></div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="footer-modal">
@@ -259,6 +263,6 @@ $idusuario = $_SESSION['idusuario'];
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../../../assets/js/calendar.js"></script>
+<script type="module" src="../../../assets/js/calendario/index.js"></script>
 
 </html>

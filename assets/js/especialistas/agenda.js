@@ -5,8 +5,6 @@ import { buildCalendar, buildMiniCalendar } from '../utils/calendar.js';
 
 const calendarEl = document.getElementById('calendar');
 const miniCalendarEl = document.getElementById('mini-calendar');
-const calendar = buildCalendar(calendarEl);
-const miniCalendar = buildMiniCalendar(miniCalendarEl);
 
 const baseurl = "http://localhost/SistemaClinico/";
 let selectedespecialista = '';
@@ -45,6 +43,9 @@ function crearCita(cita) {
 
 document.addEventListener('DOMContentLoaded', function () {
     const header = document.querySelector('.cabecera');
+    const calendar = buildCalendar(calendarEl);
+    const miniCalendar = buildMiniCalendar(miniCalendarEl);
+
     $.get('./menuPerfil.php', function (html) {
         header.innerHTML = html;
         selectedespecialista = document.getElementById('idespecialista').value;

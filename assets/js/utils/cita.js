@@ -1,4 +1,123 @@
+import { addEvent, removeEvents } from "./calendar";
 export const estadosCita = { '3': 'pendiente', '4': 'cancelado', '5': 'anulado' }
+
+export function procesarYMostrarCitas(citas, idespecialista) {
+    // 1) Remover eventos previos
+    removeEvents('cita-existente')
+
+    // 2) Agrupar citas con la nueva función que tiene en cuenta solapamientos
+    const citasAgrupadas = agruparCitasPorHorario(citas);
+
+    // 3) Añadir citas segun vista
+    if (idespecialista === '') {
+        // 1) Añadir citas agrupadas
+        Object.values(citasAgrupadas).forEach((grupo) => {
+            if (grupo.length === 1) {
+                addCitaGeneralEvent(grupo[0]);
+            } else {
+                addMultiplesCitasEvent(grupo);
+            }
+        });
+    } else {
+        // 2) Añadir citas individuales
+        citas.forEach(cita => {
+            addCitaEvent(cita);
+        });
+    }
+}
+
+export function agruparCitasPorHorario(citas) {
+    const grupos = {};
+
+    citas.forEach(cita => {
+        // Agrupar citas por fecha y hora de inicio
+        const clave = `${cita.fecha}_${cita.hora_inicio}`;
+        if (!grupos[clave]) {
+            grupos[clave] = [];
+        }
+        grupos[clave].push(cita);
+    });
+
+    return grupos;
+}
+
+export function addCitaEvent(cita) {
+    const pad = n => String(n).padStart(2, '0');
+    // recortamos a HH:mm
+    const horaIniRaw = cita.hora_inicio.slice(0, 5);
+    const horaFinRaw = cita.hora_fin.slice(0, 5);
+
+    const horaIni = formatearHora12h(horaIniRaw);
+    const horaFin = formatearHora12h(horaFinRaw);
+    const nombre = `${cita.paciente_nombres} ${cita.paciente_apellidos}`;
+    const cssEstado = `cita-${estadosCita[cita.idestado]}`;
+
+    addEvent({
+        title: `<div class="evento-contenedor">
+        <div class="nombre-arriba"><strong>${nombre}</strong></div>
+        <div class="svg-horario">
+          <span class='mi-check-clase'>${getSVGCita(cssEstado)}</span>
+          <span class="horario-agendado">${horaIni} - ${horaFin}</span>
+        </div>
+      </div>`,
+        start: `${cita.fecha}T${horaIniRaw}`,
+        end: `${cita.fecha}T${horaFinRaw}`,
+        // NO background para que se muestre como evento normal
+        classNames: ['fc-slot-custom-content', 'cita-agendada-evento', cssEstado],
+        extendedProps: {
+            cita: cita,
+            tipo: 'cita-existente',
+            citaId: cita.id
+        }
+    });
+}
+
+export function addCitaGeneralEvent(cita) {
+    const horaIniRaw = cita.hora_inicio.slice(0, 5);
+    const horaFinRaw = cita.hora_fin.slice(0, 5);
+    //const cssEstado = `cita-${estadosCita[cita.idestado]}`;
+
+    // Crear el avatar para una cita individual
+    const avatar = crearImagenEspecialista(cita);
+
+    // Colocar el avatar dentro del título
+    const titleWithAvatar = avatar.outerHTML;
+
+    addEvent({
+        title: titleWithAvatar,
+        start: `${cita.fecha}T${horaIniRaw}`,
+        end: `${cita.fecha}T${horaFinRaw}`,
+        classNames: ['fc-slot-custom-content', 'cita-agendada-evento'],
+        extendedProps: {
+            cita: cita,
+            tipo: 'cita-existente',
+            citaId: cita.idcita
+        }
+    });
+}
+
+export function addMultiplesCitasEvent(citas) {
+    // Obtener la primera cita para usar su hora de inicio y fin
+    const primera = citas[0];
+    const ini = primera.hora_inicio.slice(0, 5);
+    const fin = primera.hora_fin.slice(0, 5);
+
+    // Crear un stack con todos los avatares de las citas (tanto 30 min como 60 min)
+    const stack = crearStackAvatares(citas);
+
+    // Crear un solo evento para todas las citas agrupadas
+    addEvent({
+        title: stack.outerHTML,
+        start: `${primera.fecha}T${ini}`,
+        end: `${primera.fecha}T${fin}`,
+        classNames: ["fc-slot-custom-content", "multiples-citas-evento"],
+        extendedProps: {
+            tipo: "cita-existente",
+            multiple: true,
+            citas: citas,
+        },
+    });
+}
 
 function getSVGPendiente(width = 11.15, height = 11.15) {
     return `
@@ -134,5 +253,32 @@ ${horario}</div>
             ocultarTooltip();
         }, 1000)
     })
+}
+
+export function crearStackAvatares(citas, maxVisible = 4) {
+    const stack = document.createElement('div');
+    stack.className = 'avatar-stack';
+
+    citas.slice(0, maxVisible).forEach(cita => {
+        const img = crearImagenEspecialista(cita);
+        stack.appendChild(img);
+    });
+
+    const extraCount = citas.length - maxVisible;
+    if (extraCount > 0) {
+        const extra = document.createElement('div');
+        extra.className = 'avatar extra';
+        extra.textContent = `+${extraCount}`;
+        stack.appendChild(extra);
+    }
+    return stack;
+}
+
+export function crearImagenEspecialista(cita) {
+    const img = document.createElement('img');
+    img.src = cita.especialista_foto;
+    img.className = 'avatar';
+    img.dataset.id = cita.idcita;
+    return img;
 }
 

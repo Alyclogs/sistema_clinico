@@ -1,12 +1,14 @@
+let calendar;
+let miniCalendar;
+
 export const buildCalendar = (calendarEl) => {
-    const calendar = new FullCalendar.Calendar(calendarEl, {
+    calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: "timeGridWeek",
         slotDuration: "00:30:00",
         slotLabelInterval: "00:30:00",
         slotMinTime: "09:00:00",
         slotMaxTime: "18:00:00",
         selectable: true,
-        //nowIndicator: true,
         editable: true,
         locale: "es",
         headerToolbar: false,
@@ -14,7 +16,7 @@ export const buildCalendar = (calendarEl) => {
         slotLabelFormat: {
             hour: "2-digit",
             minute: "2-digit",
-            hour12: false, // usa true si quieres formato AM/PM
+            hour12: false,
         },
         dayHeaderFormat: {
             weekday: "long",
@@ -25,62 +27,36 @@ export const buildCalendar = (calendarEl) => {
                 console.log("Evento múltiple clickeado:", info.event);
             }
             console.log("Evento individual clickeado:", info.event);
-        },
-        /*
-        eventMouseEnter: function (info) {
-            const event = info.event;
-    
-            if (event.extendedProps.multiple && event.extendedProps.citas) {
-                const cuadrados = info.el.querySelectorAll('.avatar');
-    
-                cuadrados.forEach(cuadrado => {
-                    cuadrado.addEventListener('mouseenter', function () {
-                        const citaId = this.dataset.id;
-                        const cita = event.extendedProps.citas.find(c => c.idcita == citaId);
-                        if (cita) {
-                            mostrarTooltipCita(cita, this);
-                        }
-                    });
-    
-                    cuadrado.addEventListener('mouseleave', function () {
-                        setTimeout(() => {
-                            ocultarTooltip();
-                        }, 1000)
-                    });
-                });
-            } else if (event.extendedProps.cita && event.classNames.includes('cita-agendada-evento')) {
-                mostrarTooltipCita(event.extendedProps.cita, info.el);
-            }
-        },
-        eventMouseLeave: function (info) {
-            setTimeout(() => {
-                ocultarTooltip();
-            }, 1500)
         }
-            */
     });
+
     calendar.on('datesSet', function () {
-        updateCalendarDateRange(calendar);
+        updateCalendarDateRange();
     });
-    // Personaliza el renderizado de los eventos para permitir HTML en el título
+
     calendar.setOption('eventContent', function (arg) {
-        if (arg.event.classNames.includes('fc-slot-custom-content') || arg.event.classNames.includes('multiples-citas-evento')) {
+        if (
+            arg.event.classNames.includes('fc-slot-custom-content') ||
+            arg.event.classNames.includes('multiples-citas-evento')
+        ) {
             return { html: arg.event.title };
         }
     });
-    document.getElementById('prev-week').addEventListener('click', function () {
+
+    document.getElementById('prev-week').addEventListener('click', () => {
         calendar.prev();
-        updateCalendarDateRange(calendar);
+        updateCalendarDateRange();
     });
 
-    document.getElementById('next-week').addEventListener('click', function () {
+    document.getElementById('next-week').addEventListener('click', () => {
         calendar.next();
-        updateCalendarDateRange(calendar);
+        updateCalendarDateRange();
     });
-    return calendar;
-}
+    console.log(calendar);
+};
 
-export function updateCalendarDateRange(calendar) {
+export function updateCalendarDateRange() {
+    if (!calendar) return;
     const start = calendar.view.activeStart;
     const end = calendar.view.activeEnd;
 
@@ -90,26 +66,49 @@ export function updateCalendarDateRange(calendar) {
         year: "numeric",
     };
     const startStr = start.toLocaleDateString("es-ES", options).toUpperCase();
-    const endStr = new Date(end - 1)
-        .toLocaleDateString("es-ES", options)
-        .toUpperCase();
+    const endStr = new Date(end - 1).toLocaleDateString("es-ES", options).toUpperCase();
 
-    document.getElementById(
-        "calendar-dates"
-    ).textContent = `${startStr} - ${endStr}`;
+    document.getElementById("calendar-dates").textContent = `${startStr} - ${endStr}`;
 }
 
-export const buildMiniCalendar = (miniCalendarEl) => new FullCalendar.Calendar(miniCalendarEl, {
-    initialView: "dayGridMonth",
-    locale: "es",
-    headerToolbar: {
-        left: "prev",
-        center: "title",
-        right: "next",
-    },
-    selectable: true,
-    dateClick: function (info) {
-        calendar.gotoDate(info.dateStr);
-        updateCalendarDateRange();
-    },
-});
+export const buildMiniCalendar = (miniCalendarEl) => {
+    miniCalendar = new FullCalendar.Calendar(miniCalendarEl, {
+        initialView: "dayGridMonth",
+        locale: "es",
+        headerToolbar: {
+            left: "prev",
+            center: "title",
+            right: "next",
+        },
+        selectable: true,
+        dateClick: function (info) {
+            if (calendar) {
+                calendar.gotoDate(info.dateStr);
+                updateCalendarDateRange();
+            }
+        },
+    });
+};
+
+export function addEvent(event) {
+    if (calendar) {
+        calendar.addEvent(event);
+    }
+}
+
+export function removeEvents(tipo) {
+    if (!calendar) return;
+    calendar.getEvents().forEach(ev => {
+        if (ev.extendedProps?.tipo === tipo) {
+            ev.remove();
+        }
+    });
+}
+
+export function setOption(option, value) {
+    if (calendar) {
+        calendar.setOption(option, value);
+    }
+}
+
+export { calendar, miniCalendar };

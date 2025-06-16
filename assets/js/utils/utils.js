@@ -14,13 +14,13 @@ export function mostrarMensajeFlotante(msg, exito = false) {
     }, 2200);
 }
 
-function getInitials(nombre, apellido) {
+export function getInitials(nombre, apellido) {
     let n = nombre ? nombre.trim()[0] : '';
     let a = apellido ? apellido.trim()[0] : '';
     return (n + a).toUpperCase();
 }
 
-function stringToColor(str) {
+export function stringToColor(str) {
     // Simple hash to color
     let hash = 0;
     for (let i = 0; i < str.length; i++) {

@@ -1,37 +1,32 @@
 import api from '../utils/api.js';
 import { mostrarMensajeFlotante } from '../utils/utils.js';
-import { formatearHora12h, horaAHoraMinutos, calcularEdad, buildDate, dateStrToDate, dateToDateStr, dayAfter, dayBefore } from '../utils/date.js';
-import { getSVGCita, mostrarTooltipCita, ocultarTooltip, estadosCita } from '../utils/cita.js';
-import { buildMiniCalendar, buildCalendar, updateCalendarDateRange } from '../utils/calendar.js';
-
-const calendarEl = document.getElementById('calendar');
-const miniCalendarEl = document.getElementById('mini-calendar');
-const calendar = buildCalendar(calendarEl);
-const miniCalendar = buildMiniCalendar(miniCalendarEl);
+import { formatearHora12h, calcularEdad, buildDate } from '../utils/date.js';
+import { procesarYMostrarCitas } from '../utils/cita.js';
+import { buildMiniCalendar, buildCalendar, updateCalendarDateRange, removeEvents, setOption, buildCalendar, buildMiniCalendar, calendar, miniCalendar } from '../utils/calendar.js';
 
 const baseurl = "http://localhost/SistemaClinico/";
 var selectedservicio = "1";
 var selectedarea = "";
 var selectedsubarea = "";
 var selectedespecialista = "";
-let lastEspecialista = null;
-let horariosPorEspecialista = {};
 let horariosSeleccionados = [];
 let servicioDuracion = 30;   // valor por defecto
 let subareaDuracion = 30;
 let servicioSeleccionado = 'CONSULTA';
 let especialistaSeleccionado = '';
 let disponibilidadEspecialista = [];
-let citasGlobales = [];
 
 document.addEventListener('DOMContentLoaded', function () {
+    const calendarEl = document.getElementById('calendar');
+    const miniCalendarEl = document.getElementById('mini-calendar');
+    buildCalendar(calendarEl);
+    buildMiniCalendar(miniCalendarEl);
+
     obtenerServicios();
     refrescarCitas();
-    //refrescarCitas(false);
 
-    updateCalendarDateRange(calendar);
-    resaltarBloqueoAlmuerzo();
     calendar.render();
+    updateCalendarDateRange(calendar);
 
     function buscarSubareaPorArea(idArea) {
         $("#filtro-subarea").empty().append('<option value="" disabled selected>Seleccionar</option>').prop("disabled", true);
@@ -192,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (selectedespecialista) {
             //selectedservicio = '';
             servicioSeleccionado = '';
-            actualizarDisponibilidadEspecialista();
+            disponibilidadEspecialista = actualizarDisponibilidadEspecialista();
             refrescarCitas();
             actualizarEventosVisuales(true);
             lastEspecialista = selectedespecialista;
@@ -379,7 +374,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         // Mostrar/ocultar mensaje y body según cantidad de horarios
         const noHorarios = document.querySelector('.no-horarios-selected');
-        const subtituloCitas = document.getElementById('.subCitasSeleccionadas');
+        const subtituloCitas = document.getElementById('subCitasSeleccionadas');
         const modalCitaBody = document.querySelector('.modal-cita-body');
         const agregarMas = document.querySelector('.agregar-mas');
         const horariosSeleccionadosDiv = document.getElementById('horariosSeleccionados');
@@ -622,9 +617,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 idsubarea: idSubarea
             };
 
-            // Mostrar los datos en la consola
-            console.log('Datos que se enviarán:', data);
-
             // Enviar los datos con $.post
             $.post(baseurl + 'controllers/Citas/CitasController.php?action=create', { data: JSON.stringify(data) }, function (response) {
                 if (response.success) {
@@ -730,11 +722,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // ——— 2) actualizarEventosVisuales: usa horaInicioRaw / horaFinRaw ———
     function actualizarEventosVisuales(render = true) {
         // 1) Limpia sólo los eventos del tipo 'seleccionado'
-        calendar.getEvents().forEach(ev => {
-            if (ev.extendedProps && ev.extendedProps.tipo === 'seleccionado') {
-                ev.remove();
-            }
-        });
+        removeEvents('seleccionado');
         if (!render) return;
 
         // 2) Añade cada bloque con su horaInicioRaw/horaFinRaw exacta
@@ -761,8 +749,7 @@ document.addEventListener('DOMContentLoaded', function () {
             idsubarea: (idespecialista || selectedespecialista ? null : idsubarea ?? selectedsubarea)
         })
             .then(function (citas) {
-                citasGlobales = citas;
-                procesarYMostrarCitas(citas);
+                procesarYMostrarCitas(calendar, citas);
             })
             .catch((e) => {
                 console.log(e);
@@ -770,156 +757,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
-    function procesarYMostrarCitas(citas) {
-        // 1) Eliminar citas previas
-        calendar.getEvents().forEach(ev => {
-            if (ev.extendedProps?.tipo === 'cita-existente') {
-                ev.remove();
-            }
-        });
-
-        // 2) Agrupar citas con la nueva función que tiene en cuenta solapamientos
-        const citasAgrupadas = agruparCitasPorHorario(citas);
-
-        // 3) Añadir citas segun vista
-        if (selectedespecialista === '') {
-            // 1) Añadir citas agrupadas
-            Object.values(citasAgrupadas).forEach((grupo) => {
-                if (grupo.length === 1) {
-                    addCitaGeneralEvent(grupo[0]);
-                } else {
-                    addMultiplesCitasEvent(grupo);
-                }
-            });
-        } else {
-            // 2) Añadir citas individuales
-            citas.forEach(cita => {
-                addCitaEvent(cita);
-            });
-        }
-    }
-
-    function agruparCitasPorHorario(citas) {
-        const grupos = {};
-
-        citas.forEach(cita => {
-            // Agrupar citas por fecha y hora de inicio
-            const clave = `${cita.fecha}_${cita.hora_inicio}`;
-            if (!grupos[clave]) {
-                grupos[clave] = [];
-            }
-            grupos[clave].push(cita);
-        });
-
-        return grupos;
-    }
-
-    function addCitaEvent(cita) {
-        const pad = n => String(n).padStart(2, '0');
-        // recortamos a HH:mm
-        const horaIniRaw = cita.hora_inicio.slice(0, 5);
-        const horaFinRaw = cita.hora_fin.slice(0, 5);
-
-        const horaIni = formatearHora12h(horaIniRaw);
-        const horaFin = formatearHora12h(horaFinRaw);
-        const nombre = `${cita.paciente_nombres} ${cita.paciente_apellidos}`;
-        const cssEstado = `cita-${estadosCita[cita.idestado]}`;
-
-        calendar.addEvent({
-            title: `<div class="evento-contenedor">
-        <div class="nombre-arriba"><strong>${nombre}</strong></div>
-        <div class="svg-horario">
-          <span class='mi-check-clase'>${getSVGCita(cssEstado)}</span>
-          <span class="horario-agendado">${horaIni} - ${horaFin}</span>
-        </div>
-      </div>`,
-            start: `${cita.fecha}T${horaIniRaw}`,
-            end: `${cita.fecha}T${horaFinRaw}`,
-            // NO background para que se muestre como evento normal
-            classNames: ['fc-slot-custom-content', 'cita-agendada-evento', cssEstado],
-            extendedProps: {
-                cita: cita,
-                tipo: 'cita-existente',
-                citaId: cita.id
-            }
-        });
-    }
-
-    function addCitaGeneralEvent(cita) {
-        const horaIniRaw = cita.hora_inicio.slice(0, 5);
-        const horaFinRaw = cita.hora_fin.slice(0, 5);
-        //const cssEstado = `cita-${estadosCita[cita.idestado]}`;
-
-        // Crear el avatar para una cita individual
-        const avatar = crearImagenEspecialista(cita);
-
-        // Colocar el avatar dentro del título
-        const titleWithAvatar = avatar.outerHTML;
-
-        calendar.addEvent({
-            title: titleWithAvatar,
-            start: `${cita.fecha}T${horaIniRaw}`,
-            end: `${cita.fecha}T${horaFinRaw}`,
-            classNames: ['fc-slot-custom-content', 'cita-agendada-evento'],
-            extendedProps: {
-                cita: cita,
-                tipo: 'cita-existente',
-                citaId: cita.idcita
-            }
-        });
-    }
-
-    function addMultiplesCitasEvent(citas) {
-        // Obtener la primera cita para usar su hora de inicio y fin
-        const primera = citas[0];
-        const ini = primera.hora_inicio.slice(0, 5);
-        const fin = primera.hora_fin.slice(0, 5);
-
-        // Crear un stack con todos los avatares de las citas (tanto 30 min como 60 min)
-        const stack = crearStackAvatares(citas);
-
-        // Crear un solo evento para todas las citas agrupadas
-        calendar.addEvent({
-            title: stack.outerHTML,
-            start: `${primera.fecha}T${ini}`,
-            end: `${primera.fecha}T${fin}`,
-            classNames: ["fc-slot-custom-content", "multiples-citas-evento"],
-            extendedProps: {
-                tipo: "cita-existente",
-                multiple: true,
-                citas: citas,
-            },
-        });
-    }
-
-    function crearStackAvatares(citas, maxVisible = 4) {
-        const stack = document.createElement('div');
-        stack.className = 'avatar-stack';
-
-        citas.slice(0, maxVisible).forEach(cita => {
-            const img = crearImagenEspecialista(cita);
-            stack.appendChild(img);
-        });
-
-        const extraCount = citas.length - maxVisible;
-        if (extraCount > 0) {
-            const extra = document.createElement('div');
-            extra.className = 'avatar extra';
-            extra.textContent = `+${extraCount}`;
-            stack.appendChild(extra);
-        }
-        return stack;
-    }
-
-    function crearImagenEspecialista(cita) {
-        const img = document.createElement('img');
-        img.src = cita.especialista_foto;
-        img.className = 'avatar';
-        img.dataset.id = cita.idcita;
-        return img;
-    }
-
-    function obtenerIntervalos(calendar, selectElementId) {
+    function obtenerIntervalos(calendar) {
         const slotMinTime = calendar?.view?.calendar?.options?.slotMinTime || "08:00:00";
         const slotMaxTime = calendar?.view?.calendar?.options?.slotMaxTime || "18:00:00";
         const slotLabelInterval = calendar?.view?.calendar?.options?.slotLabelInterval?.minutes || 30;
@@ -950,227 +788,6 @@ document.addEventListener('DOMContentLoaded', function () {
             start.setMinutes(start.getMinutes() + slotLabelInterval);
         }
         return intervalos;
-    }
-
-    // 1. Carga y normalización de la disponibilidad
-    function actualizarDisponibilidadEspecialista() {
-        api.obtenerDisponibilidadEspecialista(selectedespecialista)
-            .then(data => {
-                disponibilidadEspecialista = data.map(d => ({
-                    ...d,
-                    es_excepcion: d.es_excepcion === '1',
-                    estado: d.estado ? d.estado.trim().toLowerCase() : null,
-                    dia: d.dia.toLowerCase()
-                }));
-                actualizarBusinessHours();
-                if (!disponibilidadEspecialista.length) {
-                    mostrarMensajeFlotante("Especialista sin disponibilidad");
-                }
-            });
-    }
-
-    function actualizarBusinessHours() {
-        const diasMap = {
-            domingo: 0, lunes: 1, martes: 2, miércoles: 3,
-            jueves: 4, viernes: 5, sábado: 6
-        };
-        const bh = [];
-
-        // 1. Separar registros
-        const regulares = disponibilidadEspecialista.filter(d => !d.es_excepcion);
-        const cambios = disponibilidadEspecialista.filter(d => d.es_excepcion && d.estado === 'cambio de horario');
-        const bloqueosTotales = disponibilidadEspecialista.filter(d => d.es_excepcion && d.estado === 'sin disponibilidad');
-
-        // 2. Agrupar excepciones por día
-        const bloqueosPorDia = {};
-        bloqueosTotales.forEach(d => {
-            (bloqueosPorDia[d.dia] = bloqueosPorDia[d.dia] || []).push(d);
-        });
-        const cambiosPorDia = {};
-        cambios.forEach(d => {
-            (cambiosPorDia[d.dia] = cambiosPorDia[d.dia] || []).push(d);
-        });
-
-        // 3. Construir franjas “regulares” descontando ambos tipos de excepción
-        regulares.forEach(d => {
-            let segmentos = [{ start: d.fechainicio, end: d.fechafin }];
-
-            // restar bloqueos totales
-            (bloqueosPorDia[d.dia] || []).forEach(exc => {
-                segmentos = segmentos.flatMap(seg => recortarSegmento(seg, exc.fechainicio, exc.fechafin));
-            });
-
-            // restar cambios de horario
-            (cambiosPorDia[d.dia] || []).forEach(exc => {
-                segmentos = segmentos.flatMap(seg => recortarSegmento(seg, exc.fechainicio, exc.fechafin));
-            });
-
-            // añadir cada segmento resultante
-            segmentos.forEach(seg => {
-                bh.push({
-                    daysOfWeek: [diasMap[d.dia]],
-                    startTime: d.horainicio.slice(0, 5),
-                    endTime: d.horafin.slice(0, 5),
-                    startRecur: seg.start,
-                    endRecur: seg.end
-                });
-            });
-        });
-
-        // 4. Añadir las franjas de cambio de horario tal cual
-        cambios.forEach(d => {
-            bh.push({
-                daysOfWeek: [diasMap[d.dia]],
-                startTime: d.horainicio.slice(0, 5),
-                endTime: d.horafin.slice(0, 5),
-                startRecur: d.fechainicio,
-                endRecur: d.fechafin
-            });
-        });
-
-        // 5. Aplicar y refrescar almuerzo
-        calendar.setOption("businessHours", bh.length ? bh : {
-            daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-            startTime: '00:00',
-            endTime: '00:00'
-        });
-        resaltarBloqueoAlmuerzo();
-    }
-
-    // Función helper para recortar un segmento {start,end} con un intervalo [a,b]
-    function recortarSegmento(seg, a, b) {
-        if (seg.end < a || seg.start > b) {
-            // no solapan
-            return [seg];
-        }
-        const out = [];
-        if (seg.start < a) {
-            out.push({ start: seg.start, end: dayBefore(a) });
-        }
-        if (seg.end > b) {
-            out.push({ start: dayAfter(b), end: seg.end });
-        }
-        return out;
-    }
-
-    function calcularDisponibilidadPorEspecialista(disponibilidades, citas) {
-        const disponibilidadPorEspecialista = {};
-
-        disponibilidades.forEach(d => {
-            const id = d.idespecialista;
-            const inicio = horaAHoraMinutos(d.horainicio);
-            const fin = horaAHoraMinutos(d.horafin);
-            const minutos = fin - inicio;
-
-            if (!disponibilidadPorEspecialista[id]) {
-                disponibilidadPorEspecialista[id] = { total: 0, ocupado: 0 };
-            }
-
-            disponibilidadPorEspecialista[id].total += minutos;
-        });
-
-        citas.forEach(c => {
-            const id = c.idespecialista;
-            if (!disponibilidadPorEspecialista[id]) return;
-
-            const inicio = horaAHoraMinutos(c.hora_inicio);
-            const fin = horaAHoraMinutos(c.hora_fin);
-            const minutos = fin - inicio;
-
-            disponibilidadPorEspecialista[id].ocupado += minutos;
-        });
-
-        const resultado = Object.entries(disponibilidadPorEspecialista).map(([id, tiempos]) => ({
-            idespecialista: parseInt(id),
-            minutos_disponibles: tiempos.total - tiempos.ocupado,
-            minutos_ocupados: tiempos.ocupado,
-            minutos_totales: tiempos.total
-        }));
-
-        resultado.sort((a, b) => b.minutos_disponibles - a.minutos_disponibles);
-
-        return resultado;
-    }
-
-    // 3. Generación de “bloqueos” de refrigerio
-    function generarEventosRefrigerio() {
-        const eventos = [];
-        const viewStart = calendar.view.activeStart;
-        const viewEnd = calendar.view.activeEnd;
-
-        // 1) Recolectar fechas con bloqueo total para ese día de la semana
-        const fechasBloqueadas = new Set();
-        disponibilidadEspecialista
-            .filter(d => d.es_excepcion && d.estado === 'sin disponibilidad')
-            .forEach(d => {
-                const inicio = dateStrToDate(d.fechainicio);
-                const fin = dateStrToDate(d.fechafin);
-                let fecha = new Date(inicio);
-                while (fecha <= fin) {
-                    const diaName = fecha
-                        .toLocaleDateString('es-ES', { weekday: 'long' })
-                        .toLowerCase();
-                    if (diaName === d.dia) {
-                        fechasBloqueadas.add(dateToDateStr(fecha));
-                    }
-                    fecha.setDate(fecha.getDate() + 1);
-                }
-            });
-
-        // 2) Generar el sombreado de refrigerio
-        disponibilidadEspecialista.forEach(d => {
-            if (!d.refrigerio_horainicio || !d.refrigerio_horafin) return;
-
-            // convertir rangos de fecha
-            const inicio = dateStrToDate(d.fechainicio);
-            const fin = dateStrToDate(d.fechafin);
-            let fecha = new Date(viewStart);
-
-            // recortar tiempo a HH:mm
-            const reIni = d.refrigerio_horainicio.slice(0, 5);
-            const reFin = d.refrigerio_horafin.slice(0, 5);
-
-            while (fecha <= viewEnd) {
-                const diaName = fecha
-                    .toLocaleDateString('es-ES', { weekday: 'long' })
-                    .toLowerCase();
-                const fechaStr = dateToDateStr(fecha);
-
-                if (
-                    diaName === d.dia &&
-                    fecha >= inicio && fecha <= fin &&
-                    !fechasBloqueadas.has(fechaStr) &&
-                    // asegurarnos que el refrigerio está dentro de la jornada
-                    reIni >= d.horainicio.slice(0, 5) &&
-                    reFin <= d.horafin.slice(0, 5)
-                ) {
-                    eventos.push({
-                        start: `${fechaStr}T${reIni}`,
-                        end: `${fechaStr}T${reFin}`,
-                        display: 'background',
-                        classNames: ['fc-blocked-almuerzo']
-                    });
-                }
-                fecha.setDate(fecha.getDate() + 1);
-            }
-        });
-        return eventos;
-    }
-
-    function resaltarBloqueoAlmuerzo() {
-        // eliminar previos
-        calendar.getEvents().forEach(e => {
-            if (e.extendedProps?.tipo === 'almuerzo') {
-                e.remove();
-            }
-        });
-        // añadir nuevos
-        generarEventosRefrigerio().forEach(ev => {
-            calendar.addEvent({
-                ...ev,
-                extendedProps: { tipo: 'almuerzo' }
-            });
-        });
     }
 
     //Busqueda de pacientes

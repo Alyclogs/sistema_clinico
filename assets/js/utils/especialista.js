@@ -1,13 +1,13 @@
 
 import api from './api.js';
-import { dayAfter, dateStrToDate, dateToDateStr, dayBefore, horaAHoraMinutos } from './date';
-import { mostrarMensajeFlotante } from './utils';
+import { dayAfter, dateStrToDate, dateToDateStr, dayBefore, horaAHoraMinutos } from './date.js';
+import { mostrarMensajeFlotante } from './utils.js';
 
 let disponibilidadEspecialista = [];
 
 // 1. Carga y normalización de la disponibilidad
-export function actualizarDisponibilidadEspecialista() {
-    api.obtenerDisponibilidadEspecialista(selectedespecialista)
+export function actualizarDisponibilidadEspecialista(calendar, idespecialista) {
+    return api.obtenerDisponibilidadEspecialista(idespecialista)
         .then(data => {
             disponibilidadEspecialista = data.map(d => ({
                 ...d,
@@ -15,7 +15,7 @@ export function actualizarDisponibilidadEspecialista() {
                 estado: d.estado ? d.estado.trim().toLowerCase() : null,
                 dia: d.dia.toLowerCase()
             }));
-            actualizarBusinessHours();
+            actualizarBusinessHours(calendar);
             if (!disponibilidadEspecialista.length) {
                 mostrarMensajeFlotante("Especialista sin disponibilidad");
             }
@@ -23,7 +23,7 @@ export function actualizarDisponibilidadEspecialista() {
         });
 }
 
-export function actualizarBusinessHours() {
+export function actualizarBusinessHours(calendar) {
     const diasMap = {
         domingo: 0, lunes: 1, martes: 2, miércoles: 3,
         jueves: 4, viernes: 5, sábado: 6
@@ -82,13 +82,12 @@ export function actualizarBusinessHours() {
         });
     });
 
-    // 5. Aplicar y refrescar almuerzo
     calendar.setOption("businessHours", bh.length ? bh : {
         daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
         startTime: '00:00',
         endTime: '00:00'
     });
-    resaltarBloqueoAlmuerzo();
+    resaltarBloqueoAlmuerzo(calendar);
 }
 
 // Función helper para recortar un segmento {start,end} con un intervalo [a,b]
@@ -147,7 +146,7 @@ export function calcularDisponibilidadPorEspecialista(disponibilidades, citas) {
 }
 
 // 3. Generación de “bloqueos” de refrigerio
-export function generarEventosRefrigerio() {
+export function generarEventosRefrigerio(calendar) {
     const eventos = [];
     const viewStart = calendar.view.activeStart;
     const viewEnd = calendar.view.activeEnd;
@@ -211,7 +210,7 @@ export function generarEventosRefrigerio() {
     return eventos;
 }
 
-export function resaltarBloqueoAlmuerzo() {
+export function resaltarBloqueoAlmuerzo(calendar) {
     // eliminar previos
     calendar.getEvents().forEach(e => {
         if (e.extendedProps?.tipo === 'almuerzo') {
@@ -219,7 +218,7 @@ export function resaltarBloqueoAlmuerzo() {
         }
     });
     // añadir nuevos
-    generarEventosRefrigerio().forEach(ev => {
+    generarEventosRefrigerio(calendar).forEach(ev => {
         calendar.addEvent({
             ...ev,
             extendedProps: { tipo: 'almuerzo' }

@@ -2,7 +2,8 @@ import api from '../utils/api.js';
 import { mostrarMensajeFlotante } from '../utils/utils.js';
 import { formatearHora12h, calcularEdad, buildDate } from '../utils/date.js';
 import { procesarYMostrarCitas } from '../utils/cita.js';
-import { buildMiniCalendar, buildCalendar, updateCalendarDateRange, removeEvents, setOption, buildCalendar, buildMiniCalendar, calendar, miniCalendar } from '../utils/calendar.js';
+import { calendarUI, updateCalendarDateRange } from '../utils/calendar.js';
+import { calcularDisponibilidadPorEspecialista, actualizarDisponibilidadEspecialista } from '../utils/especialista.js';
 
 const baseurl = "http://localhost/SistemaClinico/";
 var selectedservicio = "1";
@@ -15,12 +16,14 @@ let subareaDuracion = 30;
 let servicioSeleccionado = 'CONSULTA';
 let especialistaSeleccionado = '';
 let disponibilidadEspecialista = [];
+let events = [];
+const cal = new calendarUI();
 
 document.addEventListener('DOMContentLoaded', function () {
     const calendarEl = document.getElementById('calendar');
     const miniCalendarEl = document.getElementById('mini-calendar');
-    buildCalendar(calendarEl);
-    buildMiniCalendar(miniCalendarEl);
+    const calendar = cal.buildCalendar(calendarEl);
+    const miniCalendar = cal.buildMiniCalendar(miniCalendarEl);
 
     obtenerServicios();
     refrescarCitas();
@@ -60,7 +63,6 @@ document.addEventListener('DOMContentLoaded', function () {
         api.obtenerEspecialistas({ idservicio: selectedservicio, idarea: selectedarea, idsubarea: selectedsubarea }).then(function (data) {
             const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
             const especialistas = Array.isArray(parsedData) ? parsedData : [parsedData];
-            console.log(especialistas);
 
             if (especialistas.length === 0) {
                 mostrarMensajeFlotante('No hay especialistas');
@@ -173,7 +175,6 @@ document.addEventListener('DOMContentLoaded', function () {
             $(this).find('option:selected').data('duracion'),
             10
         ) || 30;
-        console.log('Buscando especialistas por subarea');
         buscarEspecialistas();
         actualizarEventosVisuales();
         refrescarCitas();
@@ -186,11 +187,12 @@ document.addEventListener('DOMContentLoaded', function () {
         especialistaSeleccionado = $(this).find('option:selected').text();
         if (selectedespecialista) {
             //selectedservicio = '';
-            servicioSeleccionado = '';
-            disponibilidadEspecialista = actualizarDisponibilidadEspecialista();
-            refrescarCitas();
-            actualizarEventosVisuales(true);
-            lastEspecialista = selectedespecialista;
+            //servicioSeleccionado = '';
+            actualizarDisponibilidadEspecialista(calendar, selectedespecialista).then(disponibilidad => {
+                disponibilidadEspecialista = disponibilidad;
+                refrescarCitas();
+                actualizarEventosVisuales(true);
+            });
         }
         // NO modificar la lista del modal ni horariosSeleccionados
     });
@@ -722,7 +724,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // ——— 2) actualizarEventosVisuales: usa horaInicioRaw / horaFinRaw ———
     function actualizarEventosVisuales(render = true) {
         // 1) Limpia sólo los eventos del tipo 'seleccionado'
-        removeEvents('seleccionado');
+        cal.removeEvents('seleccionado');
         if (!render) return;
 
         // 2) Añade cada bloque con su horaInicioRaw/horaFinRaw exacta
@@ -749,7 +751,9 @@ document.addEventListener('DOMContentLoaded', function () {
             idsubarea: (idespecialista || selectedespecialista ? null : idsubarea ?? selectedsubarea)
         })
             .then(function (citas) {
-                procesarYMostrarCitas(calendar, citas);
+                events = procesarYMostrarCitas(cal, citas, selectedespecialista);
+                console.log(events);
+                events.forEach(event => calendar.addEvent(event));
             })
             .catch((e) => {
                 console.log(e);

@@ -1,8 +1,9 @@
-let calendar;
-let miniCalendar;
+export class calendarUI{
+    calendar;
+    miniCalendar;
 
-export const buildCalendar = (calendarEl) => {
-    calendar = new FullCalendar.Calendar(calendarEl, {
+    buildCalendar = (calendarEl) => {
+    this.calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: "timeGridWeek",
         slotDuration: "00:30:00",
         slotLabelInterval: "00:30:00",
@@ -30,11 +31,11 @@ export const buildCalendar = (calendarEl) => {
         }
     });
 
-    calendar.on('datesSet', function () {
-        updateCalendarDateRange();
+    this.calendar.on('datesSet', function () {
+        updateCalendarDateRange(this.calendar);
     });
 
-    calendar.setOption('eventContent', function (arg) {
+    this.calendar.setOption('eventContent', function (arg) {
         if (
             arg.event.classNames.includes('fc-slot-custom-content') ||
             arg.event.classNames.includes('multiples-citas-evento')
@@ -44,18 +45,60 @@ export const buildCalendar = (calendarEl) => {
     });
 
     document.getElementById('prev-week').addEventListener('click', () => {
-        calendar.prev();
-        updateCalendarDateRange();
+        this.calendar.prev();
+        updateCalendarDateRange(this.calendar);
     });
 
     document.getElementById('next-week').addEventListener('click', () => {
-        calendar.next();
-        updateCalendarDateRange();
+        this.calendar.next();
+        updateCalendarDateRange(this.calendar);
     });
-    console.log(calendar);
+    return this.calendar;
 };
 
-export function updateCalendarDateRange() {
+buildMiniCalendar = (miniCalendarEl) => {
+    this.miniCalendar = new FullCalendar.Calendar(miniCalendarEl, {
+        initialView: "dayGridMonth",
+        locale: "es",
+        headerToolbar: {
+            left: "prev",
+            center: "title",
+            right: "next",
+        },
+        selectable: true,
+        dateClick: function (info) {
+            if (this.calendar) {
+                this.calendar.gotoDate(info.dateStr);
+                updateCalendarDateRange(this.calendar);
+            }
+        },
+    });
+    return this.miniCalendar;
+};
+
+addEvent(event) {
+    if (this.calendar) {
+        this.calendar.addEvent(event);
+    }
+}
+
+removeEvents(tipo) {
+    if (!this.calendar) return;
+    this.calendar.getEvents().forEach(ev => {
+        if (ev.extendedProps?.tipo === tipo) {
+            ev.remove();
+        }
+    });
+}
+
+setOption(option, value) {
+    if (this.calendar) {
+        this.calendar.setOption(option, value);
+    }
+}
+}
+
+export function updateCalendarDateRange(calendar) {
     if (!calendar) return;
     const start = calendar.view.activeStart;
     const end = calendar.view.activeEnd;
@@ -69,46 +112,5 @@ export function updateCalendarDateRange() {
     const endStr = new Date(end - 1).toLocaleDateString("es-ES", options).toUpperCase();
 
     document.getElementById("calendar-dates").textContent = `${startStr} - ${endStr}`;
-}
-
-export const buildMiniCalendar = (miniCalendarEl) => {
-    miniCalendar = new FullCalendar.Calendar(miniCalendarEl, {
-        initialView: "dayGridMonth",
-        locale: "es",
-        headerToolbar: {
-            left: "prev",
-            center: "title",
-            right: "next",
-        },
-        selectable: true,
-        dateClick: function (info) {
-            if (calendar) {
-                calendar.gotoDate(info.dateStr);
-                updateCalendarDateRange();
-            }
-        },
-    });
 };
 
-export function addEvent(event) {
-    if (calendar) {
-        calendar.addEvent(event);
-    }
-}
-
-export function removeEvents(tipo) {
-    if (!calendar) return;
-    calendar.getEvents().forEach(ev => {
-        if (ev.extendedProps?.tipo === tipo) {
-            ev.remove();
-        }
-    });
-}
-
-export function setOption(option, value) {
-    if (calendar) {
-        calendar.setOption(option, value);
-    }
-}
-
-export { calendar, miniCalendar };

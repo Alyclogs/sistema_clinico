@@ -91,7 +91,7 @@ $idusuario = $_SESSION['idusuario'];
                                 <div class="subtitulo mb-4">CITAS DEL DÍA</div>
                                 <div class="citas-dia-container"></div>
                                 <div class="subtitulo mb-4">CITAS AGENDADAS</div>
-                                <div class="citas-agregadas-container"></div>
+                                <div class="citas-container"></div>
                             </div>
                         </div>
                     </div>

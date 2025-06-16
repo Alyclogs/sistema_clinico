@@ -27,7 +27,7 @@ export default {
         console.log(baseurl + `controllers/Especialistas/EspecialistaController.php?action=read${idarea ? `&idarea=${idarea}` : ''}${idservicio ? `&idservicio=${idservicio}` : ''}${idsubarea ? `&idsubarea=${idsubarea}` : ''}${idespecialista ? `&idespecialista=${idespecialista}` : ''}`);
         return $.get(baseurl + `controllers/Especialistas/EspecialistaController.php?action=read${idarea ? `&idarea=${idarea}` : ''}${idservicio ? `&idservicio=${idservicio}` : ''}${idsubarea ? `&idsubarea=${idsubarea}` : ''}${idespecialista ? `&idespecialista=${idespecialista}` : ''}`);
     },
-    obtenerCitas: ({ idservicio, idespecialista, idarea, idsubarea, filtro = { fecha: '' } }) => {
+    obtenerCitas: ({ idservicio, idespecialista, idarea, idsubarea, filtro = { fecha: '', fechainicio: '' } }) => {
         const params = new URLSearchParams({ action: 'read' });
 
         if (idservicio) params.append('idservicio', idservicio);
@@ -35,6 +35,7 @@ export default {
         if (idarea) params.append('idarea', idarea);
         if (idsubarea) params.append('idsubarea', idsubarea);
         if (filtro.fecha) params.append("fecha", filtro.fecha);
+        if (filtro.fechainicio) params.append("fechainicio", filtro.fechainicio);
 
         const url = baseurl + 'controllers/Citas/CitasController.php?' + params.toString();
         console.log(url);

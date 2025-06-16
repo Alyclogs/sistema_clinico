@@ -1,7 +1,7 @@
 <?php
 define('DB_HOST', 'localhost');
-define('DB_USER', 'neuroeduca_admindatabase'); // Cambia 'tu_usuario' al nombre de usuario de tu base de datos
-define('DB_PASS', 'oAuyHiR~OKbt'); // Cambia 'tu_contraseña' a tu contraseña de
+define('DB_USER', 'root'); // Cambia 'tu_usuario' al nombre de usuario de tu base de datos
+define('DB_PASS', ''); // Cambia 'tu_contraseña' a tu contraseña de
 define('DB_NAME', 'neuroeduca_sistema_clinico');
 
 function connectDatabase() {

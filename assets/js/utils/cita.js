@@ -1,9 +1,10 @@
-import { addEvent, removeEvents } from "./calendar";
+import { formatearHora12h } from "./date.js";
+
 export const estadosCita = { '3': 'pendiente', '4': 'cancelado', '5': 'anulado' }
 
-export function procesarYMostrarCitas(citas, idespecialista) {
+export function procesarYMostrarCitas(calendar, citas, idespecialista = '') {
     // 1) Remover eventos previos
-    removeEvents('cita-existente')
+    calendar.removeEvents('cita-existente');
 
     // 2) Agrupar citas con la nueva función que tiene en cuenta solapamientos
     const citasAgrupadas = agruparCitasPorHorario(citas);
@@ -13,20 +14,21 @@ export function procesarYMostrarCitas(citas, idespecialista) {
         // 1) Añadir citas agrupadas
         Object.values(citasAgrupadas).forEach((grupo) => {
             if (grupo.length === 1) {
-                addCitaGeneralEvent(grupo[0]);
+                addCitaGeneralEvent(calendar, grupo[0]);
             } else {
-                addMultiplesCitasEvent(grupo);
+                addMultiplesCitasEvent(calendar, grupo);
             }
         });
     } else {
         // 2) Añadir citas individuales
         citas.forEach(cita => {
-            addCitaEvent(cita);
+            addCitaEvent(calendar, cita);
         });
     }
+    return calendar.calendar.getEvents();
 }
 
-export function agruparCitasPorHorario(citas) {
+function agruparCitasPorHorario(citas) {
     const grupos = {};
 
     citas.forEach(cita => {
@@ -41,7 +43,7 @@ export function agruparCitasPorHorario(citas) {
     return grupos;
 }
 
-export function addCitaEvent(cita) {
+function addCitaEvent(calendar, cita) {
     const pad = n => String(n).padStart(2, '0');
     // recortamos a HH:mm
     const horaIniRaw = cita.hora_inicio.slice(0, 5);
@@ -52,7 +54,7 @@ export function addCitaEvent(cita) {
     const nombre = `${cita.paciente_nombres} ${cita.paciente_apellidos}`;
     const cssEstado = `cita-${estadosCita[cita.idestado]}`;
 
-    addEvent({
+    calendar.addEvent({
         title: `<div class="evento-contenedor">
         <div class="nombre-arriba"><strong>${nombre}</strong></div>
         <div class="svg-horario">
@@ -72,7 +74,7 @@ export function addCitaEvent(cita) {
     });
 }
 
-export function addCitaGeneralEvent(cita) {
+function addCitaGeneralEvent(calendar, cita) {
     const horaIniRaw = cita.hora_inicio.slice(0, 5);
     const horaFinRaw = cita.hora_fin.slice(0, 5);
     //const cssEstado = `cita-${estadosCita[cita.idestado]}`;
@@ -83,7 +85,7 @@ export function addCitaGeneralEvent(cita) {
     // Colocar el avatar dentro del título
     const titleWithAvatar = avatar.outerHTML;
 
-    addEvent({
+    calendar.addEvent({
         title: titleWithAvatar,
         start: `${cita.fecha}T${horaIniRaw}`,
         end: `${cita.fecha}T${horaFinRaw}`,
@@ -96,7 +98,7 @@ export function addCitaGeneralEvent(cita) {
     });
 }
 
-export function addMultiplesCitasEvent(citas) {
+function addMultiplesCitasEvent(calendar, citas) {
     // Obtener la primera cita para usar su hora de inicio y fin
     const primera = citas[0];
     const ini = primera.hora_inicio.slice(0, 5);
@@ -106,7 +108,7 @@ export function addMultiplesCitasEvent(citas) {
     const stack = crearStackAvatares(citas);
 
     // Crear un solo evento para todas las citas agrupadas
-    addEvent({
+    calendar.addEvent({
         title: stack.outerHTML,
         start: `${primera.fecha}T${ini}`,
         end: `${primera.fecha}T${fin}`,
@@ -119,10 +121,10 @@ export function addMultiplesCitasEvent(citas) {
     });
 }
 
-function getSVGPendiente(width = 11.15, height = 11.15) {
-    return `
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="${width}px"
-     height="${height}px" viewBox="0 0 ${width} ${height}" style="overflow:visible;enable-background:new 0 0 ${width} ${height};"
+function getSVGPendiente(size = "small") {
+    if (size === "small") return `
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="11.15px"
+     height="11.15px" viewBox="0 0 11.15 11.15" style="overflow:visible;enable-background:new 0 0 11.15 11.15;"
      xml:space="preserve">
 <style type="text/css">
     .st010{fill-rule:evenodd;clip-rule:evenodd;fill:#F07E0B;}
@@ -140,12 +142,29 @@ function getSVGPendiente(width = 11.15, height = 11.15) {
 </g>
 </svg>
 `;
+
+    else return `<svg id="agenda_especialista" data-name="agenda especialista" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21.88 21.88" style="width: 20px; height: 20px;">
+  <defs>
+    <style>
+      .cls-01 {
+        fill: #fff;
+      }
+
+      .cls-02 {
+        fill: #f07e0b;
+        fill-rule: evenodd;
+      }
+    </style>
+  </defs>
+  <path class="cls-02" d="M10.94,0c6.04,0,10.94,4.9,10.94,10.94s-4.9,10.94-10.94,10.94S0,16.98,0,10.94,4.9,0,10.94,0"/>
+  <path class="cls-01" d="M15.34,16.37c-.22,0-.44-.09-.59-.24l-4.6-4.6c-.16-.16-.24-.37-.24-.59v-6.69c0-.46.37-.84.84-.84s.84.37.84.84v6.35l4.36,4.35c.33.33.33.85,0,1.18,0,0,0,0,0,0-.16.16-.37.24-.59.24Z"/>
+</svg>`
 }
 
-function getSVGAnulado(width = 11, height = 11) {
-    return `
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="${width}px"
-     height="${height}px" viewBox="0 0 ${width} ${height}" style="overflow:visible;enable-background:new 0 0 ${width} ${height};" xml:space="preserve">
+function getSVGAnulado(size = 'small') {
+    if (size === "small") return `
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="11.15px"
+     height="11.15px" viewBox="0 0 11.15 11.15" style="overflow:visible;enable-background:new 0 0 11.15 11.15;" xml:space="preserve">
 <style type="text/css">
     .st012{fill:none;stroke:#E5252A;stroke-linecap:round;stroke-miterlimit:10;}
 </style>
@@ -167,10 +186,10 @@ function getSVGAnulado(width = 11, height = 11) {
 `;
 }
 
-export const getSVGcancelado = (width = 11.15, height = 11.15) => {
-    return `
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="${width}px"
-     height="${height}px" viewBox="0 0 ${width} ${height}" style="overflow:visible;enable-background:new 0 0 ${width} ${height};"
+const getSVGcancelado = (size = "small") => {
+    if (size === "small") return `
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="11.15px"
+     height="11.15px" viewBox="0 0 11.15 11.15" style="overflow:visible;enable-background:new 0 0 11.15 11.15;"
      xml:space="preserve">
 <style type="text/css">
     .st013{fill-rule:evenodd;clip-rule:evenodd;fill:#48B02C;}
@@ -186,16 +205,38 @@ export const getSVGcancelado = (width = 11.15, height = 11.15) => {
 </g>
 </svg>
 `;
+    else return `
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="agenda_especialista" data-name="agenda especialista" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21.15 21.15">
+  <defs>
+    <style>
+      .cls-11 {
+        fill: #48b02c;
+      }
+
+      .cls-11, .cls-12 {
+        fill-rule: evenodd;
+      }
+
+      .cls-12 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <path class="cls-11" d="M10.57,0c5.84,0,10.57,4.73,10.57,10.57s-4.73,10.57-10.57,10.57S0,16.41,0,10.57,4.73,0,10.57,0"/>
+  <path class="cls-12" d="M7.23,15.73l-3.84-4.11c-.42-.45-.54-1.12-.24-1.65.49-.89,1.65-.98,2.28-.3l2.98,3.19,4.72-4.41s.09-.08.13-.11l2.19-2.05c.45-.42,1.12-.54,1.65-.24.89.49.98,1.65.3,2.28l-6.78,6.34h0s-2.35,2.18-2.35,2.18l-1.04-1.11Z"/>
+</svg>
+`;
 }
 
-export const getSVGCita = (estado) => {
+export const getSVGCita = (estado, size) => {
     switch (estado) {
         case 'cita-pendiente':
-            return getSVGPendiente();
+            return getSVGPendiente(size);
         case 'cita-cancelado':
-            return getSVGcancelado();
+            return getSVGcancelado(size);
         case 'cita-anulado':
-            return getSVGAnulado();
+            return getSVGAnulado(size);
         default:
             return '';
     }
@@ -255,7 +296,7 @@ ${horario}</div>
     })
 }
 
-export function crearStackAvatares(citas, maxVisible = 4) {
+function crearStackAvatares(citas, maxVisible = 4) {
     const stack = document.createElement('div');
     stack.className = 'avatar-stack';
 
@@ -274,7 +315,7 @@ export function crearStackAvatares(citas, maxVisible = 4) {
     return stack;
 }
 
-export function crearImagenEspecialista(cita) {
+function crearImagenEspecialista(cita) {
     const img = document.createElement('img');
     img.src = cita.especialista_foto;
     img.className = 'avatar';

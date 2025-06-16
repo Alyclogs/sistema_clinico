@@ -26,7 +26,11 @@ switch ($action) {
                     return;
                 } else {
                     if (isset($_GET['fecha'])) {
-                        $result = $model->obtenerCitasPorEspecialistayfecha($_GET['idespecialista'], $_GET['fecha']);
+                        $result = $model->obtenerCitasPorEspecialistayFecha($_GET['idespecialista'], $_GET['fecha']);
+                        echo json_encode($result);
+                        return;
+                    } else if (isset($_GET['fechainicio'])) {
+                        $result = $model->obtenerCitasPorEspecialistayFechaInicio($_GET['idespecialista'], $_GET['fechainicio']);
                         echo json_encode($result);
                         return;
                     } else {

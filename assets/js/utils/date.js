@@ -59,3 +59,10 @@ export function dayAfter(str) {
 export function buildDate(fechaStr, horaStr) {
     return new Date(`${fechaStr}T${horaStr}:00`);
 }
+
+export function formatearFecha(fecha) {
+    const yyyy = fecha.getFullYear();
+    const mm = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dd = String(fecha.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+}

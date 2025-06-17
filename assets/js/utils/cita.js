@@ -56,12 +56,11 @@ function addCitaEvent(calendar, cita) {
 
     calendar.addEvent({
         title: `<div class="evento-contenedor">
+        <span>${getSVGCita(cssEstado, 'big')}</span>
+        <div class="cita-evento-datos">
         <div class="nombre-arriba"><strong>${nombre}</strong></div>
-        <div class="svg-horario">
-          <span class='mi-check-clase'>${getSVGCita(cssEstado)}</span>
-          <span class="horario-agendado">${horaIni} - ${horaFin}</span>
-        </div>
-      </div>`,
+        <span class="horario-agendado">${horaIni} - ${horaFin}</span>
+      </div></div>`,
         start: `${cita.fecha}T${horaIniRaw}`,
         end: `${cita.fecha}T${horaFinRaw}`,
         // NO background para que se muestre como evento normal
@@ -184,6 +183,29 @@ function getSVGAnulado(size = 'small') {
 </g>
 </svg>
 `;
+
+    return `
+<svg id="AGENDA" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 11 11" style="width: 20px; height: 20px;">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #e5252a;
+        stroke-linecap: round;
+        stroke-miterlimit: 10;
+      }
+    </style>
+  </defs>
+  <g id="g327">
+    <path id="path329" class="cls-1" d="M10.5,5.5c0,2.76-2.24,5-5,5S.5,8.26.5,5.5,2.74.5,5.5.5s5,2.24,5,5Z"/>
+  </g>
+  <g id="g331">
+    <path id="path333" class="cls-1" d="M4.2,6.8l2.61-2.61"/>
+  </g>
+  <g id="g335">
+    <path id="path337" class="cls-1" d="M6.8,6.8l-2.61-2.61"/>
+  </g>
+</svg>`;
 }
 
 const getSVGcancelado = (size = "small") => {
@@ -206,8 +228,7 @@ const getSVGcancelado = (size = "small") => {
 </svg>
 `;
     else return `
-<?xml version="1.0" encoding="UTF-8"?>
-<svg id="agenda_especialista" data-name="agenda especialista" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21.15 21.15">
+<svg id="agenda_especialista" data-name="agenda especialista" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21.15 21.15" style="width: 20px; height: 20px;">
   <defs>
     <style>
       .cls-11 {
@@ -229,13 +250,17 @@ const getSVGcancelado = (size = "small") => {
 `;
 }
 
-export const getSVGCita = (estado, size) => {
+export const getSVGCita = (estado, size = 'small') => {
     switch (estado) {
         case 'cita-pendiente':
             return getSVGPendiente(size);
         case 'cita-cancelado':
             return getSVGcancelado(size);
         case 'cita-anulado':
+            return getSVGAnulado(size);
+        case 'cita-asistio':
+            return getSVGcancelado(size);
+        case 'cita-no-asistio':
             return getSVGAnulado(size);
         default:
             return '';

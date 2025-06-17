@@ -9,6 +9,7 @@ let disponibilidadEspecialista = [];
 export function actualizarDisponibilidadEspecialista(calendar, idespecialista) {
     return api.obtenerDisponibilidadEspecialista(idespecialista)
         .then(data => {
+            console.log(idespecialista, data);
             disponibilidadEspecialista = data.map(d => ({
                 ...d,
                 es_excepcion: d.es_excepcion === '1',

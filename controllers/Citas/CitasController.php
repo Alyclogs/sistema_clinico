@@ -8,6 +8,11 @@ $model = new CitasModel();
 
 switch ($action) {
     case 'read':
+        if (isset($_GET['idcita'])) {
+            $result = $model->obtenerCitaPorId($_GET['idcita']);
+            echo json_encode($result);
+            return;
+        }
         if (isset($_GET['idespecialista'])) {
             if (isset($_GET['idarea'])) {
                 if (isset($_GET['idsubarea'])) {
@@ -68,6 +73,21 @@ switch ($action) {
                 echo json_encode(['success' => $result, 'message' => $mensaje]);
             } catch (Exception $e) {
                 echo json_encode(['error' => 'Error al agendar cita' . $e]);
+            }
+        } else {
+            echo json_encode(['error' => 'Datos no proporcionados']);
+        }
+        break;
+
+    case 'update':
+        if (isset($_POST['data'])) {
+            try {
+                $data = json_decode($_POST['data'], true);
+                $mensaje = $data;
+                $result = $model->actualizarCita($data);
+                echo json_encode(['success' => $result, 'message' => $mensaje]);
+            } catch (Exception $e) {
+                echo json_encode(['error' => 'Error al actualizar cita' . $e]);
             }
         } else {
             echo json_encode(['error' => 'Datos no proporcionados']);

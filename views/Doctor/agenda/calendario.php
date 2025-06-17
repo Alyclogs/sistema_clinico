@@ -78,7 +78,6 @@ $idusuario = $_SESSION['idusuario'];
                                                 </svg>
                                             </button>
                                         </div>
-
                                         <!-- <button class="btn-add-cita">+ Nueva cita</button> -->
                                     </div>
                                 </div>
@@ -88,9 +87,39 @@ $idusuario = $_SESSION['idusuario'];
                         <!-- Sidebar -->
                         <div class="calendar-sidebar p-3">
                             <div id="modalCita" class="modal-cita-custom">
+                                <div class="citas-navigation" style="display:flex; justify-content: end; margin-bottom: 16px; gap: 8px;">
+                                    <div class="minicalendar-button">
+                                        <button id="btnAbrirCalendarioCita" class="btn btn-sm btn-light btn-calendario"><i class="bi bi-calendar"></i></button>
+                                        <div class="minicalendar-modal" style="display: none;">
+                                            <div id="mini-calendar-cita"></div>
+                                        </div>
+                                    </div>
+                                    <button id="prev-day" class="btn btn-light btn-sm">
+                                        <svg id="agenda_especialista" data-name="agenda especialista" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6.66 7.59" style="height: 10.1px; width: 8.9px;">
+                                            <defs>
+                                                <style>
+                                                    .cls-001 {
+                                                        fill: #76869e;
+                                                    }
+                                                </style>
+                                            </defs>
+                                            <path class="cls-001" d="M.17,4.09l5.99,3.46c.23.13.51-.03.51-.29V.34c0-.26-.28-.42-.51-.29L.17,3.5c-.23.13-.23.46,0,.59Z" />
+                                        </svg>
+                                    </button>
+                                    <button id="next-day" class="btn btn-light btn-sm">
+                                        <svg id="agenda_especialista" data-name="agenda especialista" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6.66 7.59" style="height: 10.1px; width: 8.9px;">
+                                            <defs>
+                                                <style>
+                                                    .cls-002 {
+                                                        fill: #76869e;
+                                                    }
+                                                </style>
+                                            </defs>
+                                            <path class="cls-002" d="M6.49,3.5L.51.05c-.23-.13-.51.03-.51.29v6.91c0,.26.28.42.51.29l5.99-3.46c.23-.13.23-.46,0-.59Z" />
+                                        </svg>
+                                    </button>
+                                </div>
                                 <div class="subtitulo mb-4">CITAS DEL DÍA</div>
-                                <div class="citas-dia-container"></div>
-                                <div class="subtitulo mb-4">CITAS AGENDADAS</div>
                                 <div class="citas-container"></div>
                             </div>
                         </div>

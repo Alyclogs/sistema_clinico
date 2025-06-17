@@ -64,7 +64,13 @@ body {
   color: #76869e;
 }
 
+.minicalendar-button {
+  flex: 1;
+  position: relative;
+}
+
 .minicalendar-modal {
+  display: none;
   flex-direction: column;
   background: #fff;
   width: 400px;
@@ -75,8 +81,6 @@ body {
   z-index: 1000;
   border-radius: 6px;
   box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);
-  right: 50rem;
-  top: 10.9rem;
 }
 
 .cita-chip-buttons .btn-editar-horario.btn-editando {
@@ -106,6 +110,7 @@ body {
   padding: 10px 16px;
   border-radius: 25px;
 }
+
 .sidebar {
   background: transparent;
   padding: 1rem;
@@ -146,6 +151,7 @@ body {
 #mini-calendar table {
   border: none !important;
 }
+
 #mini-calendar td,
 #mini-calendar th {
   border: none !important;
@@ -635,6 +641,21 @@ a.fc-col-header-cell-cushion {
   border: none;
 }
 
+.evento-contenedor {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.cita-evento-datos {
+  display: flex;
+  flex-direction: column;
+}
+
+.cita-agendada-evento.fc-event {
+  justify-content: start;
+}
+
 .cita-agendada-evento.cita-pendiente.fc-event {
   background: #f07e0b12 !important;
   border-left: 5px solid #f07e0b;
@@ -806,32 +827,38 @@ a.fc-event.fc-slot-custom-content.multiples-citas-evento {
 
 /* Colores según estado */
 .cuadrado-pendiente {
-  background-color: #ffc107; /* Amarillo */
+  background-color: #ffc107;
+  /* Amarillo */
   border: 1px solid #e0a800;
 }
 
 .cuadrado-cancelado {
-  background-color: #28a745; /* Verde */
+  background-color: #28a745;
+  /* Verde */
   border: 1px solid #1e7e34;
 }
 
 .cuadrado-anulado {
-  background-color: #dc3545; /* Rojo */
+  background-color: #dc3545;
+  /* Rojo */
   border: 1px solid #bd2130;
 }
 
 .cuadrado-no-asistio {
-  background-color: #6c757d; /* Gris */
+  background-color: #6c757d;
+  /* Gris */
   border: 1px solid #545b62;
 }
 
 .cuadrado-reprogramada {
-  background-color: #fd7e14; /* Naranja */
+  background-color: #fd7e14;
+  /* Naranja */
   border: 1px solid #e55a00;
 }
 
 .cuadrado-default {
-  background-color: #e9ecef; /* Gris claro */
+  background-color: #e9ecef;
+  /* Gris claro */
   border: 1px solid #ced4da;
 }
 

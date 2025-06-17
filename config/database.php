@@ -8,7 +8,6 @@ function connectDatabase() {
     try {
         // Usar charset utf8mb4 para mejor soporte de caracteres
         $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
-
         $pdo = new PDO($dsn, DB_USER, DB_PASS);
 
         // Configurar PDO para lanzar excepciones en caso de error

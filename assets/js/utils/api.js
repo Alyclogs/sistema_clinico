@@ -27,13 +27,14 @@ export default {
         console.log(baseurl + `controllers/Especialistas/EspecialistaController.php?action=read${idarea ? `&idarea=${idarea}` : ''}${idservicio ? `&idservicio=${idservicio}` : ''}${idsubarea ? `&idsubarea=${idsubarea}` : ''}${idespecialista ? `&idespecialista=${idespecialista}` : ''}`);
         return $.get(baseurl + `controllers/Especialistas/EspecialistaController.php?action=read${idarea ? `&idarea=${idarea}` : ''}${idservicio ? `&idservicio=${idservicio}` : ''}${idsubarea ? `&idsubarea=${idsubarea}` : ''}${idespecialista ? `&idespecialista=${idespecialista}` : ''}`);
     },
-    obtenerCitas: ({ idservicio, idespecialista, idarea, idsubarea, filtro = { fecha: '', fechainicio: '' } }) => {
+    obtenerCitas: ({ idservicio, idespecialista, idarea, idsubarea, idcita, filtro = { fecha: '', fechainicio: '' } }) => {
         const params = new URLSearchParams({ action: 'read' });
 
         if (idservicio) params.append('idservicio', idservicio);
         if (idespecialista) params.append('idespecialista', idespecialista);
         if (idarea) params.append('idarea', idarea);
         if (idsubarea) params.append('idsubarea', idsubarea);
+        if (idcita) params.append('idcita', idcita);
         if (filtro.fecha) params.append("fecha", filtro.fecha);
         if (filtro.fechainicio) params.append("fechainicio", filtro.fechainicio);
 
@@ -59,5 +60,5 @@ export default {
             console.error('Error en la solicitud AJAX:', textStatus, errorThrown);
             console.error('Respuesta del servidor:', jqXHR.responseText);
         });
-    }
+    },
 }

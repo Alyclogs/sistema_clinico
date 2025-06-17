@@ -7,12 +7,23 @@
   color: #fff !important;
 }
 
-.citas-dia-container,
-.citas-container {
-  margin-bottom: 3.7rem;
+.cita-container.cita-asistio .cita-content {
+  background-color: #48b02c10;
 }
 
-.cita-container {
+.cita-container.cita-no-asistio .cita-content {
+  background-color: #e5252a12;
+}
+
+.cita-content.cita-cancelado {
+  border-left: 10px solid #48B02C;
+}
+
+.cita-content.cita-pendiente {
+  border-left: 10px solid #f07e0b;
+}
+
+.cita-content {
   background-color: #fff;
   border-radius: 8px;
   padding: 12px 18px;
@@ -21,14 +32,6 @@
   justify-content: start;
   align-items: center;
   margin-bottom: 12px;
-}
-
-.cita-container.cita-cancelado {
-  border-left: 10px solid #48B02C;
-}
-
-.cita-container.cita-pendiente {
-  border-left: 10px solid #f07e0b;
 }
 
 .cita-grupos {
@@ -43,50 +46,41 @@
   align-items: center;
 }
 
-.cita-container .cita-paciente {
+.cita-content .cita-paciente {
   margin-right: 16px;
 }
 
-.cita-container .cita-time {
+.cita-content .cita-time {
   display: flex;
   flex-direction: column;
   padding-right: 18px;
   margin-right: 16px;
 }
 
-.cita-container.cita-cancelado .cita-time {
+.cita-content.cita-cancelado .cita-time {
   border-right: 1px solid #48B02C;
 }
 
-.cita-container.cita-pendiente .cita-time {
+.cita-content.cita-pendiente .cita-time {
   border-right: 1px solid #f07e0b;
+}
+
+.cita-content.cita-asistio .cita-time {
+  border-right: 1px solid #48B02C;
+}
+
+.cita-content.cita-no-asistio .cita-time {
+  border-right: 1px solid #e5252a;
 }
 
 .cita-actual {
   margin-bottom: 20px;
 }
 
-.circulo-check {
-  border: 0.5px solid #76869e;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-}
-
-.circulo-check.activo {
-  background: #76869e;
-}
-
 .botones-asistio {
   align-items: center;
-  justify-content: end;
+  justify-content: start;
   display: flex;
   margin-bottom: 12px;
-  gap: 22px;
-}
-
-.boton-asistio {
-  display: flex;
-  gap: 6px;
-  font-weight: bold;
+  gap: 12px;
 }

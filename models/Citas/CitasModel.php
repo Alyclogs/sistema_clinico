@@ -30,6 +30,29 @@ class CitasModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function obtenerCitaPorId($idcita)
+    {
+        $sql = "SELECT DISTINCT
+                c.*, 
+                p.nombres AS paciente_nombres, 
+                p.apellidos AS paciente_apellidos, 
+                p.dni AS paciente_dni, 
+                p.fecha_nacimiento AS paciente_fecha_nacimiento,
+                p.foto AS paciente_foto,
+                u.nombres AS especialista_nombre,
+                u.apellidos AS especialista_apellidos,
+                u.foto AS especialista_foto
+            FROM citas c
+            INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
+            INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
+            INNER JOIN usuarios u ON e.idespecialista = u.idusuario
+            WHERE idcita = :idcita";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':idcita', $idcita, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function obtenerCitasPorServicio($idservicio)
     {
         $sql = "SELECT DISTINCT c.*, p.nombres AS paciente_nombres,
@@ -87,7 +110,8 @@ class CitasModel
         INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
         INNER JOIN usuarios u ON e.idespecialista = u.idusuario
         WHERE c.idespecialista = :idespecialista
-        AND c.fecha = :fecha";
+        AND c.fecha = :fecha
+        ORDER BY c.hora_inicio ASC";
 
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':idespecialista', $idespecialista, PDO::PARAM_INT);
@@ -246,8 +270,8 @@ class CitasModel
     public function crearCita($data)
     {
         // Modificar la consulta SQL para que idarea e idsubarea puedan ser NULL
-        $sql = "INSERT INTO citas (idpaciente, idespecialista, idregistrador, fecha, hora_inicio, hora_fin, idestado, idservicio, idarea, idsubarea) 
-            VALUES (:idpaciente, :idespecialista, :idregistrador, :fecha, :hora_inicio, :hora_fin, :idestado, :idservicio, :idarea, :idsubarea)";
+        $sql = "INSERT INTO citas (idpaciente, idespecialista, idregistrador, fecha, hora_inicio, hora_fin, idestado, idservicio, idarea, idsubarea, asistio) 
+            VALUES (:idpaciente, :idespecialista, :idregistrador, :fecha, :hora_inicio, :hora_fin, :idestado, :idservicio, :idarea, :idsubarea, :asistio)";
 
         $stmt = $this->db->prepare($sql);
 
@@ -259,6 +283,43 @@ class CitasModel
         $stmt->bindParam(':hora_fin', $data['hora_fin']);
         $stmt->bindParam(':idestado', $data['idestado']);
         $stmt->bindParam(':idservicio', $data['idservicio']);
+        $stmt->bindParam(':asistio', $data['asistio']);
+
+        // Si los valores de idarea o idsubarea son nulos, no los asignamos
+        $stmt->bindValue(':idarea', isset($data['idarea']) ? $data['idarea'] : null, PDO::PARAM_INT);
+        $stmt->bindValue(':idsubarea', isset($data['idsubarea']) ? $data['idsubarea'] : null, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+    public function actualizarCita($data)
+    {
+        $sql = "UPDATE citas SET
+        idpaciente = :idpaciente,
+        idespecialista = :idespecialista,
+        idregistrador = :idregistrador,
+        fecha = :fecha,
+        hora_inicio = :hora_inicio,
+        hora_fin = :hora_fin,
+        idestado = :idestado,
+        idservicio = :idservicio,
+        idarea = :idarea,
+        idsubarea = :idsubarea,
+        asistio = :asistio
+        WHERE idcita = :idcita";
+
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->bindParam(':idpaciente', $data['idpaciente'], PDO::PARAM_INT);
+        $stmt->bindParam(':idespecialista', $data['idespecialista'], PDO::PARAM_INT);
+        $stmt->bindParam(':idregistrador', $data['idregistrador'], PDO::PARAM_INT);
+        $stmt->bindParam(':fecha', $data['fecha']);
+        $stmt->bindParam(':hora_inicio', $data['hora_inicio']);
+        $stmt->bindParam(':hora_fin', $data['hora_fin']);
+        $stmt->bindParam(':idestado', $data['idestado']);
+        $stmt->bindParam(':idservicio', $data['idservicio']);
+        $stmt->bindParam(':asistio', $data['asistio']);
+        $stmt->bindParam(':idcita', $data['idcita']);
 
         // Si los valores de idarea o idsubarea son nulos, no los asignamos
         $stmt->bindValue(':idarea', isset($data['idarea']) ? $data['idarea'] : null, PDO::PARAM_INT);

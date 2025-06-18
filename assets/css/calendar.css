@@ -760,7 +760,7 @@ body {
   display: none;
   flex-direction: column;
   background: #fff;
-  overflow-y: scroll;
+  overflow-y: auto;
   position: absolute;
   max-height: 360px;
   width: 100%;

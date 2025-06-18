@@ -58,9 +58,8 @@ document.addEventListener('DOMContentLoaded', function () {
     $('.citas-container').on('click', '.botones-asistio', function (e) {
         let asistio = false;
         const idcita = $(this).data('id');
-        const botones = this;
 
-        asistio = e.target.id === "btnAsistio" ?? false;
+        asistio = e.target.closest('.boton-asistio').id === "btnAsistio" ?? false;
         api.obtenerCitas({ idcita }).then(cita => {
             cita.asistio = asistio;
             $.ajax({

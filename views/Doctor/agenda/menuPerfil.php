@@ -16,7 +16,7 @@ $especialista = $especialistaModel->obtenerEspecialistaPorId($idusuario);
     aria-expanded="false"
     style="border: none; background: transparent; gap:4px">
     <img
-      src="<?php echo htmlspecialchars($especialista['foto_especialista']); ?>"
+      src="<?php echo htmlspecialchars($especialista['foto_usuario']); ?>"
       alt="Foto del especialista"
       id="especialistaFoto"
       class="rounded-circle me-2"

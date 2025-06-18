@@ -11,10 +11,10 @@ $activeCalendario = (strpos($current_url, $base_url . 'views/Clinica/agenda/cale
 $activeEspecialista = (strpos($current_url, $base_url . 'views/Clinica/especialistas/index.php') === 0) ? 'active' : '';
 $activePagos = (strpos($current_url, $base_url . 'views/Clinica/pagos/index.php') === 0) ? 'active' : '';
 
-
 // Controlar visibilidad según rol
 // Si el rol NO es 'SuperUsuario', ocultar el menú (display:none)
 $displayUsuarios = ($rol_usuario === 'SuperUsuario') ? 'flex' : 'none';
+
 ?>
 
 
@@ -124,7 +124,7 @@ $displayUsuarios = ($rol_usuario === 'SuperUsuario') ? 'flex' : 'none';
           </div>
         </div>
 
-        <div class="caja-menu <?php echo $activeCalendario; ?>" onclick="window.location.href='<?= $base_url ?>views/Clinica/agenda/calendario.php'">
+        <div class="caja-menu <?php echo $activeCalendario; ?>" onclick="window.location.href='<?= $base_url ?>views/Clinica/agenda/calendario.php'" style="display: <?php echo strtolower($rol_usuario) === "especialista" ? 'none' : 'flex' ?>">
           <div class="svg-menu">
             <svg id="" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 17.84 17.85">
               <defs>
@@ -148,6 +148,32 @@ $displayUsuarios = ($rol_usuario === 'SuperUsuario') ? 'flex' : 'none';
             </svg>
           </div>
         </div>
+
+        <div class="caja-menu <?php echo $activeCalendario; ?>" onclick="window.location.href='<?= $base_url ?>views/Doctor/agenda/calendario.php'" style="display: <?php echo strtolower($rol_usuario) !== "especialista" ? 'none' : 'flex' ?>">
+          <div class="svg-menu">
+            <svg id="" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 17.84 17.85">
+              <defs>
+                <style>
+                  .cls-calendario {
+                    fill: #76869e;
+                    stroke-width: 0px;
+                  }
+                </style>
+              </defs>
+              <rect class="cls-calendario " x="8.23" y="8.02" width="1.39" height="1.39" />
+              <path class="cls-calendario" d="m15.75,1.39h-.84V0h-1.39v1.39H4.32V0h-1.39v1.39h-.84C.94,1.39,0,2.33,0,3.49v12.27c0,1.15.94,2.09,2.09,2.09h7.17c-.48-.4-.9-.87-1.24-1.39H2.09c-.38,0-.7-.31-.7-.7V6.55h15.06v1.46h0c.53.34,1,.76,1.39,1.25V3.49c0-1.15-.94-2.09-2.09-2.09Zm.7,3.76H1.39v-1.67c0-.38.31-.7.7-.7h.84v1.39h1.39v-1.39h9.2v1.39h1.39v-1.39h.84c.38,0,.7.31.7.7v1.67Z" />
+              <path class="cls-calendario" d="m13.13,8.44c-2.59,0-4.71,2.11-4.71,4.71s2.11,4.71,4.71,4.71,4.71-2.11,4.71-4.71-2.11-4.71-4.71-4.71Zm0,8.02c-1.83,0-3.31-1.49-3.31-3.31s1.49-3.31,3.31-3.31,3.31,1.49,3.31,3.31-1.49,3.31-3.31,3.31Z" />
+              <polygon class="cls-calendario" points="13.8 10.8 12.41 10.8 12.41 13.84 14.99 13.84 14.99 12.44 13.8 12.44 13.8 10.8" />
+              <rect class="cls-calendario " x="5.44" y="10.8" width="1.39" height="1.39" />
+              <rect class="cls-calendario " x="2.65" y="10.8" width="1.39" height="1.39" />
+              <rect class="cls-calendario " x="2.65" y="8.02" width="1.39" height="1.39" />
+              <rect class="cls-calendario " x="2.65" y="13.59" width="1.39" height="1.39" />
+              <rect class="cls-calendario " x="5.44" y="8.02" width="1.39" height="1.39" />
+              <rect class="cls-calendario " x="5.44" y="13.59" width="1.39" height="1.39" />
+            </svg>
+          </div>
+        </div>
+
 
         <div class="caja-menu <?php echo $activePagos; ?>"" onclick=" window.location.href='<?= $base_url ?>views/Clinica/pagos/index.php'">
    <div class=" svg-menu">

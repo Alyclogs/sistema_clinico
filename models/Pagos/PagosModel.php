@@ -10,106 +10,113 @@ class PagosModel
         $this->db = connectDatabase();
     }
 
-    public function buscarCitasPaciente($filtro = '')
-    {
-        try {
-            $pdo = connectDatabase();
-
-            $sql = "SELECT 
-    ROW_NUMBER() OVER (ORDER BY c.fecha ASC, c.hora_inicio ASC) AS orden,
-    c.idcita,
-    c.fecha,
-    c.hora_inicio,
-    c.hora_fin,
-
-    -- Datos del paciente
-    p.idpaciente,
-    p.nombres AS paciente_nombres,
-    p.apellidos AS paciente_apellidos,
-    p.dni AS paciente_dni,
-
-    -- Datos del apoderado (usuario asociado al paciente)
-    ua.idusuario AS apoderado_id,
-    ua.nombres AS apoderado_nombres,
-    ua.apellidos AS apoderado_apellidos,
-    ua.dni AS apoderado_dni,
-    ua.telefono AS apoderado_telefono,
-    ua.correo AS apoderado_correo,
-
-    -- Datos del especialista
-    e.idespecialista,
-    ue.nombres AS especialista_nombres,
-    ue.apellidos AS especialista_apellidos,
-
-    -- Área y subárea
-    a.idarea,
-    a.area,
-    sa.idsubarea,
-    sa.subarea,
-
-    -- Servicio
-    s.idservicio,
-    s.servicio,
-
-    -- Costo correspondiente (puede ser NULL si no hay coincidencia)
-    CASE 
-        WHEN c.idservicio = 1 AND cs.precio IS NOT NULL THEN cs.precio
-        ELSE s.precio
-    END AS costo,
-
-    -- Estado del pago según el idestado
-    CASE 
-        WHEN c.idestado = 4 THEN 'Cancelado'
-        WHEN c.idestado = 3 THEN 'Pendiente'
-        ELSE 'Otro'
-    END AS estado_pago
-
-FROM citas c
-INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
-INNER JOIN usuarios ua ON p.idusuario = ua.idusuario  -- Apoderado del paciente
-
-INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
-INNER JOIN usuarios ue ON e.idespecialista = ue.idusuario  -- Datos del especialista
-INNER JOIN areas a ON c.idarea = a.idarea
-LEFT JOIN subareas sa ON c.idsubarea = sa.idsubarea
-
--- Join con costo según subárea y hora dentro del rango
-LEFT JOIN costos_subareas cs 
-    ON cs.idsubarea = c.idsubarea
-    AND c.hora_inicio >= cs.hora_inicio 
-    AND c.hora_inicio <= cs.hora_fin
-
-INNER JOIN servicios s ON c.idservicio = s.idservicio
-
-WHERE 1";
-
-            // Filtro opcional
-            if (!empty($filtro)) {
-                $sql .= " AND (
-                p.nombres LIKE :filtro
-                OR p.apellidos LIKE :filtro
-                OR p.dni LIKE :filtro
-            )";
-            }
-
-            $sql .= " ORDER BY c.fecha asc, c.hora_inicio ASC";
-
-            $stmt = $pdo->prepare($sql);
-
-            if (!empty($filtro)) {
-                $filtro = '%' . $filtro . '%';
-                $stmt->bindParam(':filtro', $filtro, PDO::PARAM_STR);
-            }
-
-            $stmt->execute();
-            $citas = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            closeDatabase($pdo);
-            return $citas;
-        } catch (PDOException $e) {
-            die("Error al buscar citas: " . $e->getMessage());
+public function buscarCitasPaciente($filtro, $idestado = 3) // filtro obligatorio, idestado por defecto = 3
+{
+    try {
+        if (empty($filtro)) {
+            throw new InvalidArgumentException("El filtro es obligatorio.");
         }
+
+        $pdo = connectDatabase();
+
+        $sql = "SELECT  
+          LPAD( ROW_NUMBER() OVER (ORDER BY c.fecha ASC, c.hora_inicio ASC), 2, '0' ) AS orden,
+            c.idcita,
+            c.fecha,
+            c.hora_inicio,
+            c.hora_fin,
+
+            -- Datos del paciente
+            p.idpaciente,
+            p.nombres AS paciente_nombres,
+            p.apellidos AS paciente_apellidos,
+            p.dni AS paciente_dni,
+            p.foto AS paciente_foto,
+            p.fecha_nacimiento AS paciente_fecha,
+
+            -- Datos del apoderado
+            ua.idusuario AS apoderado_id,
+            ua.nombres AS apoderado_nombres,
+            ua.apellidos AS apoderado_apellidos,
+            ua.dni AS apoderado_dni,
+            ua.telefono AS apoderado_telefono,
+            ua.correo AS apoderado_correo,
+
+            -- Datos del especialista
+            e.idespecialista,
+            ue.nombres AS especialista_nombres,
+            ue.apellidos AS especialista_apellidos,
+
+            -- Datos del servicio, área y subárea
+            c.idservicio,
+            s.servicio AS servicio_nombre,
+            c.idarea,
+            a.area AS area_nombre,
+            c.idsubarea,
+            sub.subarea AS subarea_nombre,
+
+            -- Precio calculado
+            CASE 
+                WHEN c.idservicio = 1 THEN 
+                    (SELECT cs.precio 
+                     FROM costos_subareas cs
+                     WHERE cs.idsubarea = c.idsubarea
+                       AND c.hora_inicio BETWEEN cs.hora_inicio AND cs.hora_fin
+                     LIMIT 1)
+                WHEN c.idservicio = 2 THEN s.precio
+                ELSE 0
+            END AS costo,
+
+            -- Estado del pago
+            CASE 
+                WHEN c.idestado = 4 THEN 'Cancelado'
+                WHEN c.idestado = 3 THEN 'Pendiente'
+                ELSE 'Otro'
+            END AS estado_pago
+
+        FROM citas c
+
+        INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
+        INNER JOIN usuarios ua ON p.idusuario = ua.idusuario
+        INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
+        INNER JOIN usuarios ue ON e.idespecialista = ue.idusuario
+        LEFT JOIN servicios s ON c.idservicio = s.idservicio
+        LEFT JOIN areas a ON c.idarea = a.idarea
+        LEFT JOIN subareas sub ON c.idsubarea = sub.idsubarea
+
+        WHERE 
+            (p.nombres LIKE :filtro
+            OR p.apellidos LIKE :filtro
+            OR p.dni LIKE :filtro)
+            AND c.idestado = :idestado
+
+        GROUP BY c.idcita, c.fecha, c.hora_inicio, c.hora_fin, 
+                 p.idpaciente, ua.idusuario, e.idespecialista, s.idservicio,
+                 a.idarea, sub.idsubarea
+
+        ORDER BY c.fecha ASC, c.hora_inicio ASC";
+
+        $stmt = $pdo->prepare($sql);
+
+        $filtroParam = '%' . $filtro . '%';
+        $stmt->bindParam(':filtro', $filtroParam, PDO::PARAM_STR);
+        $stmt->bindParam(':idestado', $idestado, PDO::PARAM_INT);
+
+        $stmt->execute();
+        $citas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        closeDatabase($pdo);
+        return $citas;
+    } catch (PDOException $e) {
+        die("Error al buscar citas: " . $e->getMessage());
+    } catch (InvalidArgumentException $e) {
+        die("Error: " . $e->getMessage());
     }
+}
+
+
+
+
 
     public function obtenerModalidades()
     {

@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../../models/Especialistas/EspecialistaModel.php';
 $especialistaModel = new EspecialistaModel();
 $areas = $especialistaModel->obtenerAreas();
+$estados = $especialistaModel->obtenerEstados();
 
 
 $subareas = $especialistaModel->obtenersubareas(); // obtiene todas
@@ -26,23 +27,47 @@ if ($id) {
 
 
 ?>
-  <span class="title-span">Información General</span>
 
-<form id="formUsuario" class="mt-3">
+
+<form id="formUsuario" enctype="multipart/form-data" class="mt-3">
     
-  
-    
-   
-    <div class="row">
+   <div class="row">
+        <div class="col-3 flex-column  d-flex align-items-center justify-content-center g-3">
+            <div class="foto-user">
+            <img
+  id="prev-image"
+  src="<?php echo $usuario ? htmlspecialchars($usuario['foto_usuario']) : ''; ?>"
+  alt="Vista previa"
+  style="max-width: 100%; <?php echo $usuario && !empty($usuario['foto_usuario']) ? '' : 'display:none;'; ?> border-radius: 10px;"
+/>
+
+            </div>
+            
+            
+            <div class="btn-adjuntar" onclick="document.getElementById('fileInput').click();">
+                <span>Adjuntar Foto</span>
+            </div>
+            
+            
+            
+        <input type="file" id="fileInput"  name="foto" class="input-file" accept="image/*" style="display:none" onchange="previewImage(event)">
+            
+        </div>
+           
+           
         
-         <input type="hidden" id="idUsuario" name="idUsuario" value="<?php echo $usuario ? htmlspecialchars($usuario['idusuario']) : ''; ?>">
+        <div class="col-9">
+     
+                <div class="row mt-3">
+        
+         <input type="hidden" id="idUsuario" name="idUsuario" value="<?php echo $usuario ? htmlspecialchars($usuario['idespecialista']) : ''; ?>">
         <div class="col-md-6 mb-3">
             <label for="nombres" class="form-label">Nombres <span>*</span></label>
-            <input type="text" class="form-control" id="nombres" name="nombres" required pattern="[A-Za-z\s]+" title="Solo se permiten letras y espacios" value="<?php echo $usuario ? htmlspecialchars($usuario['nom_especialista']) : ''; ?>">
+            <input type="text" class="form-control" id="nombres" name="nombres" required  pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" title="Solo se permiten letras y espacios" value="<?php echo $usuario ? htmlspecialchars($usuario['nom_especialista']) : ''; ?>">
         </div>
         <div class="col-md-6 mb-3">
             <label for="apellidos" class="form-label">Apellidos<span>*</span></label>
-            <input type="text" class="form-control" id="apellidos" name="apellidos" required pattern="[A-Za-z\s]+" title="Solo se permiten letras y espacios" value="<?php echo $usuario ? htmlspecialchars($usuario['ape_especialista']) : ''; ?>">
+            <input type="text" class="form-control" id="apellidos" name="apellidos" required  pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" title="Solo se permiten letras y espacios" value="<?php echo $usuario ? htmlspecialchars($usuario['ape_especialista']) : ''; ?>">
         </div>
     </div>
     <div class="row">
@@ -53,11 +78,12 @@ if ($id) {
         
           <div class="col-md-6 mb-3">
            <label for="sexo" class="form-label">Sexo<span>*</span></label>
-            <select class="form-select" id="sexoUsuario" name="sexo" required>
-                  <option value="" disabled>Seleccione</option>
-                <option value="F">Femenino</option>
-                  <option value="M">Masculino</option>
-                </select>
+          <select class="form-select" id="sexoUsuario" name="sexo" required>
+    <option value="" disabled <?php echo empty($usuario['sexo_especialista']) ? 'selected' : ''; ?>>Seleccione</option>
+    <option value="F" <?php echo (isset($usuario['sexo_especialista']) && $usuario['sexo_especialista'] === 'F') ? 'selected' : ''; ?>>Femenino</option>
+    <option value="M" <?php echo (isset($usuario['sexo_especialista']) && $usuario['sexo_especialista'] === 'M') ? 'selected' : ''; ?>>Masculino</option>
+</select>
+
         </div>
         
         
@@ -67,38 +93,18 @@ if ($id) {
     
        <div class="row">
              <div class="col-md-6 mb-3">
-            <label for="telefono" class="form-label">Teléfono</label>
-            <input type="tel" class="form-control" id="telefono" name="telefono"  maxlength="9" pattern="[0-9]{9}" title="El teléfono debe tener exactamente 9 dígitos" value="<?php echo $usuario ? htmlspecialchars($usuario['telefono_especialista']) : ''; ?>">
+            <label for="telefono" class="form-label">Teléfono<span>*</span></label>
+            <input type="tel" class="form-control" id="telefono" name="telefono"  maxlength="9" required pattern="[0-9]{9}" title="El teléfono debe tener exactamente 9 dígitos" value="<?php echo $usuario ? htmlspecialchars($usuario['telefono_especialista']) : ''; ?>">
         </div>
         
      <div class="col-md-6 mb-3">
-        <label for="correo" class="form-label">Correo Electrónico</label>
-        <input type="email" class="form-control" id="correo" name="correo"  value="<?php echo $usuario ? htmlspecialchars($usuario['correo_especialista']) : ''; ?>">
+        <label for="correo" class="form-label">Correo Electrónico<span>*</span></label>
+        <input type="email" required class="form-control" id="correo" name="correo"  value="<?php echo $usuario ? htmlspecialchars($usuario['correo_especialista']) : ''; ?>">
     </div> </div>
     
     
    
-<div class="row">
-  <div class="col-md-6 mb-3">
-    <label>Servicios<span>*</span></label><br>
-    <?php foreach ($servicios as $servicio) { ?>
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox"
-               name="idServicio[]" 
-               id="servicio_<?php echo $servicio['idservicio']; ?>" 
-               value="<?php echo htmlspecialchars($servicio['idservicio']); ?>"
-               onchange="toggleAreaRow(this)">
-        <label class="form-check-label" for="servicio_<?php echo $servicio['idservicio']; ?>">
-          <?php echo htmlspecialchars($servicio['servicio']); ?>
-        </label>
-      </div>
-    <?php } ?>
-  </div>
 
-  <div class="col-md-6 mb-3" id="areasContainer">
-    <!-- Aquí se cargarán dinámicamente los selects de áreas + subáreas por servicio -->
-  </div>
-</div>
 
     
     
@@ -106,14 +112,16 @@ if ($id) {
     
     <div class="row">
         <div class="col-md-6 mb-3">
-        
-            <input type="hidden" class="form-control" id="usuario" name="especialista" required value="<?php echo $usuario ? htmlspecialchars($usuario['usuario']) : ''; ?>">
+          <label for="usuario" class="form-label">Nombre de usuario<span>*</span></label>
+            <input type="text" class="form-control" id="usuario" name="especialista"  required value="<?php echo $usuario ? htmlspecialchars($usuario['nombre_usuario']) : ''; ?>">
         </div>
         <div class="col-md-6 mb-3">
-      
+          <label for="password" class="form-label">Contraseña<span>*</span></label>
             <div class="input-group">
-                <input type="hidden" class="form-control" name="password" id="password" <?php echo $usuario ? '' : 'required'; ?> maxlength="8" value="">
-             
+                <input type="password" class="form-control" name="password" id="password" <?php echo $usuario ? '' : 'required'; ?> maxlength="8" value="">
+                 <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                    <i class="bi bi-eye" id="togglePasswordIcon"></i>
+                </button>
             </div>
            
         </div>
@@ -131,115 +139,44 @@ if ($id) {
     </div>
            <?php } ?>
     </div>
+        </div>
+    
+   
+</div>
    
 </form>
 <script>
-const subareasPorArea = <?php echo json_encode($subareasAgrupadas); ?>;
-const areas = <?php echo json_encode($areas); ?>;
+  function previewImage(event) {
+    const input = event.target;
+    const file = input.files[0];
 
-function toggleAreaRow(checkbox) {
-  const container = document.getElementById('areasContainer');
-  const servicioId = checkbox.value;
-  const existingDiv = document.getElementById('areaRow_' + servicioId);
-
-  if (checkbox.checked) {
-    if (!existingDiv) {
-      const divRow = document.createElement('div');
-      divRow.className = 'mb-4 border p-3 rounded';
-      divRow.id = 'areaRow_' + servicioId;
-
-      // Etiqueta servicio
-      const labelServicio = document.createElement('label');
-      labelServicio.className = 'form-label fw-bold';
-      labelServicio.textContent = `Área y Especialidades para servicio: ${checkbox.nextElementSibling.textContent}`;
-      divRow.appendChild(labelServicio);
-
-      // input hidden para idServicio[]
-      const inputServicio = document.createElement('input');
-      inputServicio.type = 'hidden';
-      inputServicio.name = 'idServicio[]';
-      inputServicio.value = servicioId;
-      divRow.appendChild(inputServicio);
-
-      // Select área con name idArea[servicioId]
-      const selectArea = document.createElement('select');
-      selectArea.className = 'form-select mt-2';
-      selectArea.name = `idArea[${servicioId}]`; // 💡 CLAVE
-      selectArea.required = true;
-      selectArea.onchange = function () { cargarSubareas(this, servicioId); };
-
-      const optionDefault = document.createElement('option');
-      optionDefault.value = '';
-      optionDefault.textContent = 'Seleccione una área';
-      optionDefault.disabled = true;
-      optionDefault.selected = true;
-      selectArea.appendChild(optionDefault);
-
-      areas.forEach(area => {
-        const opt = document.createElement('option');
-        opt.value = area.idarea;
-        opt.textContent = area.area;
-        selectArea.appendChild(opt);
-      });
-
-      divRow.appendChild(selectArea);
-
-      // Contenedor subáreas
-      const subareaContainer = document.createElement('div');
-      subareaContainer.id = 'subareasContainer_' + servicioId;
-      subareaContainer.className = 'mt-3';
-      divRow.appendChild(subareaContainer);
-
-      container.appendChild(divRow);
-    }
-  } else {
-    if (existingDiv) {
-      container.removeChild(existingDiv);
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = document.getElementById('prev-image');
+        img.src = e.target.result;
+        img.style.display = 'block'; // Mostrar la imagen
+      };
+      reader.readAsDataURL(file);
     }
   }
-}
-
-function cargarSubareas(select, servicioId) {
-  const areaId = select.value;
-  const subareaCont = document.getElementById('subareasContainer_' + servicioId);
-  subareaCont.innerHTML = '';
-
-  // Para servicio 2 no mostrar subáreas
-  if (parseInt(servicioId) === 2) {
-    return;
-  }
-
-  if (subareasPorArea[areaId]) {
-    const label = document.createElement('label');
-    label.className = 'form-label';
-    label.textContent = 'Especialidades (puede seleccionar más de una):';
-    subareaCont.appendChild(label);
-
-    subareasPorArea[areaId].forEach(sub => {
-      const divCheck = document.createElement('div');
-      divCheck.className = 'form-check';
-
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.className = 'form-check-input';
-      checkbox.name = `idSubArea[${servicioId}][]`; // 💡 CLAVE
-      checkbox.id = `subarea_${servicioId}_${sub.idsubarea}`;
-      checkbox.value = sub.idsubarea;
-
-      const labelCheck = document.createElement('label');
-      labelCheck.className = 'form-check-label';
-      labelCheck.htmlFor = checkbox.id;
-      labelCheck.textContent = sub.subarea;
-
-      divCheck.appendChild(checkbox);
-      divCheck.appendChild(labelCheck);
-
-      subareaCont.appendChild(divCheck);
-    });
-  }
-}
 </script>
-
+<script>
+    // Mostrar/ocultar contraseña
+    $(document).ready(function() {
+        $('#togglePassword').on('click', function() {
+            const passwordField = $('#password');
+            const icon = $('#togglePasswordIcon');
+            if (passwordField.attr('type') === 'password') {
+                passwordField.attr('type', 'text');
+                icon.removeClass('bi-eye').addClass('bi-eye-slash');
+            } else {
+                passwordField.attr('type', 'password');
+                icon.removeClass('bi-eye-slash').addClass('bi-eye');
+            }
+        });
+    });
+</script>
 <script>
     function generarNombreUsuarioYPassword() {
         const nombres = document.getElementById('nombres').value.trim();

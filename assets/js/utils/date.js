@@ -66,3 +66,10 @@ export function formatearFecha(fecha) {
     const dd = String(fecha.getDate()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}`;
 }
+
+export function ajustarFecha(fechaStr, dias) {
+    const [year, month, day] = fechaStr.split('-').map(Number);
+    const fecha = new Date(year, month - 1, day); // mes base 0
+    fecha.setDate(fecha.getDate() + dias);
+    return fecha.toISOString().split('T')[0];
+}

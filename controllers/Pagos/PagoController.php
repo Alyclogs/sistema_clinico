@@ -5,18 +5,20 @@ $modelo = new PagosModel();
 
 try {
     if (!isset($_GET['action'])) {
-        throw new Exception('Error: AcciÃ³n no especificada.');
+        throw new Exception('Error: Acci¨®n no especificada.');
   }
   
     $action = $_GET['action'];
 
     switch ($action) {
-        case 'buscar':
-         $filtro = $_GET['filtro'] ?? '';
-    $usuarios = $modelo->buscarCitasPaciente($filtro);
+      case 'buscar':
+   $filtro = $_GET['filtro'] ?? '';
+        $idestado = isset($_GET['idestado']) ? (int)$_GET['idestado'] : 3;
+    $usuarios = $modelo->buscarCitasPaciente($filtro, $idestado);
     echo json_encode($usuarios);
     exit;
-        break;
+    break;
+
         
         case 'create':
     $idsCitas = !empty($_POST['ids_citas']) ? explode(',', $_POST['ids_citas']) : [];
@@ -56,7 +58,7 @@ try {
     $success = false;
 }
 
-// Salida JSON estÃ¡ndar
+// Salida JSON est¨¢ndar
 header('Content-Type: application/json');
 echo json_encode([
     'success' => $success,

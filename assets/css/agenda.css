@@ -7,6 +7,22 @@
   color: #fff !important;
 }
 
+.modal-cita-header {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 15px;
+  margin-bottom: 28px;
+  align-items: center;
+  border-bottom: 0.25px solid #76869e35;
+}
+
+.subtitulo {
+  color: #76869e;
+  font-size: 18px;
+  font-weight: normal;
+  margin: 0;
+}
+
 .cita-container.cita-asistio .cita-content {
   background-color: #48b02c10;
 }
@@ -32,6 +48,7 @@
   justify-content: start;
   align-items: center;
   margin-bottom: 12px;
+  cursor: pointer;
 }
 
 .cita-grupos {
@@ -57,20 +74,8 @@
   margin-right: 16px;
 }
 
-.cita-content.cita-cancelado .cita-time {
-  border-right: 1px solid #48B02C;
-}
-
-.cita-content.cita-pendiente .cita-time {
-  border-right: 1px solid #f07e0b;
-}
-
-.cita-content.cita-asistio .cita-time {
-  border-right: 1px solid #48B02C;
-}
-
-.cita-content.cita-no-asistio .cita-time {
-  border-right: 1px solid #e5252a;
+.cita-content .cita-time {
+  border-right: 0.5px solid #76869e;
 }
 
 .cita-actual {
@@ -81,6 +86,38 @@
   align-items: center;
   justify-content: start;
   display: flex;
-  margin-bottom: 12px;
+  margin-bottom: 42px;
   gap: 12px;
+}
+
+.botones-asistio button {
+  width: 100%;
+  padding-block: 2px;
+  border: none;
+  justify-content: start;
+  display: flex;
+  align-items: center;
+}
+
+.botones-asistio button span {
+  justify-content: center;
+  color: #fff;
+  display: flex;
+  width: 100%;
+}
+
+.botones-asistio #btnAsistio {
+  background-color: #48B02C;
+}
+
+.botones-asistio #btnNoAsistio {
+  background-color: #e5252a;
+}
+
+.botones-asistio #btnAsistio:hover {
+  background-color: #3a9e1e;
+}
+
+.botones-asistio #btnNoAsistio:hover {
+  background-color: #ca171d;
 }

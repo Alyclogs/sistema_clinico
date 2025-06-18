@@ -1,4 +1,5 @@
-import { formatearHora12h } from "./date.js";
+import { formatearHora12h, formatearFecha, calcularEdad } from "./date.js";
+import api from "./api.js";
 
 export const estadosCita = { '3': 'pendiente', '4': 'cancelado', '5': 'anulado' }
 
@@ -64,7 +65,7 @@ function addCitaEvent(calendar, cita) {
         start: `${cita.fecha}T${horaIniRaw}`,
         end: `${cita.fecha}T${horaFinRaw}`,
         // NO background para que se muestre como evento normal
-        classNames: ['fc-slot-custom-content', 'cita-agendada-evento', cssEstado],
+        classNames: ['fc-slot-custom-content', 'cita-agendada-evento', 'evento-single', cssEstado],
         extendedProps: {
             cita: cita,
             tipo: 'cita-existente',
@@ -118,6 +119,147 @@ function addMultiplesCitasEvent(calendar, citas) {
             citas: citas,
         },
     });
+}
+
+export async function obtenerCitasEspecialista(idespecialista, fechaSeleccionada) {
+    console.log(fechaSeleccionada);
+    const citas = api.obtenerCitas({ idespecialista: idespecialista });
+    const citasHoyPromise = api.obtenerCitas({ idespecialista: idespecialista, filtro: { fecha: fechaSeleccionada } });
+    const citasContainer = document.querySelector('.citas-container');
+    citasContainer.innerHTML = '';
+    document.getElementById('subtituloCitas').textContent = fechaSeleccionada === formatearFecha(new Date()) ? 'Citas de hoy' : `Citas del día ${fechaSeleccionada}`
+
+    return Promise.all([citas, citasHoyPromise]).then(([citas, citasHoy]) => {
+        if (citas.length == 0) return;
+
+        if (citasHoy.length === 0) {
+            citasContainer.innerHTML += '<p class="mb-4">No hay citas para este día.</p>';
+        } else {
+            const ahora = new Date();
+            let citaActual = null;
+            let citasPasadas = [];
+
+            // Buscar la cita actual
+            citasHoy.forEach(cita => {
+                const fechaInicio = new Date(`${fechaSeleccionada}T${cita.hora_inicio}`);
+                const fechaFin = new Date(`${fechaSeleccionada}T${cita.hora_fin}`);
+
+                if (ahora >= fechaInicio && ahora < fechaFin && cita.asistio == null) {
+                    citaActual = cita;
+                }
+
+                if (ahora >= fechaFin) {
+                    citasPasadas.push(cita);
+                }
+            });
+
+            if (citaActual) {
+                const citaActualElement = crearCitaEspecialista(citaActual);
+                citaActualElement.classList.add('cita-actual');
+                citaActualElement.append(buildBotones(citaActual));
+                citasContainer.prepend(citaActualElement);
+
+                // Remover la cita actual del array para no duplicarla abajo
+                citasHoy = citasHoy.filter(c => c !== citaActual);
+            }
+
+            if (citasPasadas) {
+                citasHoy = citasHoy.filter(c => !citasPasadas.includes(c));
+            }
+
+            // Añadir el resto de citas
+            citasHoy.forEach(cita => {
+                const citaElement = crearCitaEspecialista(cita);
+                if (cita.asistio == true) {
+                    citaElement.classList.add('cita-asistio');
+                } else if (cita.asistio == false) {
+                    citaElement.classList.add('cita-no-asistio');
+                }
+                citasContainer.appendChild(citaElement);
+            });
+
+            if (citasPasadas) {
+                const citasSinMarcar = citasPasadas.filter(cita => cita.asistio == null);
+                if (citasSinMarcar) {
+                    citasSinMarcar.forEach(cita => {
+                        const citaSinMarcarElement = crearCitaEspecialista(cita);
+                        citaSinMarcarElement.append(buildBotones(cita));
+                        citasContainer.appendChild(citaSinMarcarElement);
+                    })
+                    citasPasadas = citasPasadas.filter(c => !citasSinMarcar.includes(c));
+                }
+                citasPasadas.forEach(cita => {
+                    const citaPasadaElement = crearCitaEspecialista(cita);
+                    if (cita.asistio == true) {
+                        citaPasadaElement.classList.add('cita-asistio');
+                    } else if (cita.asistio == false) {
+                        citaPasadaElement.classList.add('cita-no-asistio');
+                    }
+                    citasContainer.appendChild(citaPasadaElement);
+                })
+            }
+        }
+        //procesarYMostrarCitas(cal, citas, idespecialista);
+        return citas;
+    }).catch(error => {
+        citasContainer.innerHTML = '<div class="alert alert-danger">Error al obtener citas</div>';
+        console.error('Error al obtener citas:', error);
+    });
+}
+
+export function crearCitaEspecialista(cita) {
+    const estado = `cita-${estadosCita[cita.idestado]}`;
+    const asistio = cita.asistio == true ? 'cita-asistio' : cita.asistio == false ? 'cita-no-asistio' : null;
+    const citaElement = document.createElement('div');
+    citaElement.className = `cita-container`;
+    citaElement.innerHTML = `<div class="cita-content ${estado} ${asistio}" data-id="${cita.idcita}">
+    <div class="cita-grupos" style="justify-content: space-between";>
+    <div class="cita-grupo">
+                <div class="cita-time">
+        <span>${formatearHora12h(cita.hora_inicio)}</span>
+        <span>${formatearHora12h(cita.hora_fin)}</span>
+    </div>
+    <div class="cita-paciente">
+        <span>${cita.paciente_nombres} ${cita.paciente_apellidos}</span>
+    </div></div>
+    <div class="cita-grupo">
+    <div class="cita-estado">
+        ${getSVGCita(asistio, 'big')}
+    </div></div></div></div>`;
+    return citaElement;
+}
+
+function buildBotones(cita) {
+    const botonesAsistio = document.createElement('div');
+    botonesAsistio.className = 'botones-asistio';
+    botonesAsistio.dataset.id = cita.idcita;
+    botonesAsistio.innerHTML = `
+                <button id="btnAsistio" class="btn btn-success boton-asistio">
+<svg id="agenda_especialista" data-name="agenda especialista" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9.14 6.74" style="width: 9px; height: 9px">
+  <defs>
+    <style>
+      .cls-100 {
+        fill: #fff;
+        fill-rule: evenodd;
+      }
+    </style>
+  </defs>
+  <path class="cls-100" d="M2.61,6.05L.25,3.53C0,3.25-.08,2.84.1,2.51c.3-.55,1.01-.6,1.4-.19l1.83,1.96,2.9-2.71s.05-.05.08-.07l1.35-1.26c.27-.26.69-.33,1.01-.15.55.3.6,1.01.19,1.4l-4.17,3.89h0s-1.44,1.34-1.44,1.34l-.64-.68Z"/>
+</svg>
+                <span>Asistió</span></button>
+                <button id="btnNoAsistio" class="btn btn-danger boton-asistio">
+<svg id="agenda_especialista" data-name="agenda especialista" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6.74 6.74" style="width: 9px; height: 9px">
+  <defs>
+    <style>
+      .cls-102 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <path class="cls-102" d="M6.38,6.68c-.24.11-.48.06-.72-.18-.71-.71-1.42-1.41-2.12-2.13-.13-.13-.2-.15-.34,0-.71.73-1.43,1.44-2.16,2.16-.22.22-.48.26-.72.13-.24-.13-.35-.37-.31-.65.03-.15.12-.26.22-.36.71-.71,1.41-1.42,2.13-2.12.14-.14.13-.21,0-.34C1.63,2.48.91,1.75.18,1.02-.03.81-.06.5.1.27.26.03.55-.06.82.04c.12.04.2.13.28.21.69.69,1.38,1.37,2.06,2.07.15.15.22.18.39,0,.69-.72,1.41-1.42,2.12-2.13.18-.18.39-.25.63-.19.22.06.35.23.42.45.01.04,0,.08.01.1,0,.25-.12.4-.26.54-.7.69-1.39,1.39-2.09,2.08-.15.14-.14.22,0,.36.72.71,1.43,1.42,2.14,2.14.33.34.26.81-.15,1Z"/>
+</svg>
+                <span>No asistió</span></button>`;
+    return botonesAsistio;
 }
 
 function getSVGPendiente(size = "small") {

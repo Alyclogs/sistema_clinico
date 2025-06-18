@@ -67,20 +67,33 @@ body {
 .minicalendar-button {
   flex: 1;
   position: relative;
+  display: flex;
+  justify-content: end;
+}
+
+#btnAbrirCalendarioCita {
+  border-radius: 35px;
+  background-color: #f07e0b;
+  padding: 8px;
+  height: 32px;
+  width: 32px;
+  justify-content: center;
+  align-items: center;
+  display: flex;
 }
 
 .minicalendar-modal {
   display: none;
   flex-direction: column;
   background: #fff;
-  width: 400px;
-  height: 340px;
+  width: 300px;
   overflow: hidden;
   position: absolute;
-  padding: 18px;
+  padding: 12px;
   z-index: 1000;
   border-radius: 6px;
   box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);
+  top: 2.3rem;
 }
 
 .cita-chip-buttons .btn-editar-horario.btn-editando {
@@ -143,18 +156,50 @@ body {
   overflow-x: auto;
 }
 
-#mini-calendar .fc-daygrid-day {
+#mini-calendar .fc-daygrid-day,
+#mini-calendar-cita .fc-daygrid-day {
   border: none !important;
   font-size: 14px;
 }
 
-#mini-calendar table {
+#mini-calendar table,
+#mini-calendar-cita table {
   border: none !important;
+  font-size: 12px;
 }
 
 #mini-calendar td,
-#mini-calendar th {
+#mini-calendar th,
+#mini-calendar-cita td,
+#mini-calendar-cita th {
   border: none !important;
+  font-size: 12px;
+}
+
+#mini-calendar thead,
+#mini-calendar-cita thead,
+#mini-calendar tbody,
+#mini-calendar-cita tbody {
+  font-size: 12px;
+}
+
+#mini-calendar .fc,
+.fc *,
+.fc ::after,
+.fc ::before {
+  font-size: 12px;
+}
+
+#mini-calendar-cita .fc,
+.fc *,
+.fc ::after,
+.fc ::before {
+  font-size: 12px;
+}
+
+#mini-calendar a.fc .fc-col-header-cell-cushion,
+#mini-calendar-modal a.fc .fc-col-header-cell-cushion {
+  font-size: 12px !important;
 }
 
 .fc-scroller-harness .fc-scroller {
@@ -176,6 +221,7 @@ body {
 .fc .fc-daygrid-day-number {
   color: #76869e;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .fc .fc-timegrid .fc-daygrid-body {
@@ -194,16 +240,29 @@ body {
   padding: 0px 10px;
 }
 
+.fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events {
+  min-height: 0.5rem;
+}
+
 #calendar .fc-theme-standard td,
 .fc-theme-standard th {
   border: 1px solid var(--border-color);
 }
 
-a.fc-col-header-cell-cushion {
+#calendar a.fc-col-header-cell-cushion {
   text-decoration: none;
   color: #76869e;
   font-weight: 700;
   font-size: 14px;
+  text-transform: uppercase;
+}
+
+#mini-calendar a.fc-col-header-cell-cushion,
+#mini-calendar-cita a.fc-col-header-cell-cushion {
+  text-decoration: none;
+  color: #76869e;
+  font-weight: 700;
+  font-size: 12px;
   text-transform: uppercase;
 }
 
@@ -229,14 +288,16 @@ a.fc-col-header-cell-cushion {
   font-weight: bold;
 }
 
-#mini-calendar .fc-header-toolbar {
+#mini-calendar .fc-header-toolbar,
+#mini-calendar-cita .fc-header-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
 }
 
-#mini-calendar .fc-header-toolbar .fc-button {
+#mini-calendar .fc-header-toolbar .fc-button,
+#mini-calendar-cita .fc-header-toolbar .fc-button {
   background: none;
   border: none;
   font-size: 1rem;
@@ -244,11 +305,13 @@ a.fc-col-header-cell-cushion {
   padding: 0 0.5rem;
 }
 
-#mini-calendar .fc-header-toolbar .fc-button:hover {
+#mini-calendar .fc-header-toolbar .fc-button:hover,
+#mini-calendar-cita .fc-header-toolbar .fc-button:hover {
   color: #76869e;
 }
 
-#mini-calendar .fc-header-toolbar .fc-toolbar-title {
+#mini-calendar .fc-header-toolbar .fc-toolbar-title,
+#mini-calendar-cita .fc-header-toolbar .fc-toolbar-title {
   font-size: 1rem;
   font-weight: 600;
 }
@@ -636,7 +699,7 @@ a.fc-col-header-cell-cushion {
   font-weight: 400;
 }
 
-.fc-event.fc-slot-custom-content.cita-agendada-evento {
+.fc-event.cita-agendada-evento {
   background: none;
   border: none;
 }
@@ -653,20 +716,24 @@ a.fc-col-header-cell-cushion {
 }
 
 .cita-agendada-evento.fc-event {
+  justify-content: center;
+}
+
+.cita-agendada-evento.evento-single {
   justify-content: start;
 }
 
-.cita-agendada-evento.cita-pendiente.fc-event {
+.cita-agendada-evento.evento-single.cita-pendiente.fc-event {
   background: #f07e0b12 !important;
   border-left: 5px solid #f07e0b;
 }
 
-.cita-agendada-evento.cita-cancelado.fc-event {
+.cita-agendada-evento.evento-single.cita-cancelado.fc-event {
   background: #48b02c10 !important;
   border-left: 5px solid #48b02c;
 }
 
-.cita-agendada-evento.cita-anulado.fc-event {
+.cita-agendada-evento.evento-single.cita-anulado.fc-event {
   background: #e5252a12 !important;
   border-left: 5px solid #e5252a;
 }

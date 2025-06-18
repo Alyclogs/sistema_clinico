@@ -5,8 +5,8 @@ require_once __DIR__ . '/../../config/database.php';
 
 class UsuarioModel
 {
-    
-     private $baseurl = "https://neuroeduca.edu.pe/SistemaClinico/";
+
+    private $baseurl = "http://localhost/SistemaClinico/";
     public function verificarUsuario($usuario, $password)
     {
         try {
@@ -183,63 +183,63 @@ ORDER BY u.idUsuario DESC;
     }
 
     public function guardarUsuario($nombres, $apellidos, $dni, $telefono, $correo, $idestado, $idrol, $usuario, $passwordHash, $sexo)
-{
-       $baseurl = $this->baseurl;
-       
-    $pdo = connectDatabase();
+    {
+        $baseurl = $this->baseurl;
 
-    // Avatares seg��n sexo
-    $imagenesMujeres = [
-     $baseurl . "assets/img/area2mujer.png",
-        $baseurl . "assets/img/area1mujer.png",
-       
-    ];
+        $pdo = connectDatabase();
 
-    $imagenesHombres = [
-         $baseurl . "assets/img/area2hombre.png",
-         $baseurl . "assets/img/area1hombre.png",
-    ];
+        // Avatares seg��n sexo
+        $imagenesMujeres = [
+            $baseurl . "assets/img/area2mujer.png",
+            $baseurl . "assets/img/area1mujer.png",
 
-    // Seleccionar imagen aleatoria seg��n sexo
-    if (strtolower($sexo) === 'F') {
-        $foto = $imagenesMujeres[array_rand($imagenesMujeres)];
-    } else {
-        $foto = $imagenesHombres[array_rand($imagenesHombres)];
-    }
+        ];
 
-    try {
-        $stmt = $pdo->prepare("
+        $imagenesHombres = [
+            $baseurl . "assets/img/area2hombre.png",
+            $baseurl . "assets/img/area1hombre.png",
+        ];
+
+        // Seleccionar imagen aleatoria seg��n sexo
+        if (strtolower($sexo) === 'F') {
+            $foto = $imagenesMujeres[array_rand($imagenesMujeres)];
+        } else {
+            $foto = $imagenesHombres[array_rand($imagenesHombres)];
+        }
+
+        try {
+            $stmt = $pdo->prepare("
             INSERT INTO usuarios 
                 (nombres, apellidos, dni, telefono, correo, idestado, idrol, usuario, password, foto , sexo)
             VALUES 
                 (:nombres, :apellidos, :dni, :telefono, :correo, :idestado, :idrol, :usuario, :password, :foto , :sexo)
         ");
 
-        $executed = $stmt->execute([
-            'nombres' => $nombres,
-            'apellidos' => $apellidos,
-            'dni' => $dni,
-            'telefono' => $telefono,
-            'correo' => $correo,
-            'idestado' => $idestado,
-            'idrol' => $idrol,
-            'usuario' => $usuario,
-            'password' => $passwordHash,
-            'foto' => $foto,
-             'sexo' => $sexo,
-        ]);
+            $executed = $stmt->execute([
+                'nombres' => $nombres,
+                'apellidos' => $apellidos,
+                'dni' => $dni,
+                'telefono' => $telefono,
+                'correo' => $correo,
+                'idestado' => $idestado,
+                'idrol' => $idrol,
+                'usuario' => $usuario,
+                'password' => $passwordHash,
+                'foto' => $foto,
+                'sexo' => $sexo,
+            ]);
 
-        if ($executed) {
-            return $pdo->lastInsertId(); // Retornar el ID del usuario insertado
-        } else {
-            throw new Exception("Error al insertar el usuario en la base de datos.");
+            if ($executed) {
+                return $pdo->lastInsertId(); // Retornar el ID del usuario insertado
+            } else {
+                throw new Exception("Error al insertar el usuario en la base de datos.");
+            }
+        } catch (PDOException $e) {
+            throw $e;
+        } finally {
+            closeDatabase($pdo);
         }
-    } catch (PDOException $e) {
-        throw $e;
-    } finally {
-        closeDatabase($pdo);
     }
-}
 
 
 

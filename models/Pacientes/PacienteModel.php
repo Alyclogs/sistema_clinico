@@ -4,7 +4,7 @@ require_once __DIR__ . '/../Pacientes/PacienteModel.php';
 require_once __DIR__ . '/../Users/UserModel.php';
 class PacientesModel
 {
-    private $baseurl = "https://neuroeduca.edu.pe/SistemaClinico/";
+    private $baseurl = "http://localhost/SistemaClinico/";
     private $db;
     public function __construct()
     {

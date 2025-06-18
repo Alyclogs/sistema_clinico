@@ -15,6 +15,7 @@ function getInitials(nombre, apellido) {
     let a = apellido ? apellido.trim()[0] : '';
     return (n + a).toUpperCase();
 }
+
 function mostrarMensajeFlotante(msg, exito = false) {
     let div = document.getElementById('mensajeFlotante');
     if (div) div.remove();
@@ -36,6 +37,7 @@ function mostrarMensajeFlotante(msg, exito = false) {
         div.remove();
     }, 2200);
 }
+
 function fetchUsers() {
     $.get(baseurl + "controllers/Especialistas/EspecialistaController.php?action=read", function (data) {
         let html = '';
@@ -44,7 +46,7 @@ function fetchUsers() {
             const initials = getInitials(especialista.nombres, especialista.apellidos);
             html += `<tr>
                         <td style="display:flex;align-items:center;gap:8px;border:none">
-                            <div class="avatar-iniciales" style="background:${color};"><span>${initials}</span></div>
+                           <img class="avatar-iniciales" src="${especialista.foto}">
                             <b>${especialista.nombres} ${especialista.apellidos}</b>
                         </td>
                         <td>${especialista.dni}</td>
@@ -64,7 +66,7 @@ function fetchUsers() {
         $(".td-botones").each(function () {
             var id = $(this).data('id');
             var nombre = $(this).data('nombre');
-            $.get(baseurl + 'components/botonesEspecialista.html', function (btnHtml) {
+            $.get(baseurl + 'assets/js/especialistas/botonesEspecialista.html', function (btnHtml) {
                 btnHtml = btnHtml.replace(/\$\{IDUSUARIO\}/g, id);
                 btnHtml = btnHtml.replace(/\$\{NOMBREUSUARIO\}/g, nombre);
                 $(this).html(btnHtml);
@@ -74,24 +76,11 @@ function fetchUsers() {
 }
 
 $(document).ready(function () {
-    const horarioModal = new bootstrap.Modal(document.getElementById('horarioModal'));
+    // Inicializar los modales correctamente
+    const usuarioModal = new bootstrap.Modal(document.getElementById('usuarioModal'));
+    const horarioModal = new bootstrap.Modal(document.getElementById('horarioModal')); // Inicializar horarioModal
+    const servicioModal = new bootstrap.Modal(document.getElementById('servicioModal')); // Inicializar servicioModal
 
-    // Delegación de evento por si el botón se carga dinámicamente
-    $(document).on('click', '.btn-horario', function () {
-
-        $.get('formHorario.php')
-            .done(function (formHtml) {
-                console.log("Contenido recibido:", formHtml);
-                $('#horarioModalBody').html(formHtml);
-                horarioModal.show();
-            })
-            .fail(function () {
-                alert("Error cargando el formulario.");
-            });
-    });
-});
-
-$(document).ready(function () {
     fetchUsers();
 
     $('#inputBuscarUsuario').on('input', function () {
@@ -103,20 +92,14 @@ $(document).ready(function () {
         }
     });
 
-    const usuarioModal = new bootstrap.Modal(document.getElementById('usuarioModal'));
-
-
-
     // Abrir modal para AGREGAR usuario
     $('.btn-add-user').on('click', function () {
         $('#usuarioModalLabel').text('Agregar Nuevo Usuario');
         $.get('formEspecialistas.php', function (formHtml) {
             $('#usuarioModalBody').html(formHtml);
-            $('#usuarioModal').modal('show');
+            usuarioModal.show(); // Mostrar el modal de usuario
         });
     });
-
-
 
     // Abrir modal para EDITAR usuario
     $('#tablaEspecialistasBody').on('click', '.btn-edit', function () {
@@ -124,7 +107,7 @@ $(document).ready(function () {
         $('#usuarioModalLabel').text('Editar Usuario (ID: ' + userId + ')');
         $.get('formEspecialistas.php', { id: userId }, function (formHtml) {
             $('#usuarioModalBody').html(formHtml);
-            $('#usuarioModal').modal('show');
+            usuarioModal.show(); // Mostrar el modal de usuario
         });
     });
 
@@ -132,7 +115,7 @@ $(document).ready(function () {
     $(document).on('click', '#btnGuardarUsuario', function () {
         const formUsuario = $('#formUsuario');
         if (formUsuario[0].checkValidity()) {
-            const formData = formUsuario.serialize();
+            const formData = new FormData(formUsuario[0]);
             const userId = $('#idUsuario').val();
             let url, action;
             if (userId) {
@@ -147,14 +130,12 @@ $(document).ready(function () {
                 url: url,
                 data: formData,
                 dataType: 'json',
+                processData: false, // ✅ importante
+                contentType: false, // ✅ importante
                 success: function (response) {
                     mostrarMensajeFlotante(response.message, response.success);
-
                     setTimeout(function () {
-                        usuarioModal.hide();
-
-
-                        // ✅ Redirección si fue exitoso
+                        usuarioModal.hide(); // Ocultar modal
                         if (response.success) {
                             window.location.href = baseurl + 'views/Clinica/especialistas/index.php';
                         }
@@ -170,26 +151,98 @@ $(document).ready(function () {
         }
     });
 
-    // Eliminar usuario 
-    $('#tablaUsuariosBody').on('click', '.btn-delete', function () {
-        const userId = $(this).data('id');
-        const nombreUsuario = $(this).data('nombre');
-        if (confirm(`¿Está seguro de que desea eliminar del sistema a ${nombreUsuario}?`)) {
+    $(document).on('click', '#btnGuardarHorario', function () {
+        const form = $('#formHorario');
+        const formData = form.serialize();
+        const url = baseurl + 'controllers/Especialistas/EspecialistaController.php?action=guardarHorario';
+
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: formData,
+            dataType: 'json',
+            success(response) {
+                mostrarMensajeFlotante(response.message, response.success);
+                setTimeout(() => {
+                    horarioModal.hide(); // Ocultar el modal de horario
+                    if (response.success) {
+                        window.location.href = baseurl + 'views/Clinica/especialistas/index.php';
+                    }
+                }, 1000);
+            },
+            error(jqXHR, textStatus, errorThrown) {
+                console.error('Error en la solicitud AJAX:', textStatus, errorThrown);
+                console.error('Respuesta del servidor:', jqXHR.responseText);
+            }
+        });
+    });
+
+    $(document).on('click', '#btnGuardarServicios', function (e) {
+        e.preventDefault(); // Detiene el envío real del formulario
+
+        const formServicios = $('#servicioForm');
+
+        if (formServicios[0].checkValidity()) {
+            const formData = formServicios.serialize();
+            const url = baseurl + 'controllers/Especialistas/EspecialistaController.php?action=guardarServicios';
+
             $.ajax({
                 type: 'POST',
-                url: baseurl + 'controllers/Users/UserController.php?action=delete&id=' + userId,
-                data: { idUsuario: userId },
+                url: url,
+                data: formData,
                 dataType: 'json',
                 success: function (response) {
-                    alert(response.message);
-                    fetchUsers();
+                    mostrarMensajeFlotante(response.message, response.success);
+                    setTimeout(function () {
+                        servicioModal.hide(); // Ocultar el modal de servicio
+                        if (response.success) {
+                            window.location.href = baseurl + 'views/Clinica/especialistas/index.php';
+                        }
+                    }, 1000);
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     console.error('Error en la solicitud AJAX:', textStatus, errorThrown);
                     console.error('Respuesta del servidor:', jqXHR.responseText);
                 }
             });
+        } else {
+            formServicios[0].reportValidity();
         }
+    });
+
+    $(document).on('click', '.btn-horario', function () {
+        var idUsuario = $(this).data('id'); // Captura el ID del botón
+        $.get('formHorario.php', { id: idUsuario }) // Envíalo como parámetro GET
+            .done(function (formHtml) {
+                $('#horarioModalBody').html(formHtml); // Carga el contenido en horarioModalBody
+                horarioModal.show(); // Muestra el modal de horario
+            })
+            .fail(function () {
+                alert("Error cargando el formulario.");
+            });
+    });
+
+    $(document).on('click', '.btn-servicio', function () {
+        var idUsuario = $(this).data('id'); // Captura el ID del botón
+        $.get('formServicios.php', { id: idUsuario }) // Envíalo como parámetro GET
+            .done(function (formHtml) {
+                $('#servicioModalBody').html(formHtml); // Carga el contenido en servicioModalBody
+                servicioModal.show(); // Muestra el modal de servicio
+            })
+            .fail(function () {
+                alert("Error cargando el formulario.");
+            });
+    });
+
+
+    document.getElementById('closeHorarioModal').addEventListener('click', function () {
+        horarioModal.hide();
+        location.reload();  // Recargar la págin
+    });
+
+    document.getElementById('btnCancelarHorario').addEventListener('click', function () {
+        horarioModal.hide();
+        location.reload();
     });
 });
 
@@ -211,9 +264,7 @@ function buscarUsuarios(filtro) {
                         <td class="td-botones" data-id="${usuario.idusuario}"></td>
                     </tr>`;
         });
-
         $("#tablaUsuariosBody").html(html);
-
         $(".td-botones").each(function () {
             var id = $(this).data('id');
             $.get(baseurl + 'assets/js/usuarios/botonesUsuario.html', function (btnHtml) {

@@ -3,114 +3,130 @@
     src: url('fonts/Type Machine.ttf') format('truetype');
 }
 
-.pagos-tablas{
-    width:60%;
+.pagos-tablas {
+    width: 70%;
 }
 
-.caja-general-ticket{
-      width: 40%;
-    display: flex
-;
+.caja-general-ticket {
+    width: 30%;
+    display: flex;
     justify-content: center;
 }
 
-.info-paciente{
-  width: max-content;
+.info-paciente {
+    width: 246px;
     background: #f07e0b;
     padding: 5px 15px;
-    border-radius: 10px;
-       display: flex
-;
+    border-radius: 15px;
+    display: flex;
     align-items: center;
-    gap: 10px;
-    
+    gap: 2px;
+    flex-direction: column;
+    height: 367px;
+    align-items: center;
+    justify-content: center;
 }
 
-.container-tabla-pagos{
-        margin-top: 10px;
+
+.container-tabla-pagos {
+    margin-top: 10px;
     background: #fff;
     padding: 10px 20px;
     border-radius: 20px;
 }
-.info-paciente svg{
-width:14px;    
+
+.info-paciente svg {
+    width: 14px;
 }
 
-.info-paciente span{
-     color:#fff;
-    font-weight:400;
-    font-size:14px;
+.info-paciente span {
+    color: #fff;
+    font-weight: 400;
+    font-size: 14px;
 }
 
-.table-pagos th{
-      color:#f07e0b;
-    font-weight:700;
-    font-size:14px;
-    
+.table-pagos th {
+    color: #f07e0b;
+    font-weight: 700;
+    font-size: 14px;
+
 }
 
-.table-pagos th span{
-    border-bottom:1px solid #f07e0b !important;
+.table-pagos th span {
+    border-bottom: 1px solid #f07e0b !important;
 }
 
-.table-pagos tbody tr{
+.table-pagos tbody tr {
     background: transparent !important;
 }
 
-.table-pagos tbody td{
-    
-    font-size:14px;
-    color:#76869e;
-     font-weight:500;
+.table-pagos tbody td {
+
+    font-size: 14px;
+    color: #76869e;
+    font-weight: 500;
 }
 
-.estado-pendiente{
-    color:#c42d35 !important;
-  
+.estado-pendiente {
+    color: #c42d35 !important;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
-.estado-pendiente svg{
-    width:14px;
+.estado-pendiente svg {
+    width: 14px;
 }
 
-.estado-cancelado{
-    color:#48b02c !important;
-  
+.estado-cancelado {
+    color: #48b02c !important;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
-.estado-cancelado svg{
-    width:14px;
+.estado-cancelado svg {
+    width: 14px;
 }
 
-.circulo-check{
+.circulo-check {
     border: 0.5px solid #76869e;
-    width:20px;
-    height:20px;
-    border-radius:50%;
-    
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+
 
 }
 
-.circulo-check.activo{
- 
-    background:#76869e;
+.circulo-check.activo {
+
+    background-color: #F07E0B;
+    border: none;
 }
 
-.encabezado-ticket p{
-    color:#76869e;
-    font-size:14px;
-    font-weight:600;
-    margin:0;text-align:center;
+.circulo-check:focus {
+    outline: none;
+    box-shadow: none;
 }
 
 
 
-.papel-ticket{
-    height:auto;
+.encabezado-ticket p {
+    color: #76869e;
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+    text-align: center;
+}
+
+
+
+.papel-ticket {
+    height: auto;
     border: 0.25px solid #59636d;
-    background:#fff;
+    background: #fff;
     font-family: 'Type Machine', sans-serif;
-    
+
 }
 
 .cabeza-ticket {
@@ -118,168 +134,172 @@ width:14px;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-        padding: 15px;
-}
-.cabeza-ticket span{
-    font-size:12px;
-    font-weight:400;
-    color:#59636d;
+    padding: 15px;
 }
 
-.codigo-ticket{
+.cabeza-ticket span {
+    font-size: 12px;
+    font-weight: 400;
+    color: #59636d;
+}
+
+.codigo-ticket {
     padding: 15px;
     border: 0.7px dashed #59636d;
     border-left: none;
     border-right: none;
-    display: flex
-;
+    display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
 }
 
-.codigo-ticket span{
-    font-size:12px;
-    font-weight:400;
-    color:#59636d;
+.codigo-ticket span {
+    font-size: 12px;
+    font-weight: 400;
+    color: #59636d;
 }
 
 
-.nombres-ticket span{
-      font-size:12px;
-    font-weight:400;
-    color:#59636d;
+.nombres-ticket span {
+    font-size: 12px;
+    font-weight: 400;
+    color: #59636d;
 }
 
-.nombres-ticket{
-    display: flex
-;
+.nombres-ticket {
+    display: flex;
     flex-direction: column;
     padding: 20px;
 }
 
-.encabezado-tabla-ticket{
-         display: flex
-;
+.encabezado-tabla-ticket {
+    display: flex;
     align-items: center;
-   justify-content: space-between;
+    justify-content: space-between;
     border: 0.7px dashed #59636d;
     border-left: none;
     border-right: none;
     width: 100%;
 }
 
-.ancho-encabezado{
-    width:20%;
+.ancho-encabezado {
+    width: 20%;
 }
 
-.encabezado-tabla{
-      padding: 15px;
-    display: flex
-;
+.encabezado-tabla {
+    padding: 15px;
+    display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.encabezado-tabla span{
-     font-size:12px;
-    font-weight:400;
-    color:#59636d;
-    text-align:center;
+.encabezado-tabla span {
+    font-size: 12px;
+    font-weight: 400;
+    color: #59636d;
+    text-align: center;
 }
 
-.cantidad-producto{
-    display:flex;
-   
-}
-.span-caja{
-    padding:10px 15px 0px 15px;
-    display:flex;
-}
-.span-caja span{
-       font-size:12px;
-    font-weight:400;
-    color:#59636d;
-}
-
-.ancho-producto{
-    width:80%;
-}
-
-.caja-cantidad{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-
-.caja-cantidad span{
-    text-align:center;
-}
-
-
-.precios-producto{
-        display: flex
-;
-     justify-content: space-between;
+.cantidad-producto {
+    display: flex;
 
 }
 
+.span-caja {
+    padding: 10px 15px 0px 15px;
+    display: flex;
+}
 
-.span-caja-precio{
-    align-items:center;
-    justify-content:center;
+.span-caja span {
+    font-size: 12px;
+    font-weight: 400;
+    color: #59636d;
+}
+
+.ancho-producto {
+    width: 80%;
+}
+
+.caja-cantidad {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.caja-cantidad span {
+    text-align: center;
 }
 
 
-.total-tabla-ticket{
-    display:flex;
+.precios-producto {
+    display: flex;
+    justify-content: space-between;
+
+}
+
+
+.span-caja-precio {
+    align-items: center;
+    justify-content: center;
+}
+
+
+.total-tabla-ticket {
+    display: flex;
     justify-content: space-between;
 }
 
 
-.ancho-total{
-    width:60%;
+.ancho-total {
+    width: 60%;
 }
 
-.titulo-total{
+.titulo-total {
     justify-content: start;
     padding: 5px 15px;
 }
 
-.caja-total-ticket{
-        margin: 15px 0px;
-            border: 0.7px dashed #59636d;
+.caja-total-ticket {
+
+    border: 0.7px dashed #59636d;
     border-left: none;
     border-right: none;
-        padding: 15px 0px;
+    padding: 15px 0px;
+    border-top: none;
 }
 
-.ancho-monto{
-    width:100%;
+.ancho-monto {
+    width: 100%;
 }
 
 .gracias-ticket {
-display: flex
-;
+    display: flex;
     align-items: center;
     justify-content: center;
     border-bottom: 0.7px dashed #59636d;
-    padding-bottom: 15px;
+    padding: 20px;
 }
 
+.caja-descripcion-tabla {
+    padding: 15px 0px;
+    border-bottom: 0.7px dashed #59636d;
+}
 
 .gracias-ticket span {
     font-size: 12px;
     font-weight: 400;
     color: #59636d;
 }
-.caja-imagen-qr{
-    display:flex;
-    align-items:center;
-    justify-content:center;
+
+.caja-imagen-qr {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 
-.btn-pagar{
+.btn-pagar {
     background: #f07e0b;
     color: #fff;
     font-size: 14px;
@@ -289,39 +309,42 @@ display: flex
     border-radius: 5px;
 }
 
-.encabezado-medios-pagos span{
-    color:#76869e;
-    font-size:20px;
-    font-weight:700;
+.encabezado-medios-pagos span {
+    color: #76869e;
+    font-size: 22px;
+    font-weight: 700;
 }
-.form-row{
+
+.fondo-blanco-form {
+    background: #fff;
+    gap: 20px;
+    padding: 20px;
+
+    border-radius: 10px;
     display: flex;
     justify-content: space-between;
     flex-direction: column;
     margin: 20px 0px;
-    gap: 20px;
-    padding: 20px;
-    background: #fff;
-    border-radius: 10px;
 }
 
-.form-group{
-        display: flex
-;
-    gap: 20px;
-    align-items: center;
+.form-group {
+    display: flex;
+    gap: 10px;
+    align-items: start;
+    flex-direction: column;
 
 }
 
-.form-pago label{
-    font-size:14px;
-    color:#76869e;
-    font-weight:400;
-    width:50%;
+.form-pago label {
+    font-size: 14px;
+    color: #76869e;
+    font-weight: 400;
+
 }
 
-.form-pago input, .form-pago select{
-       width: 251px;
+.form-pago input,
+.form-pago select {
+    width: 251px;
     height: 39px;
     background-color: #76869e1a;
     color: #59636d;
@@ -330,69 +353,292 @@ display: flex
     border: none;
     border-radius: 5px;
 }
-.table tbody tr{
-        border-bottom: 5px solid #fff;
+
+.table tbody tr {
+    border-bottom: 5px solid #fff;
 }
 
-.container-medios-pago{
-    margin-top:20px;
+.container-medios-pago {
+    margin-top: 20px;
+    width: 77%;
 }
 
-.form-container-two{
-        display: flex
-;
-    align-items: center;
+.form-container-two {
+    display: flex;
     justify-content: space-between;
 }
 
-.campo-flex-end{
-    display:flex;
-    justify-content:flex-end;
-    width:70%;
+.campo-flex-end {
+    display: flex;
+    justify-content: flex-end;
+
 }
 
-.btn-imprimir button{
-  background: #f07e0b !important;
+.btn-imprimir button {
+    background: #f07e0b !important;
     color: #fff !important;
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 600;
-    border: none;  
-    border-radius:5px;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 30px;
 }
-.previsualizacion-ticket{
-        display: flex
-;
+
+.previsualizacion-ticket {
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 10px;
 }
+
+.filtros-pagos {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+}
+
+.filtros-pagos label {
+    font-size: 14px;
+    color: #76869e;
+    font-weight: 400;
+}
+
+.filtros-pagos select {
+    width: 100px;
+    height: 39px;
+    background-color: #76869e1a;
+    color: #59636d;
+    font-size: 14px;
+    font-weight: 700;
+    border: none;
+    border-radius: 5px;
+    text-align: center;
+}
+
+
+
+.foto-paciente {
+    width: 108px;
+    height: 108px;
+    border: 5px solid #fff;
+    border-radius: 50%;
+    overflow: hidden;
+
+}
+
+.foto-paciente img {
+    width: 100%;
+}
+
+.nombre-paciente,
+.dni-paciente,
+.edad-paciente {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nombre-paciente span {
+    color: #fff;
+    font-weight: 700;
+    font-size: 20px;
+    text-align: center;
+}
+
+.dni-paciente span {
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+}
+
+.edad-paciente span {
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+}
+
+.flex-info-paciente {
+
+    display: flex;
+    justify-content: space-between;
+
+
+}
+
+.input-montoTotal {
+    font-size: 30px !important;
+    font-weight: 700 !important;
+    color: #59636D !important;
+    background: none !important;
+}
+
+.btnGuardarDiv {
+    width: 100%;
+}
+
+.btnGuardarDiv button {
+    width: 100%;
+    font-size: 25px;
+}
+
 @media print {
-  @page {
-    size: 80mm auto;
-    margin: 0;
-  }
+    @page {
+        size: 80mm auto;
+        margin: 0;
+    }
 
-  body * {
-    visibility: hidden;
-  }
+    body * {
+        visibility: hidden;
+    }
 
-  #ticket, #ticket * {
-    visibility: visible;
-  }
+    #ticket,
+    #ticket * {
+        visibility: visible;
+    }
 
-  #ticket {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 80mm;
-    padding: 0;
-    margin: 0;
-  }
+    #ticket {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 80mm;
+        padding: 0;
+        margin: 0;
+    }
 
-  .btn-imprimir {
-    display: none;
-  }
+    .btn-imprimir {
+        display: none;
+    }
+}
+
+.form-select:valid {
+    background-color: #f07e0b1a;
+}
+
+.filtros-pagos select {
+    background-color: #f07e0b1a;
+
+
+}
+
+
+.container-tabla-pagos {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.tabla-pagos {
+    display: grid;
+    grid-template-rows: auto 1fr;
+}
+
+.tabla-cabecera,
+.fila {
+    display: grid;
+    grid-template-columns:
+        8%
+        /* Cita */
+        16%
+        /* Especialista */
+        16%
+        /* Terapia */
+        12%
+        /* Fecha */
+        16%
+        /* Hora */
+        10%
+        /* Estado */
+        10%
+        /* Total */
+        12%
+        /* Acción */
+    ;
+    align-items: center;
+    padding: 8px 0;
+}
+
+
+
+.celda {
+    padding: 0 12px;
+}
+
+
+
+.celda span {
+    font-size: 14px;
+    color: #F07E0B;
+    font-weight: 700;
+}
+
+.fila .celda {
+    font-size: 14px;
+    color: #76869E;
+    font-weight: 500;
+
+}
+
+
+.tabla-cuerpo {
+    height: 237px;
+    overflow: auto;
+
+
+}
+
+/* Webkit (Chrome, Edge, Safari) */
+.tabla-cuerpo::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.tabla-cuerpo::-webkit-scrollbar-track {
+    background: #59636d0f;
+    border-radius: 4px;
+
+}
+
+.tabla-cuerpo::-webkit-scrollbar-thumb {
+    background-color: #76869e75;
+    border-radius: 4px;
+
+}
+
+.fila-total .celda {
+    font-size: 30px;
+    color: #59636D;
+    font-weight: 700;
+
+}
+
+.scroll-ticket {
+    max-height: 630px;
+    overflow: auto;
+    padding: 0px 10px;
+}
+
+
+
+
+
+.scroll-ticket::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.scroll-ticket::-webkit-scrollbar-track {
+    background: #59636d0f;
+    border-radius: 4px;
+
+}
+
+.scroll-ticket::-webkit-scrollbar-thumb {
+    background-color: #76869e75;
+    border-radius: 4px;
+
 }
 
 
@@ -401,5 +647,6 @@ display: flex
 
 
 
-
-
+.page-content-header {
+    padding: 0px 25px !important;
+}

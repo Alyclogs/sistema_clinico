@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const calendarEl = document.getElementById('calendar');
     const miniCalendarEl = document.getElementById('mini-calendar');
     const calendar = cal.buildCalendar(calendarEl);
-    const miniCalendar = cal.buildMiniCalendar(miniCalendarEl);
+    const miniCalendar = cal.buildMiniCalendar(miniCalendarEl, calendar);
 
     obtenerServicios();
     refrescarCitas();
@@ -301,7 +301,6 @@ document.addEventListener('DOMContentLoaded', function () {
         actualizarEventosVisuales();
         //refrescarCitas();
     });
-
 
     // --- GESTIÓN DE HORARIOS SELECCIONADOS  ---
     var idxEditando = null; // Índice del horario que se está editando
@@ -636,7 +635,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
         });
     }
-
 
     $(document).on('click', '.btn-cancelar', function () {
         const usuarioModal = bootstrap.Modal.getInstance(document.getElementById('usuarioModal'));

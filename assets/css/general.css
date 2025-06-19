@@ -1,3 +1,22 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap");
+
+* {
+  font-family: "Nunito", sans-serif;
+  font-size: 14px;
+  color: rgb(93, 109, 132);
+}
+
+body {
+  background-color: rgb(249, 251, 252);
+  font-family: "Nunito", sans-serif;
+  font-size: 14px;
+  color: rgb(93, 109, 132);
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -6,6 +25,7 @@ body {
 .caja-principal {
   display: flex;
 }
+
 .lado-izquierdo {
   width: 5%;
   padding: 0;
@@ -151,6 +171,7 @@ body {
   z-index: 9999;
   border-radius: 5px;
 }
+
 .alert-success {
   background-color: #48b02c2b !important;
   color: #2e7d32 !important;
@@ -160,6 +181,7 @@ body {
   border: none;
   margin: 0 !important;
 }
+
 .alert-danger {
   background-color: #c42d352b !important;
   color: #c42d35 !important;
@@ -170,31 +192,11 @@ body {
   margin: 0 !important;
 }
 
-.svg-x-end{
-    display: flex
-;
-    justify-content: flex-end;
+.svg-x-end {
+  display: flex;
+  justify-content: flex-end;
 }
 
-.svg-x{
-    width:20px;
+.svg-x {
+  width: 20px;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -65,6 +65,8 @@
 
 .cita-content .cita-paciente {
   margin-right: 16px;
+  display: flex;
+  flex-direction: column;
 }
 
 .cita-content .cita-time {

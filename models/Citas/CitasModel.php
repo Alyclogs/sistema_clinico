@@ -13,6 +13,7 @@ class CitasModel
     {
         $sql = "SELECT DISTINCT
                 c.*, 
+                p.idpaciente AS paciente_id,
                 p.nombres AS paciente_nombres, 
                 p.apellidos AS paciente_apellidos, 
                 p.dni AS paciente_dni, 
@@ -34,6 +35,7 @@ class CitasModel
     {
         $sql = "SELECT DISTINCT
                 c.*, 
+                p.idpaciente AS paciente_id,
                 p.nombres AS paciente_nombres, 
                 p.apellidos AS paciente_apellidos, 
                 p.dni AS paciente_dni, 
@@ -55,7 +57,9 @@ class CitasModel
 
     public function obtenerCitasPorServicio($idservicio)
     {
-        $sql = "SELECT DISTINCT c.*, p.nombres AS paciente_nombres,
+        $sql = "SELECT DISTINCT c.*,
+        p.idpaciente AS paciente_id,
+        p.nombres AS paciente_nombres,
         p.apellidos AS paciente_apellidos,
         p.dni AS paciente_dni,
         p.fecha_nacimiento AS paciente_fecha_nacimiento,
@@ -76,7 +80,9 @@ class CitasModel
 
     public function obtenerCitasPorEspecialista($idespecialista)
     {
-        $sql = "SELECT DISTINCT c.*, p.nombres AS paciente_nombres,
+        $sql = "SELECT DISTINCT c.*,
+        p.idpaciente AS paciente_id, 
+        p.nombres AS paciente_nombres,
         p.apellidos AS paciente_apellidos,
         p.dni AS paciente_dni,
         p.fecha_nacimiento AS paciente_fecha_nacimiento,
@@ -98,6 +104,7 @@ class CitasModel
     public function obtenerCitasPorEspecialistayFecha($idespecialista, $fecha)
     {
         $sql = "SELECT DISTINCT c.*,
+        p.idpaciente AS paciente_id, 
         p.nombres AS paciente_nombres,
         p.apellidos AS paciente_apellidos,
         p.dni AS paciente_dni,
@@ -105,10 +112,12 @@ class CitasModel
         p.foto AS paciente_foto,
         u.nombres AS especialista_nombre,
         u.apellidos AS especialista_apellidos,
-        u.foto AS especialista_foto
+        u.foto AS especialista_foto,
+        s.servicio AS servicio
         FROM citas c INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
         INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
         INNER JOIN usuarios u ON e.idespecialista = u.idusuario
+        INNER JOIN servicios s ON s.idservicio = c.idservicio
         WHERE c.idespecialista = :idespecialista
         AND c.fecha = :fecha
         ORDER BY c.hora_inicio ASC";
@@ -123,6 +132,7 @@ class CitasModel
     public function obtenerCitasPorEspecialistayFechaInicio($idespecialista, $fechaInicio)
     {
         $sql = "SELECT DISTINCT c.*,
+        p.idpaciente AS paciente_id,
         p.nombres AS paciente_nombres,
         p.apellidos AS paciente_apellidos,
         p.dni AS paciente_dni,
@@ -146,7 +156,9 @@ class CitasModel
 
     public function obtenerCitasPorEspecialistayServicio($idespecialista, $idservicio)
     {
-        $sql = "SELECT DISTINCT c.*, p.nombres AS paciente_nombres,
+        $sql = "SELECT DISTINCT c.*,
+        p.idpaciente AS paciente_id, 
+        p.nombres AS paciente_nombres,
         p.apellidos AS paciente_apellidos,
         p.dni AS paciente_dni,
         p.fecha_nacimiento AS paciente_fecha_nacimiento,
@@ -169,7 +181,9 @@ class CitasModel
 
     public function obtenerCitasPorArea($idarea, $idservicio)
     {
-        $sql = "SELECT DISTINCT c.*, p.nombres AS paciente_nombres,
+        $sql = "SELECT DISTINCT c.*,
+        p.idpaciente AS paciente_id,
+        p.nombres AS paciente_nombres,
         p.apellidos AS paciente_apellidos,
         p.dni AS paciente_dni,
         p.fecha_nacimiento AS paciente_fecha_nacimiento,
@@ -192,7 +206,9 @@ class CitasModel
 
     public function obtenerCitasPorEspecialistayArea($idespecialista, $idarea, $idservicio)
     {
-        $sql = "SELECT DISTINCT c.*, p.nombres AS paciente_nombres,
+        $sql = "SELECT DISTINCT c.*,
+        p.idpaciente AS paciente_id,
+        p.nombres AS paciente_nombres,
         p.apellidos AS paciente_apellidos,
         p.dni AS paciente_dni,
         p.fecha_nacimiento AS paciente_fecha_nacimiento,
@@ -217,7 +233,9 @@ class CitasModel
 
     public function obtenerCitasPorAreaySubarea($idarea, $idsubarea, $idservicio)
     {
-        $sql = "SELECT DISTINCT c.*, p.nombres AS paciente_nombres,
+        $sql = "SELECT DISTINCT c.*,
+        p.idpaciente AS paciente_id,
+        p.nombres AS paciente_nombres,
         p.apellidos AS paciente_apellidos,
         p.dni AS paciente_dni,
         p.fecha_nacimiento AS paciente_fecha_nacimiento,
@@ -242,7 +260,9 @@ class CitasModel
 
     public function obtenerCitasPorEspecialistayAreaySubarea($idespecialista, $idarea, $idsubarea, $idservicio)
     {
-        $sql = "SELECT DISTINCT c.*, p.nombres AS paciente_nombres,
+        $sql = "SELECT DISTINCT c.*,
+        p.idpaciente AS paciente_id,
+        p.nombres AS paciente_nombres,
         p.apellidos AS paciente_apellidos,
         p.dni AS paciente_dni,
         p.fecha_nacimiento AS paciente_fecha_nacimiento,

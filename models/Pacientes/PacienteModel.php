@@ -103,4 +103,22 @@ class PacientesModel
             throw new Exception("Error al insertar el usuario en la base de datos: " . $result);
         }
     }
+
+    public function obtenerPacientePorId($id)
+    {
+        $sql = "SELECT p.*,
+        ua.idusuario AS apoderado_id,
+            ua.nombres AS apoderado_nombres,
+            ua.apellidos AS apoderado_apellidos,
+            ua.dni AS apoderado_dni,
+            ua.telefono AS apoderado_telefono,
+            ua.correo AS apoderado_correo
+        FROM pacientes p
+        INNER JOIN usuarios ua ON p.idusuario = ua.idusuario 
+        WHERE idpaciente = :idpaciente";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':idpaciente', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }

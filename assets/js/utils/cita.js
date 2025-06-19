@@ -212,7 +212,7 @@ export function crearCitaEspecialista(cita) {
     const asistio = cita.asistio == true ? 'cita-asistio' : cita.asistio == false ? 'cita-no-asistio' : null;
     const citaElement = document.createElement('div');
     citaElement.className = `cita-container`;
-    citaElement.innerHTML = `<div class="cita-content ${estado} ${asistio}" data-id="${cita.idcita}">
+    citaElement.innerHTML = `<div class="cita-content ${estado} ${asistio}" data-id="${cita.idcita}" data-paciente="${cita.paciente_id}">
     <div class="cita-grupos" style="justify-content: space-between";>
     <div class="cita-grupo">
                 <div class="cita-time">
@@ -221,6 +221,7 @@ export function crearCitaEspecialista(cita) {
     </div>
     <div class="cita-paciente">
         <span>${cita.paciente_nombres} ${cita.paciente_apellidos}</span>
+        <span>${cita.servicio}</span>
     </div></div>
     <div class="cita-grupo">
     <div class="cita-estado">
@@ -445,7 +446,7 @@ export function mostrarTooltipCita(cita, targetElement) {
 ${horario}</div>
         </div>
         </div>
-        <button class="btn btn-light btn-ver-cita" onclick="verCita(${cita.idcita})">Ver cita</button>
+        <button class="btn btn-light btn-ver-cita" onclick="window.location.href = "${baseurl}/views/Doctor/pacientes/pacienteDetalles.php?id=${cita.paciente_id}"">Ver cita</button>
         </div>`;
 
     document.body.appendChild(tooltip);

@@ -1,0 +1,153 @@
+.body {
+    color: #76869e;
+}
+
+.main-container {
+    display: flex;
+    align-items: start;
+    justify-content: center;
+    height: 100%;
+    padding: 18px;
+    gap: 22px;
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    width: 420px;
+}
+
+.minicalendar-button {
+    flex: 1;
+    position: relative;
+    display: flex;
+    justify-content: end;
+}
+
+#btnAbrirCalendarioCita {
+    border-radius: 35px;
+    background-color: #f07e0b;
+    padding: 8px;
+    height: 32px;
+    width: 32px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+.minicalendar-modal {
+    display: none;
+    flex-direction: column;
+    background: #fff;
+    width: 300px;
+    overflow: hidden;
+    position: absolute;
+    padding: 12px;
+    z-index: 1000;
+    border-radius: 6px;
+    box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);
+    top: 2.3rem;
+}
+
+.detalles-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: 18px;
+    width: 720px;
+}
+
+.resumen-container {
+    width: 100%;
+}
+
+.paciente-detalles {
+    display: flex;
+    flex-direction: column;
+}
+
+.paciente-detalles-container {
+    background-color: #fff;
+    padding: 18px;
+    padding-left: 28px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.paciente-detalles-row {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: 18px;
+}
+
+.paciente-opciones {
+    background: none;
+    outline: none;
+    border: none;
+    border-radius: 25px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.subtitle-bold {
+    font-weight: bold;
+    color: #59636d;
+    margin-bottom: 8px;
+}
+
+.paciente-historial {
+    height: 100%;
+}
+
+.paciente-container {
+    border: 1px solid #76869e65;
+    border-radius: 18px;
+    background-color: #fff;
+    padding: 0;
+}
+
+.container-cabecera {
+    background: #f9fbfc;
+    display: flex;
+    padding: 18px;
+    height: 42px;
+    justify-content: space-between;
+    align-items: center;
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+}
+
+.container-body {
+    padding: 18px;
+    min-height: 340px;
+    background-color: #fff;
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
+}
+
+.completar-formulario {
+    background-color: #f07e0b;
+    color: #fff;
+    padding-block: 3px;
+}
+
+.text-editor-options {
+    height: 32px;
+    background: none;
+}
+
+.ql-toolbar {
+    border-inline: none !important;
+}
+
+.ql-container {
+    border: none !important;
+    min-height: 340px;
+    border-bottom-right-radius: 18px;
+    border-bottom-left-radius: 18px;
+}

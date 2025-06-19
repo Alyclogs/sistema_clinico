@@ -1,34 +1,27 @@
-import api from '../utils/api.js';
-import { formatearFecha, ajustarFecha } from '../utils/date.js';
-import { obtenerCitasEspecialista, procesarYMostrarCitas } from '../utils/cita.js';
+import { procesarYMostrarCitas } from '../utils/cita.js';
 import { calendarUI, updateCalendarDateRange } from '../utils/calendar.js';
 import { actualizarDisponibilidadEspecialista } from '../utils/especialista.js';
+import api from '../utils/api.js';
 
 const calendarEl = document.getElementById('calendar');
 const miniCalendarEl = document.getElementById('mini-calendar');
-const miniCalendarCitaEl = document.getElementById('mini-calendar-cita');
 
-const baseurl = "http://localhost/SistemaClinico/";
 let selectedespecialista = '';
-let fechaSeleccionada = '';
+const baseurl = "http://localhost/SistemaClinico/";
 
 document.addEventListener('DOMContentLoaded', function () {
     const cal = new calendarUI();
-    const header = document.querySelector('.cabecera');
+    const header = document.querySelectorAll('.cabecera');
     const calendar = cal.buildCalendar(calendarEl);
     const miniCalendar = cal.buildMiniCalendar(miniCalendarEl, calendar);
-    const miniCalendarCita = cal.buildMiniCalendar(miniCalendarCitaEl);
-
-    const hoy = new Date();
-    fechaSeleccionada = formatearFecha(hoy);
 
     $.get('./menuPerfil.php', function (html) {
-        header.innerHTML = html;
+        header.forEach(h => h.innerHTML = html);
         selectedespecialista = document.getElementById('idespecialista').value;
 
         updateCalendarDateRange(calendar);
         actualizarDisponibilidadEspecialista(calendar, selectedespecialista).then(disponibilidad => {
-            obtenerCitasEspecialista(selectedespecialista, fechaSeleccionada).then((citas) => {
+            api.obtenerCitas({ idespecialista: selectedespecialista }).then((citas) => {
                 procesarYMostrarCitas(cal, citas, selectedespecialista);
             });
         });
@@ -45,57 +38,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    $('#btnAbrirCalendarioCita').on('click', function () {
-        const calendarmodal = document.getElementById('minicalendarCitaModal');
-        if (calendarmodal.style.display === 'none') {
-            calendarmodal.style.display = 'flex';
-            miniCalendarCita.render();
-        } else {
-            calendarmodal.style.display = 'none';
-        }
-    });
-
-    $('.citas-container').on('click', '.botones-asistio', function (e) {
-        let asistio = false;
-        const idcita = $(this).data('id');
-
-        asistio = e.target.closest('.boton-asistio').id === "btnAsistio" ?? false;
-        api.obtenerCitas({ idcita }).then(cita => {
-            cita.asistio = asistio;
-            $.ajax({
-                type: 'POST',
-                url: baseurl + 'controllers/Citas/CitasController.php?action=update',
-                data: { data: JSON.stringify(cita) },
-                dataType: 'json',
-                success: async function (response) {
-                    if (response.success) {
-                        await obtenerCitasEspecialista(selectedespecialista, fechaSeleccionada);
-                    }
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    console.error('Error en la solicitud AJAX:', textStatus, errorThrown);
-                    console.error('Respuesta del servidor:', jqXHR.responseText);
-                }
-            }).fail(function (jqXHR, textStatus, errorThrown) {
-                console.error('Error en la solicitud AJAX:', textStatus, errorThrown);
-                console.error('Respuesta del servidor:', jqXHR.responseText);
-            }).catch(e => console.log(e));
-        })
-    })
-
-    $('#prev-day').on('click', async function () {
-        fechaSeleccionada = ajustarFecha(fechaSeleccionada, -1);
-        await obtenerCitasEspecialista(selectedespecialista, fechaSeleccionada);
-    });
-
-    $('#next-day').on('click', async function () {
-        fechaSeleccionada = ajustarFecha(fechaSeleccionada, 1);
-        await obtenerCitasEspecialista(selectedespecialista, fechaSeleccionada);
-    });
-
-    miniCalendarCita.setOption('dateClick', async function (info) {
-        fechaSeleccionada = info.dateStr;
-        await obtenerCitasEspecialista(selectedespecialista, fechaSeleccionada);
-        document.getElementById('minicalendarCitaModal').style.display = 'none';
+    $('.citas-container').on('click', '.cita-content', function () {
+        const idpaciente = $(this).data('paciente');
+        window.location.href = baseurl + `views/Doctor/pacientes/pacienteDetalles.php?id=${idpaciente}`;
     });
 });

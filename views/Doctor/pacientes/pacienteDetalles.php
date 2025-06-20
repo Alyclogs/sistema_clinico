@@ -32,7 +32,6 @@ if ($idcita) {
 ?>
 <!DOCTYPE html>
 <html lang='es'>
-?>
 <!DOCTYPE html>
 <html lang='es'>
 
@@ -66,7 +65,7 @@ if ($idcita) {
                                 <div class="detalles-container">
                                     <div class="paciente-detalles-container">
                                         <div class="paciente-detalles-main">
-                                            <div class="paciente-detalles-row mb-4">
+                                            <div class="detalles-row">
                                                 <input type="hidden" id="pacienteId" value="<?= htmlspecialchars($idpaciente) ?>">
                                                 <input type="hidden" id="citaId" value="<?= htmlspecialchars($idcita) ?>">
                                                 <img id="pacienteFoto" src="<?= htmlspecialchars($paciente['foto']) ?>" width="100px" height="100px"></img>
@@ -91,46 +90,95 @@ if ($idcita) {
                                     <div class="paciente-historial">
                                         <div class="paciente-container">
                                             <div class="container-cabecera">
-                                                <span class="cabecera-titulo">HISTORIAL CLÍNICO</span>
-                                                <button id="btnCompletarFormulario" class="btn completar-formulario">
-                                                    <svg id="INFO_PACIENTE" data-name="INFO PACIENTE" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10.83 10.85" style="height: 9px; width: 9px">
-                                                        <defs>
-                                                            <style>
-                                                                .cls-014 {
-                                                                    fill: none;
-                                                                    stroke: #fff;
-                                                                    stroke-linecap: round;
-                                                                    stroke-linejoin: round;
-                                                                    stroke-width: .85px;
-                                                                }
-                                                            </style>
-                                                        </defs>
-                                                        <g id="Quote_request" data-name="Quote request">
-                                                            <path class="cls-014" d="M3.01,10.41h-1.74c-.47,0-.85-.38-.85-.85V1.27c0-.47.38-.85.85-.85h4.06c.23,0,.45.09.6.25l.85.85c.15.15.25.36.25.6v2.33" />
-                                                            <path class="cls-014" d="M8.96,4.91c.33-.33.87-.33,1.2,0,.33.33.33.87,0,1.2l-3.5,3.5c-.06.06-.13.11-.21.15l-1.19.62c-.16.08-.36.06-.49-.08-.13-.13-.16-.33-.08-.49l.62-1.19c.04-.08.09-.15.15-.21l3.5-3.5Z" />
-                                                            <line class="cls-014" x1="2.12" y1="3.64" x2="5.33" y2="3.64" />
-                                                            <line class="cls-014" x1="2.12" y1="5.33" x2="5.33" y2="5.33" />
-                                                            <line class="cls-014" x1="2.12" y1="7.03" x2="3.64" y2="7.03" />
-                                                        </g>
-                                                    </svg>
-                                                    Completar formulario</button>
+                                                <div class="cabecera-body">
+                                                    <span class="cabecera-titulo">Historial clínico</span>
+                                                    <span class="cabecera-subtitulo">Inicia tu evaluación aquí</span>
+                                                </div>
                                             </div>
-                                            <div class="container-body" id="pacienteHistorial"></div>
+                                            <div class="container-body" id="pacienteHistorial">
+                                                <div class="historial-elements">
+                                                    <div id="iniciarEvaluacionPsicológica" class="historial-element">
+                                                        <div class="historial-bloque">
+                                                            <svg id="INFO_PACIENTE" data-name="INFO PACIENTE" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25.82 25.86" style="width: 24px; height: 24px;">
+                                                                <defs>
+                                                                    <style>
+                                                                        .cls-015 {
+                                                                            fill: none;
+                                                                            stroke: #76869e;
+                                                                            stroke-linecap: round;
+                                                                            stroke-linejoin: round;
+                                                                            stroke-width: 1.51px;
+                                                                        }
+                                                                    </style>
+                                                                </defs>
+                                                                <g id="g121">
+                                                                    <g id="g127">
+                                                                        <path id="path129" class="cls-015" d="M15.33,3.5c.9.23,1.74.58,2.52,1.04,0,0,.37-.37.79-.79.31-.3.72-.48,1.15-.48s.85.17,1.15.48c.37.37.78.78,1.15,1.15.31.3.48.72.48,1.15s-.17.84-.48,1.15c-.42.42-.79.79-.79.79.46.77.81,1.62,1.05,2.51h1.09c.9,0,1.62.73,1.62,1.62v1.64c0,.9-.73,1.62-1.62,1.62h-1.09c-.23.89-.59,1.74-1.05,2.51,0,0,.37.37.79.79.31.3.48.72.48,1.15s-.18.86-.49,1.16l-1.11,1.11c-.31.32-.73.49-1.17.49s-.85-.17-1.15-.48c-.42-.42-.79-.79-.79-.79-.78.46-1.62.81-2.52,1.04v1.12c0,.9-.73,1.62-1.62,1.62h-1.64c-.9,0-1.62-.73-1.62-1.62v-1.09c-.89-.23-1.73-.59-2.5-1.05,0,0-.37.37-.79.79-.3.31-.71.48-1.14.48s-.84-.17-1.14-.48c-.37-.37-.77-.78-1.14-1.15-.3-.31-.47-.72-.47-1.15s.17-.85.47-1.15c.42-.42.79-.79.79-.79-.46-.78-.81-1.62-1.04-2.52h-1.11c-.9,0-1.62-.73-1.62-1.62v-1.64c0-.9.73-1.62,1.62-1.62h1.05c.23-.89.59-1.74,1.05-2.51,0,0-.37-.37-.79-.79-.31-.3-.48-.72-.48-1.15s.17-.84.48-1.15c.37-.37.78-.78,1.15-1.15.31-.3.72-.48,1.15-.48s.85.17,1.15.48c.42.42.79.79.79.79.78-.46,1.62-.81,2.52-1.04v-1.12c0-.9.73-1.62,1.62-1.62h1.64c.9,0,1.62.73,1.62,1.62v1.12Z" />
+                                                                    </g>
+                                                                    <g id="g131">
+                                                                        <path id="path133" class="cls-015" d="M12.91,8.07c2.69,0,4.87,2.18,4.87,4.87s-2.18,4.87-4.87,4.87-4.87-2.18-4.87-4.87,2.18-4.87,4.87-4.87Z" />
+                                                                    </g>
+                                                                </g>
+                                                            </svg>
+                                                            <span class="texto-bloque">Evaluación Psicológica</span>
+                                                        </div>
+                                                        <button class="btn btn-default">Iniciar</button>
+                                                    </div>
+                                                    <div id="iniciarEvaluacionFísica" class="historial-element">
+                                                        <div class="historial-bloque">
+                                                            <svg id="INFO_PACIENTE" data-name="INFO PACIENTE" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25.82 25.86" style="width: 24px; height: 24px;">
+                                                                <defs>
+                                                                    <style>
+                                                                        .cls-015 {
+                                                                            fill: none;
+                                                                            stroke: #76869e;
+                                                                            stroke-linecap: round;
+                                                                            stroke-linejoin: round;
+                                                                            stroke-width: 1.51px;
+                                                                        }
+                                                                    </style>
+                                                                </defs>
+                                                                <g id="g121">
+                                                                    <g id="g127">
+                                                                        <path id="path129" class="cls-015" d="M15.33,3.5c.9.23,1.74.58,2.52,1.04,0,0,.37-.37.79-.79.31-.3.72-.48,1.15-.48s.85.17,1.15.48c.37.37.78.78,1.15,1.15.31.3.48.72.48,1.15s-.17.84-.48,1.15c-.42.42-.79.79-.79.79.46.77.81,1.62,1.05,2.51h1.09c.9,0,1.62.73,1.62,1.62v1.64c0,.9-.73,1.62-1.62,1.62h-1.09c-.23.89-.59,1.74-1.05,2.51,0,0,.37.37.79.79.31.3.48.72.48,1.15s-.18.86-.49,1.16l-1.11,1.11c-.31.32-.73.49-1.17.49s-.85-.17-1.15-.48c-.42-.42-.79-.79-.79-.79-.78.46-1.62.81-2.52,1.04v1.12c0,.9-.73,1.62-1.62,1.62h-1.64c-.9,0-1.62-.73-1.62-1.62v-1.09c-.89-.23-1.73-.59-2.5-1.05,0,0-.37.37-.79.79-.3.31-.71.48-1.14.48s-.84-.17-1.14-.48c-.37-.37-.77-.78-1.14-1.15-.3-.31-.47-.72-.47-1.15s.17-.85.47-1.15c.42-.42.79-.79.79-.79-.46-.78-.81-1.62-1.04-2.52h-1.11c-.9,0-1.62-.73-1.62-1.62v-1.64c0-.9.73-1.62,1.62-1.62h1.05c.23-.89.59-1.74,1.05-2.51,0,0-.37-.37-.79-.79-.31-.3-.48-.72-.48-1.15s.17-.84.48-1.15c.37-.37.78-.78,1.15-1.15.31-.3.72-.48,1.15-.48s.85.17,1.15.48c.42.42.79.79.79.79.78-.46,1.62-.81,2.52-1.04v-1.12c0-.9.73-1.62,1.62-1.62h1.64c.9,0,1.62.73,1.62,1.62v1.12Z" />
+                                                                    </g>
+                                                                    <g id="g131">
+                                                                        <path id="path133" class="cls-015" d="M12.91,8.07c2.69,0,4.87,2.18,4.87,4.87s-2.18,4.87-4.87,4.87-4.87-2.18-4.87-4.87,2.18-4.87,4.87-4.87Z" />
+                                                                    </g>
+                                                                </g>
+                                                            </svg>
+                                                            <span class="texto-bloque">Evaluación Física</span>
+                                                        </div>
+                                                        <button class="btn btn-default">Iniciar</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="paciente-container">
+                                        <div class="container-cabecera">
+                                            <div class="cabecera-body">
+                                                <span class="cabecera-titulo">Resumen del paciente</span>
+                                                <span class="cabecera-subtitulo">Aquí podrás visualizar los datos de la última sesión realizada</span>
+                                            </div>
+                                        </div>
+                                        <div class="ultimo-resumen" id="resumenUltimaCita">
+                                            El paciente seleccionado aún no tiene citas de consulta agendadas con usted. En cuanto las tenga, podrá editar su resumen aquí.
                                         </div>
                                     </div>
                                 </div>
                                 <div class="resumen-container">
-                                    <div class="paciente-container">
+                                    <div id="editorResumen" class="paciente-container" style="display: none;">
                                         <div class="container-cabecera">
                                             <span class="cabecera-titulo">RESUMEN DEL PACIENTE</span>
                                         </div>
                                         <div id="editor"></div>
                                         <div class="botones-resumen">
                                             <button class="btn" id="btnCancelarResumen">Cancelar</button>
-                                            <button class="btn" id="btnGuardarResumen">Guardar</button>
+                                            <button class="btn btn-default" id="btnGuardarResumen">Guardar</button>
                                         </div>
                                     </div>
-                                    <div id="pacienteResumenes" class="paciente-resumenes"></div>
+                                    <div id="pacienteResumenes" class="paciente-resumenes" style="display:none;"></div>
                                 </div>
                             </div>
                         </div>

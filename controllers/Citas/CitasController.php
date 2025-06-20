@@ -13,6 +13,11 @@ switch ($action) {
             echo json_encode($result);
             return;
         }
+        if (isset($_GET['idpaciente'])) {
+            $result = $model->obtenerCitasPorPaciente($_GET['idpaciente']);
+            echo json_encode($result);
+            return;
+        }
         if (isset($_GET['idespecialista'])) {
             if (isset($_GET['idarea'])) {
                 if (isset($_GET['idsubarea'])) {

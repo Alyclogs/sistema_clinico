@@ -2,6 +2,7 @@ import { formatearHora12h, formatearFecha, calcularEdad } from "./date.js";
 import api from "./api.js";
 
 export const estadosCita = { '3': 'pendiente', '4': 'cancelado', '5': 'anulado' }
+const baseurl = "http://localhost/SistemaClinico/";
 
 export function procesarYMostrarCitas(calendar, citas, idespecialista = '') {
     // 1) Remover eventos previos
@@ -122,7 +123,6 @@ function addMultiplesCitasEvent(calendar, citas) {
 }
 
 export async function obtenerCitasEspecialista(idespecialista, fechaSeleccionada) {
-    console.log(fechaSeleccionada);
     const citas = api.obtenerCitas({ idespecialista: idespecialista });
     const citasHoyPromise = api.obtenerCitas({ idespecialista: idespecialista, filtro: { fecha: fechaSeleccionada } });
     const citasContainer = document.querySelector('.citas-container');
@@ -446,7 +446,7 @@ export function mostrarTooltipCita(cita, targetElement) {
 ${horario}</div>
         </div>
         </div>
-        <button class="btn btn-light btn-ver-cita" onclick="window.location.href = "${baseurl}/views/Doctor/pacientes/pacienteDetalles.php?id=${cita.paciente_id}"">Ver cita</button>
+        <button class="btn btn-light btn-ver-cita" onclick="window.location.href='${baseurl}views/Doctor/pacientes/pacienteDetalles.php?idpaciente=${cita.paciente_id}'">Ver cita</button>
         </div>`;
 
     document.body.appendChild(tooltip);

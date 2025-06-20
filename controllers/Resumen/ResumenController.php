@@ -1,13 +1,14 @@
 <?php
 require_once __DIR__ . '/../../models/Resumen/ResumenModel.php';
+header('Content-Type: application/json');
 
 $modelo = new ResumenModel();
 $mensaje = '';
 $action = $_GET['action'];
 
 if ($action === "read") {
-    if (isset($_GET['idcita'])) {
-        $resumenes = $modelo->obtenerResumenesPorCita($_GET['idcita']);
+    if (isset($_GET['idpaciente'])) {
+        $resumenes = $modelo->obtenerResumenesPorPaciente($_GET['idpaciente']);
         echo json_encode($resumenes);
         exit;
     }
@@ -42,7 +43,6 @@ if ($action === "read") {
     $mensaje = 'Error: Acción no válida.';
 }
 
-header('Content-Type: application/json');
 echo json_encode([
     'success' => strpos($mensaje, 'Error') === false,
     'message' => $mensaje

@@ -40,6 +40,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     $('.citas-container').on('click', '.cita-content', function () {
         const idpaciente = $(this).data('paciente');
-        window.location.href = baseurl + `views/Doctor/pacientes/pacienteDetalles.php?id=${idpaciente}`;
+        window.location.href = baseurl + `views/Doctor/pacientes/pacienteDetalles.php?idpaciente=${idpaciente}`;
     });
 });

@@ -27,7 +27,7 @@ export default {
         console.log(baseurl + `controllers/Especialistas/EspecialistaController.php?action=read${idarea ? `&idarea=${idarea}` : ''}${idservicio ? `&idservicio=${idservicio}` : ''}${idsubarea ? `&idsubarea=${idsubarea}` : ''}${idespecialista ? `&idespecialista=${idespecialista}` : ''}`);
         return $.get(baseurl + `controllers/Especialistas/EspecialistaController.php?action=read${idarea ? `&idarea=${idarea}` : ''}${idservicio ? `&idservicio=${idservicio}` : ''}${idsubarea ? `&idsubarea=${idsubarea}` : ''}${idespecialista ? `&idespecialista=${idespecialista}` : ''}`);
     },
-    obtenerCitas: ({ idservicio, idespecialista, idarea, idsubarea, idcita, filtro = { fecha: '', fechainicio: '' } }) => {
+    obtenerCitas: ({ idservicio, idespecialista, idarea, idsubarea, idcita, idpaciente, filtro = { fecha: '', fechainicio: '' } }) => {
         const params = new URLSearchParams({ action: 'read' });
 
         if (idservicio) params.append('idservicio', idservicio);
@@ -35,6 +35,7 @@ export default {
         if (idarea) params.append('idarea', idarea);
         if (idsubarea) params.append('idsubarea', idsubarea);
         if (idcita) params.append('idcita', idcita);
+        if (idpaciente) params.append('idpaciente', idpaciente);
         if (filtro.fecha) params.append("fecha", filtro.fecha);
         if (filtro.fechainicio) params.append("fechainicio", filtro.fechainicio);
 
@@ -48,9 +49,9 @@ export default {
     obtenerDisponibilidadEspecialista: (idespecialista) => {
         return $.get(baseurl + `controllers/Disponibilidad/DisponibilidadController.php?action=read&idespecialista=${idespecialista}`);
     },
-    obtenerResumenes: (idcita) => {
-        console.log(baseurl + `controllers/Resumen/ResumenController.php?action=read&idcita=${idcita}`);
-        return $.get(baseurl + `controllers/Resumen/ResumenController.php?action=read&idcita=${idcita}`);
+    obtenerResumenes: (idcita, idpaciente) => {
+        console.log(baseurl + `controllers/Resumen/ResumenController.php?action=read${idcita ? `&idcita=${idcita}` : ''}&idpaciente=${idpaciente}`);
+        return $.get(baseurl + `controllers/Resumen/ResumenController.php?action=read${idcita ? `&idcita=${idcita}` : ''}&idpaciente=${idpaciente}`);
     },
     agendarPaciente: ({ data, onSuccess, onError }) => {
         $.ajax({

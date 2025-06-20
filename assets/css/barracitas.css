@@ -72,6 +72,48 @@
   cursor: pointer;
 }
 
+.fc-scroller-harness .fc-scroller {
+  overflow: hidden !important;
+  display: block;
+}
+
+.fc .fc-scroller-liquid-absolute {
+  overflow: hidden scroll !important;
+}
+
+.fc .fc-col-header-cell-cushion {
+  background-color: transparent;
+  height: 53px;
+  align-items: center;
+  display: grid;
+}
+
+.fc .fc-daygrid-day-number {
+  color: #76869e;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.fc .fc-timegrid .fc-daygrid-body {
+  display: none;
+}
+
+.fc .fc-button-primary {
+  background-color: transparent;
+}
+
+.fc-timegrid-event {
+  border: none;
+  border-radius: 0;
+  background: rgb(96 191 233 / 24%);
+  border-left: 10px solid #60bfe9;
+  padding: 0px 10px;
+}
+
+.fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events {
+  min-height: 0.5rem;
+}
+
 #btnAbrirCalendarioCita {
   border-radius: 35px;
   background-color: #f07e0b;

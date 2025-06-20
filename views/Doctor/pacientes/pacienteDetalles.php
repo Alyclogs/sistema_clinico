@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../../../models/Pacientes/PacienteModel.php';
+require_once __DIR__ . '/../../../models/Citas/CitasModel.php';
 
 if (!isset($_SESSION['usuario']) || !isset($_SESSION['rol'])) {
     header("Location: http://localhost/SistemaClinico/views/login.php");
@@ -8,16 +9,29 @@ if (!isset($_SESSION['usuario']) || !isset($_SESSION['rol'])) {
 }
 $idusuario = $_SESSION['idusuario'];
 
-$id = isset($_GET['id']) ? $_GET['id'] : null;
+$idpaciente = isset($_GET['idpaciente']) ? $_GET['idpaciente'] : null;
 $paciente = null;
-if ($id) {
+if ($idpaciente) {
     $pacienteModel = new PacientesModel();
-    $paciente = $pacienteModel->obtenerPacientePorId($id);
+    $paciente = $pacienteModel->obtenerPacientePorId($idpaciente);
     if (!$paciente) {
         echo '<div class="alert alert-danger">No se encontró el paciente.</div>';
         return;
     }
 }
+$idcita = isset($_GET['idcita']) ? $_GET['idcita'] : null;
+$cita = null;
+if ($idcita) {
+    $citaModel = new CitasModel();
+    $cita = $citaModel->obtenerCitaPorId($idcita);
+    if (!$cita) {
+        echo '<div class="alert alert-danger">No se encontró la cita.</div>';
+        return;
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang='es'>
 ?>
 <!DOCTYPE html>
 <html lang='es'>
@@ -29,6 +43,7 @@ if ($id) {
     <link rel="stylesheet" href="../../../assets/css/general.css">
     <link rel="stylesheet" href="../../../assets/css/agenda.css">
     <link rel="stylesheet" href="../../../assets/css/resumen-paciente.css">
+    <link rel="stylesheet" href="../../../assets/css/barracitas.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js'></script>
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
@@ -52,6 +67,8 @@ if ($id) {
                                     <div class="paciente-detalles-container">
                                         <div class="paciente-detalles-main">
                                             <div class="paciente-detalles-row mb-4">
+                                                <input type="hidden" id="pacienteId" value="<?= htmlspecialchars($idpaciente) ?>">
+                                                <input type="hidden" id="citaId" value="<?= htmlspecialchars($idcita) ?>">
                                                 <img id="pacienteFoto" src="<?= htmlspecialchars($paciente['foto']) ?>" width="100px" height="100px"></img>
                                                 <div class="paciente-detalles">
                                                     <span id="pacienteNombre" class="subtitle-bold"><?= htmlspecialchars($paciente['nombres']) . ' ' . htmlspecialchars($paciente['apellidos']) ?></span>
@@ -108,8 +125,12 @@ if ($id) {
                                             <span class="cabecera-titulo">RESUMEN DEL PACIENTE</span>
                                         </div>
                                         <div id="editor"></div>
+                                        <div class="botones-resumen">
+                                            <button class="btn" id="btnCancelarResumen">Cancelar</button>
+                                            <button class="btn" id="btnGuardarResumen">Guardar</button>
+                                        </div>
                                     </div>
-                                    <div class="paciente-resumenes"></div>
+                                    <div id="pacienteResumenes" class="paciente-resumenes"></div>
                                 </div>
                             </div>
                         </div>
@@ -128,13 +149,8 @@ if ($id) {
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script type="module" src="../../../assets/js/especialistas/barraCitas.js"></script>
 <script type="module" src="../../../assets/js/paciente/pacienteDetalles.js"></script>
-<script>
-    const quill = new Quill('#editor', {
-        theme: 'snow',
-        placeholder: 'Empieza a escribir...',
-    });
-</script>
 
 </html>

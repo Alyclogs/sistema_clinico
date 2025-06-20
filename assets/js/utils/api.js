@@ -48,6 +48,10 @@ export default {
     obtenerDisponibilidadEspecialista: (idespecialista) => {
         return $.get(baseurl + `controllers/Disponibilidad/DisponibilidadController.php?action=read&idespecialista=${idespecialista}`);
     },
+    obtenerResumenes: (idcita) => {
+        console.log(baseurl + `controllers/Resumen/ResumenController.php?action=read&idcita=${idcita}`);
+        return $.get(baseurl + `controllers/Resumen/ResumenController.php?action=read&idcita=${idcita}`);
+    },
     agendarPaciente: ({ data, onSuccess, onError }) => {
         $.ajax({
             type: 'POST',

@@ -156,30 +156,25 @@ body {
   overflow-x: auto;
 }
 
-#mini-calendar .fc-daygrid-day,
-#mini-calendar-cita .fc-daygrid-day {
+#mini-calendar .fc-daygrid-day {
   border: none !important;
   font-size: 14px;
 }
 
-#mini-calendar table,
-#mini-calendar-cita table {
+#mini-calendar table {
   border: none !important;
   font-size: 12px;
 }
 
 #mini-calendar td,
-#mini-calendar th,
-#mini-calendar-cita td,
-#mini-calendar-cita th {
+#mini-calendar th {
   border: none !important;
   font-size: 12px;
 }
 
 #mini-calendar thead,
 #mini-calendar-cita thead,
-#mini-calendar tbody,
-#mini-calendar-cita tbody {
+#mini-calendar tbody {
   font-size: 12px;
 }
 
@@ -190,15 +185,7 @@ body {
   font-size: 12px;
 }
 
-#mini-calendar-cita .fc,
-.fc *,
-.fc ::after,
-.fc ::before {
-  font-size: 12px;
-}
-
-#mini-calendar a.fc .fc-col-header-cell-cushion,
-#mini-calendar-modal a.fc .fc-col-header-cell-cushion {
+#mini-calendar a.fc .fc-col-header-cell-cushion {
   font-size: 12px !important;
 }
 
@@ -257,8 +244,7 @@ body {
   text-transform: uppercase;
 }
 
-#mini-calendar a.fc-col-header-cell-cushion,
-#mini-calendar-cita a.fc-col-header-cell-cushion {
+#mini-calendar a.fc-col-header-cell-cushionn {
   text-decoration: none;
   color: #76869e;
   font-weight: 700;
@@ -288,16 +274,14 @@ body {
   font-weight: bold;
 }
 
-#mini-calendar .fc-header-toolbar,
-#mini-calendar-cita .fc-header-toolbar {
+#mini-calendar .fc-header-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0;
 }
 
-#mini-calendar .fc-header-toolbar .fc-button,
-#mini-calendar-cita .fc-header-toolbar .fc-button {
+#mini-calendar .fc-header-toolbar .fc-button {
   background: none;
   border: none;
   font-size: 1rem;
@@ -305,13 +289,11 @@ body {
   padding: 0 0.5rem;
 }
 
-#mini-calendar .fc-header-toolbar .fc-button:hover,
-#mini-calendar-cita .fc-header-toolbar .fc-button:hover {
+#mini-calendar .fc-header-toolbar .fc-button {
   color: #76869e;
 }
 
-#mini-calendar .fc-header-toolbar .fc-toolbar-title,
-#mini-calendar-cita .fc-header-toolbar .fc-toolbar-title {
+#mini-calendar .fc-header-toolbar .fc-toolbar-title {
   font-size: 1rem;
   font-weight: 600;
 }

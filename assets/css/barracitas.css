@@ -1,0 +1,98 @@
+#mini-calendar-cita .fc-header-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0;
+}
+
+#mini-calendar-cita .fc-header-toolbar .fc-button {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #76869e49;
+  padding: 0 0.5rem;
+}
+
+#mini-calendar-cita .fc-header-toolbar .fc-button:hover {
+  color: #76869e;
+}
+
+#mini-calendar-cita .fc-header-toolbar .fc-toolbar-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+#mini-calendar-cita a.fc-col-header-cell-cushion {
+  text-decoration: none;
+  color: #76869e;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+#mini-calendar-cita .fc-daygrid-day {
+  border: none !important;
+  font-size: 14px;
+}
+
+#mini-calendar-cita table {
+  border: none !important;
+  font-size: 12px;
+}
+
+#mini-calendar-cita td,
+#mini-calendar-cita th {
+  border: none !important;
+  font-size: 12px;
+}
+
+#mini-calendar-cita thead,
+#mini-calendar-cita tbody {
+  font-size: 12px;
+}
+
+#mini-calendar-cita .fc,
+.fc *,
+.fc ::after,
+.fc ::before {
+  font-size: 12px;
+}
+
+#mini-calendar-cita a.fc .fc-col-header-cell-cushion {
+  font-size: 12px !important;
+}
+
+.fc .fc-daygrid-day.fc-day-today {
+  background-color: #f3f3f3 !important;
+}
+
+.fc .fc-daygrid-day-number {
+  color: #76869e;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+#btnAbrirCalendarioCita {
+  border-radius: 35px;
+  background-color: #f07e0b;
+  padding: 8px;
+  height: 32px;
+  width: 32px;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+.minicalendar-modal {
+  display: none;
+  flex-direction: column;
+  background: #fff;
+  width: 300px;
+  overflow: hidden;
+  position: absolute;
+  padding: 12px;
+  z-index: 1000;
+  border-radius: 6px;
+  box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);
+  top: 2.3rem;
+}

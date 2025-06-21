@@ -14,6 +14,11 @@ switch ($action) {
             return;
         }
         if (isset($_GET['idpaciente'])) {
+            if (isset($_GET['fecha'])) {
+                $result = $model->obtenerCitasPorPacienteyFecha($_GET['idpaciente'], $_GET['fecha']);
+                echo json_encode($result);
+                return;
+            }
             $result = $model->obtenerCitasPorPaciente($_GET['idpaciente']);
             echo json_encode($result);
             return;

@@ -88,17 +88,18 @@ class ResumenModel
 
     public function actualizarResumen($data)
     {
-        $sql = "UPDATE resumenes SET resumen = :resumen, idcita = :idcita, fechahora = :fechahora WHERE idresumen = :idresumen";
+        $sql = "UPDATE resumenes_pacientes SET resumen = :resumen, idcita = :idcita, fechahora = :fechahora WHERE idresumen = :idresumen";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':resumen', $data['resumen'], PDO::PARAM_STR);
         $stmt->bindParam(':idcita', $data['idcita'], PDO::PARAM_INT);
         $stmt->bindParam(':fechahora', $data['fechahora']);
+        $stmt->bindParam(':idresumen', $data['idresumen'], PDO::PARAM_INT);
         return $stmt->execute();
     }
 
     public function eliminarResumen($idresumen)
     {
-        $sql = "DELETE FROM resumenes WHERE idresumen = :idresumen";
+        $sql = "DELETE FROM resumenes_pacientes WHERE idresumen = :idresumen";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':idresumen', $idresumen, PDO::PARAM_INT);
         return $stmt->execute();

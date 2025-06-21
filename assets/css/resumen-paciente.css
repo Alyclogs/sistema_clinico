@@ -202,6 +202,7 @@
 }
 
 .resumen-bloque {
+  width: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -224,7 +225,7 @@
   border: 1px solid #f07e0b;
 }
 
-.btn-circular.btn-editando svg {
+.boton-circular.btn-editando .cls-016 {
   fill: #f07e0b;
 }
 

@@ -19,16 +19,6 @@ if ($idpaciente) {
         return;
     }
 }
-$idcita = isset($_GET['idcita']) ? $_GET['idcita'] : null;
-$cita = null;
-if ($idcita) {
-    $citaModel = new CitasModel();
-    $cita = $citaModel->obtenerCitaPorId($idcita);
-    if (!$cita) {
-        echo '<div class="alert alert-danger">No se encontró la cita.</div>';
-        return;
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang='es'>
@@ -65,7 +55,6 @@ if ($idcita) {
                                         <div class="paciente-detalles-main">
                                             <div class="detalles-row">
                                                 <input type="hidden" id="pacienteId" value="<?= htmlspecialchars($idpaciente) ?>">
-                                                <input type="hidden" id="citaId" value="<?= htmlspecialchars($idcita) ?>">
                                                 <img id="pacienteFoto" src="<?= htmlspecialchars($paciente['foto']) ?>" width="100px" height="100px"></img>
                                                 <div class="paciente-detalles">
                                                     <span id="pacienteNombre" class="subtitle-bold"><?= htmlspecialchars($paciente['nombres']) . ' ' . htmlspecialchars($paciente['apellidos']) ?></span>
@@ -168,7 +157,7 @@ if ($idcita) {
                                 <div class="resumen-container">
                                     <div id="editorResumen" class="paciente-container" style="display: none;">
                                         <div class="container-cabecera">
-                                            <span class="cabecera-titulo">RESUMEN DEL PACIENTE</span>
+                                            <span id="editorResumenTitulo" class="cabecera-titulo">Resumen de la cita</span>
                                         </div>
                                         <div id="editor"></div>
                                         <div class="botones-resumen">

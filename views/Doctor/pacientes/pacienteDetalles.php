@@ -32,8 +32,6 @@ if ($idcita) {
 ?>
 <!DOCTYPE html>
 <html lang='es'>
-<!DOCTYPE html>
-<html lang='es'>
 
 <head>
     <meta charset='utf-8' />

@@ -42,7 +42,8 @@ class ResumenModel
         INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
         INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
         INNER JOIN usuarios u ON e.idespecialista = u.idusuario
-        WHERE c.idpaciente = :idpaciente";
+        WHERE c.idpaciente = :idpaciente
+        ORDER BY rp.fechahora ASC";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':idpaciente', $idpaciente, PDO::PARAM_INT);
         $stmt->execute();
@@ -77,22 +78,21 @@ class ResumenModel
 
     public function guardarResumen($data)
     {
-        $sql = "INSERT INTO resumenes_pacientes (resumen, idcita, idpaciente) VALUES (:resumen, :idcita, :idpaciente)";
+        $sql = "INSERT INTO resumenes_pacientes (resumen, idcita, fechahora) VALUES (:resumen, :idcita, :fechahora)";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':resumen', $data['resumen'], PDO::PARAM_STR);
         $stmt->bindParam(':idcita', $data['idcita'], PDO::PARAM_INT);
-        $stmt->bindParam(':idpaciente', $data['idpaciente'], PDO::PARAM_INT);
+        $stmt->bindParam(':fechahora', $data['fechahora']);
         return $stmt->execute();
     }
 
     public function actualizarResumen($data)
     {
-        $sql = "UPDATE resumenes SET resumen = :resumen, idcita = :idcita, idpaciente = :idpaciente WHERE idresumen = :idresumen";
+        $sql = "UPDATE resumenes SET resumen = :resumen, idcita = :idcita, fechahora = :fechahora WHERE idresumen = :idresumen";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':resumen', $data['resumen'], PDO::PARAM_STR);
         $stmt->bindParam(':idcita', $data['idcita'], PDO::PARAM_INT);
-        $stmt->bindParam(':idpaciente', $data['idpaciente'], PDO::PARAM_INT);
-        $stmt->bindParam(':idresumen', $data['resumen'], PDO::PARAM_INT);
+        $stmt->bindParam(':fechahora', $data['fechahora']);
         return $stmt->execute();
     }
 

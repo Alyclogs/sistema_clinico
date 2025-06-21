@@ -3,6 +3,7 @@ import { calcularEdad, formatearHora12h } from '../utils/date.js';
 import { mostrarMensajeFlotante } from '../utils/utils.js';
 
 const baseurl = "http://localhost/SistemaClinico/";
+let selectedcita = '';
 
 async function listarResumenes() {
     const citasPacientePromise = api.obtenerCitas({ idpaciente: document.getElementById('pacienteId').value });
@@ -13,7 +14,7 @@ async function listarResumenes() {
             const ultimoResumenEl = document.getElementById('resumenUltimaCita');
             const ultimacita = citas[citas.length - 1];
             const ultimoresumen = resumenes.find(r => r.idcita === ultimacita.idcita);
-            ultimoResumenEl.innerHTML = ultimacita.resumen_id && ultimoresumen ? crearUltimoResumen(ultimoresumen).innerHTML : crearResumenBlanco(ultimacita);
+            ultimoResumenEl.innerHTML = ultimacita.resumen_id && ultimoresumen ? crearUltimoResumen(ultimoresumen).innerHTML : crearResumenBlanco(ultimacita).innerHTML;
 
             const resumenList = document.getElementById('pacienteResumenes');
             resumenList.innerHTML = '';
@@ -62,9 +63,11 @@ function crearResumen(resumen) {
         <div class="paciente-detalles">
         <span class="subtitle-bold" style="margin-bottom: 0">${resumen.especialista_nombres} ${resumen.especialista_apellidos} (${resumen.cita_servicio} ${resumen.cita_area})</span>
         <span>${formatearHora12h(resumen.cita_hora_inicio)} - ${resumen.fechahora}</span>
-        </div></div></div><span class="texto-bloque">${resumen.resumen}</span></div>
+        </div></div></div>
+        <span class="texto-bloque">${resumen.resumen}</span>
+        </div>
         <div class="botones-resumen" style="padding: 0px;">
-        <button id="btnEditarResumen" class="boton-circular btn btn-sm rounded-circle">
+        <button id="btnEditarResumen" class="boton-circular btn btn-sm rounded-circle" data-id="${resumen.idresumen}">
 <svg id="INFO_PACIENTE" data-name="INFO PACIENTE" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9 8.99" style="width: 24px; height: 24px;">
   <defs>
     <style>
@@ -75,7 +78,7 @@ function crearResumen(resumen) {
   </defs>
   <path class="cls-016" d="M8.72,1.86l-1.59-1.59c-.37-.37-.97-.37-1.34,0L.58,5.48c-.07.07-.07.14-.08.15L0,8.67c-.01.08.01.18.08.24.06.07.15.1.24.08l3.04-.49s.08-.01.15-.08l5.2-5.22c.38-.37.38-.97,0-1.34ZM3.32,7.81l-.87-.87,3.68-3.68.87.87-3.68,3.68ZM2.04,6.54s-.93-.93-.87-.87l3.68-3.68.87.87-3.68,3.68ZM.62,8.37l.34-2.11,1.76,1.76-2.09.35ZM8.33,2.8l-.93.93-2.14-2.14.93-.93c.14-.14.39-.14.55,0l1.59,1.59c.15.15.15.39,0,.55Z"/>
 </svg></button>
-        <button id="btnEditarResumen" class="boton-circular btn btn-sm rounded-circle">
+        <button id="btnEliminarResumen" class="boton-circular btn btn-sm rounded-circle" data-id="${resumen.idresumen}">
 <svg id="INFO_PACIENTE" data-name="INFO PACIENTE" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7.87 9" style="width: 24px; height: 24px;">
   <defs>
     <style>
@@ -126,13 +129,22 @@ document.addEventListener('DOMContentLoaded', function () {
         theme: 'snow',
         placeholder: 'Empieza a escribir...',
     });
+    let quill2 = null;
     listarResumenes();
 
     document.addEventListener('click', function (e) {
         if (e.target.id === 'btnGuardarResumen') {
+            if (!selectedcita) {
+                mostrarMensajeFlotante('Debe seleccionar una cita primero');
+                return;
+            }
+            if (quill.root.innerHTML === '') {
+                mostrarMensajeFlotante('El resumen no puede estar vacío');
+                return;
+            }
             const resumenData = {
-                idpaciente: document.getElementById('pacienteId').value,
-                idcita: document.getElementById('citaId').value,
+                idcita: selectedcita,
+                fechahora: new Date().toISOString(),
                 resumen: quill.root.innerHTML
             }
 
@@ -143,6 +155,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 dataType: 'json',
                 success: function (response) {
                     if (response.success) {
+                        selectedcita = '';
+                        quill.root.innerHTML = '';
                         listarResumenes();
                     } else {
                         console.log(response.error);
@@ -160,14 +174,77 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Respuesta del servidor:', jqXHR.responseText);
             });
         }
+        if (e.target.id === 'btnActualizarResumen') {
+            if (!selectedcita) {
+                mostrarMensajeFlotante('Debe seleccionar una cita primero');
+                return;
+            }
+            if (quill2?.root.innerHTML === '') {
+                mostrarMensajeFlotante('El resumen no puede estar vacío');
+                return;
+            }
+            const resumenData = {
+                idcita: selectedcita,
+                fechahora: new Date().toISOString(),
+                resumen: quill2?.root.innerHTML
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: baseurl + 'controllers/Resumen/ResumenController.php?action=update',
+                data: { data: JSON.stringify(resumenData) },
+                dataType: 'json',
+                success: function (response) {
+                    if (response.success) {
+                        selectedcita = '';
+                        listarResumenes();
+                    } else {
+                        console.log(response.error);
+                        mostrarMensajeFlotante('No se pudo actualizar el resumen');
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    mostrarMensajeFlotante('No se pudo actualizar el resumen');
+                    console.error('Error en la solicitud AJAX:', textStatus, errorThrown);
+                    console.error('Respuesta del servidor:', jqXHR.responseText);
+                }
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                mostrarMensajeFlotante('No se pudo actualizar el resumen');
+                console.error('Error en la solicitud AJAX:', textStatus, errorThrown);
+                console.error('Respuesta del servidor:', jqXHR.responseText);
+            });
+        }
+        if (e.target.id === 'btnEditarResumen') {
+            console.log(e.target.dataset.id);
+            const resumenEl = document.querySelector(`.paciente-container[data-id="${e.target.dataset.id}"]`);
+            const textoResumen = resumenEl.querySelector('.texto-bloque').textContent;
+            const container = resumenEl.querySelector('.texto-bloque');
+            const btnEditar = resumenEl.querySelector("#btnEditarResumen");
+            console.log(resumenEl, textoResumen, container, btnEditar);
+            container.outerHTML = '<div id="editorResumenSeleccionado"></div>';
+            btnEditar.id = "btnActualizarResumen";
+            btnEditar.dataset.id = e.target.dataset.id;
+            btnEditar.classList.add('btn-editando');
+            selectedcita = e.target.dataset.id;
+
+            const quill2 = new Quill('#editorResumenSeleccionado', {
+                theme: 'snow',
+                placeholder: 'Empieza a escribir...',
+            });
+            quill2.root.innerHTML = textoResumen;
+        }
         if (e.target.id === 'btnVerResumenes') {
             document.getElementById('editorResumen').style.display = '';
             document.getElementById('pacienteResumenes').style.display = '';
         }
         if (e.target.id === 'btnAsignarResumen') {
-            const resumenEl = document.querySelector(`.paciente-container[data-id="${e.target.dataset.id}"]`);
-            const textoResumen = resumenEl.querySelector('.texto-bloque').textContent;
-            quill.root.innerHTML = textoResumen;
+            document.getElementById('editorResumen').style.display = '';
+            document.getElementById('pacienteResumenes').style.display = '';
+            selectedcita = e.target.dataset.id;
+        }
+        if (e.target.id === 'btnCancelarResumen') {
+            document.getElementById('editorResumen').style.display = 'none';
+            document.getElementById('pacienteResumenes').style.display = 'none';
         }
     })
 })

@@ -139,7 +139,7 @@
 }
 
 .texto-bloque {
-  color: #59636d
+  color: #59636d;
 }
 
 .text-editor-options {
@@ -218,6 +218,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.boton-circular.btn-editando {
+  border: 1px solid #f07e0b;
+}
+
+.btn-circular.btn-editando svg {
+  fill: #f07e0b;
 }
 
 .datos-cita {

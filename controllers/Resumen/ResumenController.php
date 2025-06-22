@@ -21,7 +21,7 @@ if ($action === "read") {
         $resultado = $modelo->eliminarResumen($id);
         $mensaje = $resultado ? 'Resumen eliminado correctamente.' : 'Error al eliminar el resumen.';
     } else {
-        $mensaje = 'Error: ID inválido.';
+        $mensaje = 'Error: ID ' . $id . ' es inválido.';
     }
 } elseif ($action === "update") {
     if (isset($_POST['data'])) {

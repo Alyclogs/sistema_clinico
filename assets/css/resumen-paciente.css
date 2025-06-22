@@ -36,6 +36,7 @@
 }
 
 .resumen-container {
+  height: 100%;
   width: 100%;
   gap: 18px;
   display: flex;
@@ -82,6 +83,8 @@
 }
 
 .paciente-container {
+  display: flex;
+  flex-direction: column;
   border: 1px solid #76869e65;
   border-radius: 8px;
   max-width: 820px;
@@ -163,7 +166,6 @@
   display: flex;
   justify-content: end;
   gap: 6px;
-  padding: 12px;
 }
 
 .btn-default {
@@ -172,9 +174,10 @@
   padding: 3.5px 12px;
 }
 
-#btnCancelarResumen {
+.btn-cancelar {
   color: #76869e;
   text-decoration: underline;
+  border: none;
 }
 
 .ultimo-resumen {
@@ -187,8 +190,7 @@
   gap: 18px;
   display: flex;
   flex-direction: column;
-  max-height: 480px;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .resumen-item {

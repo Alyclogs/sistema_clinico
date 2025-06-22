@@ -160,8 +160,8 @@ if ($idpaciente) {
                                             <span id="editorResumenTitulo" class="cabecera-titulo">Resumen de la cita</span>
                                         </div>
                                         <div id="editor"></div>
-                                        <div class="botones-resumen">
-                                            <button class="btn" id="btnCancelarResumen">Cancelar</button>
+                                        <div class="botones-resumen" style="padding: 12px;">
+                                            <button class="btn btn-cancelar" id="btnCancelarResumen">Cancelar</button>
                                             <button class="btn btn-default" id="btnGuardarResumen">Guardar</button>
                                         </div>
                                     </div>

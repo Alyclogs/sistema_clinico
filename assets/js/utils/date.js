@@ -73,3 +73,19 @@ export function ajustarFecha(fechaStr, dias) {
     fecha.setDate(fecha.getDate() + dias);
     return fecha.toISOString().split('T')[0];
 }
+
+export function formatearFechaLocal(fechaStr) {
+    const fecha = new Date(fechaStr);
+    const opcionesFecha = { month: 'long', day: 'numeric', year: 'numeric' };
+    const fechaTexto = fecha.toLocaleDateString('es-ES', opcionesFecha);
+    return fechaTexto.charAt(0).toUpperCase() + fechaTexto.slice(1);
+}
+
+export function formatearFechaFull(fechaStr) {
+    const fecha = new Date(fechaStr);
+    const opcionesFecha = { month: 'long', day: 'numeric', year: 'numeric' };
+    const opcionesHora = { hour: 'numeric', minute: '2-digit', hour12: true };
+    const hora = fecha.toLocaleString('en-US', opcionesHora).toLowerCase();
+    const fechaTexto = fecha.toLocaleDateString('es-ES', opcionesFecha);
+    return `${hora} - ${fechaTexto.charAt(0).toUpperCase() + fechaTexto.slice(1)}`;
+}

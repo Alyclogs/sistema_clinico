@@ -168,7 +168,7 @@ $idusuario = $_SESSION['idusuario'];
                                     <div class="no-horarios-selected">No se han seleccionado citas.
                                         Seleccione sus citas en la agenda</div>
                                     <div class="modal-cita-body">
-                                        <div id="horariosSeleccionados" class="citas-lista"></div>
+                                        <div id="horariosSeleccionados" class="citas-lista" style="max-height: 520px; overflow-y: auto;"></div>
                                         <div class="agregar-horario" style="display: none;">
                                             <div class="calendario">
                                                 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="12.34px"
@@ -239,7 +239,7 @@ $idusuario = $_SESSION['idusuario'];
                                     </div>
                                 </div>
                                 <div id="modalReprogramaciones" style="display: none;">
-                                    <div class="citas-container"></div>
+                                    <div class="citas-container" style="max-height: 620px; overflow-y: auto;"></div>
                                 </div>
                             </div>
                         </div>

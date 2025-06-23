@@ -211,13 +211,14 @@ document.addEventListener('DOMContentLoaded', function () {
             return `${pad(end.getHours())}:${pad(end.getMinutes())}`;
         })();
 
-        // 1) Si ya existe ese bloque, lo removemos:
+        // 1) Si ya existe ese bloque o se solapa con alguno, lo removemos:
         const idxExist = horariosSeleccionados.findIndex(h =>
             h.idespecialista === selectedespecialista &&
             h.fecha === fecha &&
-            h.horaInicioRaw === horaInicioRaw &&
-            h.horaFinRaw === horaFinRaw
+            (h.horaInicioRaw === horaInicioRaw && h.horaFinRaw === horaFinRaw ||
+                horaInicioRaw < h.horaFinRaw && h.horaInicioRaw < horaFinRaw)
         );
+
         if (idxExist >= 0) {
             eliminarHorario(idxExist);
             return;
@@ -277,10 +278,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 horaInicioRaw >= labIni &&
                 horaFinRaw <= labFin &&
                 !(horaInicioRaw < refFin && horaFinRaw > refIni)
-                && !citasActuales.some(c => {
-                    console.log('horaInicioRaw < c.hora_fin', horaInicioRaw < c.hora_fin, 'horaFinRaw > c.hora_inicio', horaFinRaw > c.hora_inicio);
-                    return c.fecha === fecha && horaInicioRaw < c.hora_fin && horaFinRaw > c.hora_inicio
-                })
+                && !citasActuales.some(c => c.fecha === fecha && (horaInicioRaw < c.hora_fin.slice(0, 5) && horaFinRaw > c.hora_inicio.slice(0, 5)) || (horaInicioRaw > c.hora_fin.slice(0, 5) && horaFinRaw < c.hora_inicio.slice(0, 5)))
             ) {
                 disponible = true;
             }

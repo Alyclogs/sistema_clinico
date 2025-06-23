@@ -334,6 +334,11 @@ body {
   display: none;
 }
 
+.modal-cita-header {
+  display: flex;
+  gap: 22px;
+}
+
 .modal-cita-header h2 {
   font-weight: 700;
   font-size: 20px;
@@ -341,6 +346,18 @@ body {
   border-bottom: 1px solid #76869e;
   padding-bottom: 8px;
   width: max-content;
+  cursor: pointer;
+}
+
+.modal-cita-header h2:hover {
+  font-weight: 700;
+  font-size: 20px;
+  margin-bottom: 24px;
+  color: #e55a00;
+  border-bottom: 1px solid #e55a00;
+  padding-bottom: 8px;
+  width: max-content;
+  cursor: pointer;
 }
 
 .busqueda-paciente {
@@ -1003,4 +1020,61 @@ a.fc-event.fc-slot-custom-content.multiples-citas-evento {
   font-size: 14px;
   color: white;
   font-weight: bold;
+}
+
+.cita-container.cita-asistio .cita-content {
+  background-color: #48b02c10;
+}
+
+.cita-container.cita-no-asistio .cita-content {
+  background-color: #e5252a12;
+}
+
+.cita-content.cita-cancelado {
+  border-left: 10px solid #48B02C;
+}
+
+.cita-content.cita-pendiente {
+  border-left: 10px solid #f07e0b;
+}
+
+.cita-content {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 12px 18px;
+  box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+.cita-grupos {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cita-grupo {
+  display: flex;
+  align-items: center;
+}
+
+.cita-content .cita-paciente {
+  margin-right: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.cita-content .cita-time {
+  display: flex;
+  flex-direction: column;
+  padding-right: 18px;
+  margin-right: 16px;
+}
+
+.cita-content .cita-time {
+  border-right: 0.5px solid #76869e;
 }

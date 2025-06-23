@@ -75,7 +75,8 @@ export function ajustarFecha(fechaStr, dias) {
 }
 
 export function formatearFechaLocal(fechaStr) {
-    const fecha = new Date(fechaStr);
+    const [anio, mes, dia] = fechaStr.split('-').map(Number);
+    const fecha = new Date(anio, mes - 1, dia);
     const opcionesFecha = { month: 'long', day: 'numeric', year: 'numeric' };
     const fechaTexto = fecha.toLocaleDateString('es-ES', opcionesFecha);
     return fechaTexto.charAt(0).toUpperCase() + fechaTexto.slice(1);
@@ -83,9 +84,14 @@ export function formatearFechaLocal(fechaStr) {
 
 export function formatearFechaFull(fechaStr) {
     const fecha = new Date(fechaStr);
-    const opcionesFecha = { month: 'long', day: 'numeric', year: 'numeric' };
-    const opcionesHora = { hour: 'numeric', minute: '2-digit', hour12: true };
-    const hora = fecha.toLocaleString('en-US', opcionesHora).toLowerCase();
-    const fechaTexto = fecha.toLocaleDateString('es-ES', opcionesFecha);
-    return `${hora} - ${fechaTexto.charAt(0).toUpperCase() + fechaTexto.slice(1)}`;
+    const opciones = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    };
+    const fechaTexto = fecha.toLocaleString('es-ES', opciones);
+    return fechaTexto.charAt(0).toUpperCase() + fechaTexto.slice(1);
 }

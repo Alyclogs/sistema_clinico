@@ -114,7 +114,7 @@ class CitasModel
         u.apellidos AS especialista_apellidos,
         u.foto AS especialista_foto,
         a.area AS cita_area,
-        s.servicio AS cita_servicio,
+        s.servicio AS servicio,
         rp.idresumen AS resumen_id
         FROM citas c
         INNER JOIN pacientes p ON c.idpaciente = p.idpaciente
@@ -124,7 +124,6 @@ class CitasModel
         INNER JOIN servicios s ON c.idservicio = s.idservicio
         LEFT JOIN resumenes_pacientes rp ON rp.idcita = c.idcita
         WHERE c.idpaciente = :idpaciente
-        AND c.asistio = 1
         ORDER BY c.fecha DESC";
 
         $stmt = $this->db->prepare($sql);
@@ -146,7 +145,7 @@ class CitasModel
         u.apellidos AS especialista_apellidos,
         u.foto AS especialista_foto,
         a.area AS cita_area,
-        s.servicio AS cita_servicio,
+        s.servicio AS servicio,
         rp.idresumen AS resumen_id
         FROM citas c
         INNER JOIN pacientes p ON c.idpaciente = p.idpaciente

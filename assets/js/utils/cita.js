@@ -154,7 +154,7 @@ export async function obtenerCitasEspecialista(idespecialista, fechaSeleccionada
             });
 
             if (citaActual) {
-                const citaActualElement = crearCitaEspecialista(citaActual);
+                const citaActualElement = crearCitaContainer(citaActual);
                 citaActualElement.classList.add('cita-actual');
                 citaActualElement.append(buildBotones(citaActual));
                 citasContainer.prepend(citaActualElement);
@@ -169,7 +169,7 @@ export async function obtenerCitasEspecialista(idespecialista, fechaSeleccionada
 
             // Añadir el resto de citas
             citasHoy.forEach(cita => {
-                const citaElement = crearCitaEspecialista(cita);
+                const citaElement = crearCitaContainer(cita);
                 if (cita.asistio == true) {
                     citaElement.classList.add('cita-asistio');
                 } else if (cita.asistio == false) {
@@ -182,14 +182,14 @@ export async function obtenerCitasEspecialista(idespecialista, fechaSeleccionada
                 const citasSinMarcar = citasPasadas.filter(cita => cita.asistio == null);
                 if (citasSinMarcar) {
                     citasSinMarcar.forEach(cita => {
-                        const citaSinMarcarElement = crearCitaEspecialista(cita);
+                        const citaSinMarcarElement = crearCitaContainer(cita);
                         citaSinMarcarElement.append(buildBotones(cita));
                         citasContainer.appendChild(citaSinMarcarElement);
                     })
                     citasPasadas = citasPasadas.filter(c => !citasSinMarcar.includes(c));
                 }
                 citasPasadas.forEach(cita => {
-                    const citaPasadaElement = crearCitaEspecialista(cita);
+                    const citaPasadaElement = crearCitaContainer(cita);
                     if (cita.asistio == true) {
                         citaPasadaElement.classList.add('cita-asistio');
                     } else if (cita.asistio == false) {
@@ -207,7 +207,31 @@ export async function obtenerCitasEspecialista(idespecialista, fechaSeleccionada
     });
 }
 
-export function crearCitaEspecialista(cita) {
+export async function obtenerCitasPaciente(idpaciente) {
+    const citasContainer = document.querySelector('.citas-container');
+    citasContainer.innerHTML = '';
+
+    return api.obtenerCitas({ idpaciente }).then((citas) => {
+        if (citas.length == 0) return;
+
+        citas.forEach(cita => {
+            const citaElement = crearCitaContainer(cita);
+            if (cita.asistio == true) {
+                citaElement.classList.add('cita-asistio');
+            } else if (cita.asistio == false) {
+                citaElement.classList.add('cita-no-asistio');
+            }
+            citasContainer.appendChild(citaElement);
+        });
+        //procesarYMostrarCitas(cal, citas, idespecialista);
+        return citas;
+    }).catch(error => {
+        citasContainer.innerHTML = '<div class="alert alert-danger">Error al obtener citas</div>';
+        console.error('Error al obtener citas:', error);
+    });
+}
+
+export function crearCitaContainer(cita) {
     const estado = `cita-${estadosCita[cita.idestado]}`;
     const asistio = cita.asistio == true ? 'cita-asistio' : cita.asistio == false ? 'cita-no-asistio' : null;
     const citaElement = document.createElement('div');

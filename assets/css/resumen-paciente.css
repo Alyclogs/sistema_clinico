@@ -174,8 +174,20 @@
   padding: 3.5px 12px;
 }
 
+.btn-default:hover {
+  background-color: #e47302;
+  color: #fff;
+  padding: 3.5px 12px;
+}
+
 .btn-cancelar {
   color: #76869e;
+  text-decoration: underline;
+  border: none;
+}
+
+.btn-cancelar:hover {
+  color: #586b88;
   text-decoration: underline;
   border: none;
 }
@@ -191,6 +203,7 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  max-height: 420px;
 }
 
 .resumen-item {
@@ -205,6 +218,12 @@
 
 .resumen-bloque {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.contenido-resumen {
+  gap: 18px;
   display: flex;
   flex-direction: column;
 }

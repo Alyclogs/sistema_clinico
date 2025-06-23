@@ -22,60 +22,57 @@ async function listarResumenes() {
     const resumenesPacientePromise = api.obtenerResumenes('', document.getElementById('pacienteId').value);
 
     return Promise.all([citasPacientePromise, citasPacienteDiaPromise, resumenesPacientePromise]).then(([citas, citasdia, resumenes]) => {
-        if (citas.length && citas.length > 1) {
+        if (citas.length && citas.length > 0) {
             const ultimoResumenEl = document.getElementById('resumenUltimaCita');
-            const ultimacita = citasdia.length ? citasdia[0] : citas[citas.length - 1]; // Citas en orden descendente por fecha
+            const ultimacita = citasdia.length ? citasdia[0] : citas[citas.length - 1];
             const ultimoresumen = resumenes.find(r => r.idcita === ultimacita.idcita);
             const citasSinResumen = citas.filter(c => !c.resumen_id);
 
             ultimoResumenEl.innerHTML = ultimacita.resumen_id && ultimoresumen ? crearUltimoResumen(ultimoresumen).outerHTML : crearResumenBlanco(ultimacita).outerHTML;
+            ultimoResumenEl.querySelector('.paciente-container').style.border = 'none';
             const resumenList = document.getElementById('pacienteResumenes');
             resumenList.innerHTML = '';
 
             if (!citasSinResumen.length) {
                 resumenesCompletos = true;
+                citas = citas.filter(c => !citasSinResumen.includes(c));
                 document.getElementById("editorResumen").style.display = "none";
             } else {
                 resumenesCompletos = false;
                 if (!initialView) document.getElementById("editorResumen").style.display = "";
             }
 
-            if (ultimacita.resumen_id && !resumenesCompletos) {
+            if (!resumenesCompletos) {
                 selectedcita = `${citasSinResumen[citasSinResumen.length - 1]?.idcita}`;
-                document.getElementById("editorResumenTitulo").textContent = `Resumen de la cita ${citas.find(c => c.idcita == parseInt(selectedcita)).fecha}`;
+                const citaActual = citas.find(c => c.idcita == parseInt(selectedcita));
+                console.log(citaActual.fecha, formatearFechaLocal(citaActual.fecha));
+                document.getElementById("editorResumenTitulo").textContent = `Resumen de la cita del ${formatearFechaLocal(citaActual.fecha)} - ${formatearHora12h(citaActual.hora_inicio)}`;
                 citas = citas.filter(c => c.idcita !== parseInt(selectedcita));
             } else {
                 selectedcita = `${ultimacita.idcita}`;
-                document.getElementById("editorResumenTitulo").textContent = `Resumen de la cita ${citas.find(c => c.idcita == parseInt(selectedcita)).fecha}`;
+                const citaActual = citas.find(c => c.idcita == parseInt(selectedcita));
+                document.getElementById("editorResumenTitulo").textContent = `Resumen de la cita del ${formatearFechaLocal(citaActual.fecha)} - ${formatearHora12h(citaActual.hora_inicio)}`;
             }
             ultimacitaId = `${ultimacita.idcita}`;
-            ultimoresumenId = `${ultimoresumen.idresumen}`
+            ultimoresumenId = ultimoresumen ? `${ultimoresumen.idresumen}` : '';
             selectedresumen = selectedcita.resumen_id ? `${selectedcita.resumen_id}` : '';
 
-            citas.forEach(cita => {
-                if (cita.resumen_id) {
-                    const resumen = resumenes.find(r => r.idcita === cita.idcita);
-                    const resumenItem = crearResumen(resumen, cita.idespecialista === especialistaActual);
+            if (resumenes.length) {
+                resumenes.forEach(resumen => {
+                    const resumenItem = crearResumen(resumen, resumen.especialista_id === especialistaActual || resumen.especialista_id === parseInt(especialistaActual));
                     resumenList.prepend(resumenItem);
-                }
-            });
-        } else if (citas.length && citas.length == 1) {
-            const ultimoResumenEl = document.getElementById('resumenUltimaCita');
-            const ultimacita = citasdia.length ? citasdia[0] : citas[0]; // Citas en orden descendente por fecha
-            const ultimoresumen = resumenes.find(r => r.idcita === ultimacita.idcita);
-            ultimoResumenEl.innerHTML = ultimacita.resumen_id && ultimoresumen ? crearUltimoResumen(ultimoresumen).outerHTML : crearResumenBlanco(ultimacita).outerHTML;
+                });
+            }
 
-            const resumenList = document.getElementById('pacienteResumenes');
-            resumenList.innerHTML = '';
-            selectedcita = `${ultimacita.idcita}`;
-            ultimacitaId = `${ultimacita.idcita}`;
-            selectedresumen = ultimoresumen ? `${ultimoresumen.idresumen}` : '';
-            document.getElementById("editorResumenTitulo").textContent = `Resumen de la cita ${citas.find(c => c.idcita == parseInt(selectedcita)).fecha}`;
+            citasSinResumen.forEach(cita => {
+                const resumenItem = crearResumenBlanco(cita, cita.asistio);
+                resumenList.appendChild(resumenItem);
+            });
         }
     })
 }
 
-function crearResumenBlanco(cita) {
+function crearResumenBlanco(cita, asignable = true) {
     const resumenItem = document.createElement('div');
     resumenItem.className = 'paciente-container';
     resumenItem.dataset.idcita = cita.idcita;
@@ -84,14 +81,15 @@ function crearResumenBlanco(cita) {
                 <img class="avatar" width="32px" height="32px" src="${cita.especialista_foto}">
                 <div class="datos-especialista">
                 <div class="paciente-detalles">
-                <span class="subtitle-bold" style="margin-bottom: 0">${cita.especialista_nombres} ${cita.especialista_apellidos} (${cita.cita_servicio} ${cita.cita_area})</span>
+                <span class="subtitle-bold" style="margin-bottom: 0">${cita.especialista_nombres} ${cita.especialista_apellidos} (${cita.servicio} ${cita.cita_area})</span>
                 <span>${formatearHora12h(cita.hora_inicio)} - ${formatearFechaLocal(cita.fecha)}</span>
                 </div></div></div>
                 <div class="contenido-resumen">
                 <span class="texto-bloque">Esta cita no tiene asignada un resumen.</span>
-                <div class="botones-resumen">
+                ${asignable ? `<div class="botones-resumen">
                 <button id="btnAsignarResumen" class="btn btn-default btn-resumen" data-idcita="${cita.idcita}">Asignar resumen</button>
-                </div></div></div>`;
+                </div>` : ''}
+                </div></div>`;
 
     return resumenItem;
 }
@@ -108,7 +106,7 @@ function crearResumen(resumen, editable) {
         <img class="avatar" width="32px" height="32px" src="${resumen.especialista_foto}">
         <div class="datos-especialista">
         <div class="paciente-detalles">
-        <span class="subtitle-bold" style="margin-bottom: 0">${resumen.especialista_nombres} ${resumen.especialista_apellidos} (${resumen.cita_servicio} ${resumen.cita_area})</span>
+        <span class="subtitle-bold" style="margin-bottom: 0">${resumen.especialista_nombres} ${resumen.especialista_apellidos} (${resumen.servicio} ${resumen.cita_area})</span>
         <span>${formatearFechaFull(resumen.fechahora)}</span>
         </div></div></div></div>
         ${editable ? `<div class="botones-resumen" style="padding: 0px;">
@@ -150,13 +148,12 @@ function crearUltimoResumen(resumen) {
     const resumenItem = document.createElement('div');
     resumenItem.className = 'paciente-container';
     resumenItem.dataset.idresumen = resumen.idresumen;
-    resumenItem.style.border = 'none';
     resumenItem.innerHTML = `<div class="container-body">
         <div class="detalles-row">
         <img class="avatar" width="32px" height="32px" src="${resumen.especialista_foto}">
         <div class="datos-especialista">
         <div class="paciente-detalles">
-        <span class="subtitle-bold" style="margin-bottom: 0">${resumen.especialista_nombres} ${resumen.especialista_apellidos} (${resumen.cita_servicio} ${resumen.cita_area})</span>
+        <span class="subtitle-bold" style="margin-bottom: 0">${resumen.especialista_nombres} ${resumen.especialista_apellidos} (${resumen.servicio} ${resumen.cita_area})</span>
         <span>${formatearFechaFull(resumen.fechahora)}</span>
         </div></div></div>
         <div class="contenido-resumen">
@@ -207,10 +204,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         initialView = false;
                         quillActual.root.innerHTML = '';
                         quill2 = null;
+                        mostrarMensajeFlotante('Resumen guardado correctamente', true);
                         listarResumenes();
                     } else {
-                        console.log(response.error);
-                        mostrarMensajeFlotante('No se pudo guardar el resumen');
+                        mostrarMensajeFlotante(response.message);
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
@@ -256,10 +253,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         selectedresumen = '';
                         initialView = false;
                         quill3 = null;
+                        mostrarMensajeFlotante('Resumen actualizado correctamente', true);
                         listarResumenes();
                     } else {
-                        console.log(response.error);
-                        mostrarMensajeFlotante('No se pudo actualizar el resumen');
+                        console.log(response.message);
+                        mostrarMensajeFlotante(response.message);
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
@@ -291,8 +289,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         initialView = false;
                         quill2 = null;
                         quill3 = null;
+                        mostrarMensajeFlotante('Resumen eliminado correctamente', true)
                         listarResumenes();
                     } else {
+                        console.log(response.message);
                         mostrarMensajeFlotante(response.message);
                     }
                 },
@@ -311,34 +311,34 @@ document.addEventListener('DOMContentLoaded', function () {
             selectedresumen = e.target.closest(".paciente-container").dataset.idresumen;
             selectedcita = e.target.closest(".paciente-container").dataset.idcita;
 
-            if (selectedresumen !== ultimoresumenId) {
-                if (lastSelectedResumen && lastSelectedResumen !== selectedresumen) {
-                    const lastContainer = document.querySelector(`.paciente-container[data-idresumen="${lastSelectedResumen}"] .contenido-resumen`);
-                    if (lastContainer && contenidoOriginalR[lastSelectedResumen]) {
-                        lastContainer.innerHTML = contenidoOriginalR[lastSelectedResumen];
-                    }
+            if (lastSelectedResumen && lastSelectedResumen !== selectedresumen) {
+                const lastContainers = document.querySelectorAll(`.paciente-container[data-idresumen="${lastSelectedResumen}"] .contenido-resumen`);
+                const lastContainer = lastContainers[lastContainers.length - 1];
+                if (lastContainer && contenidoOriginalR[lastSelectedResumen]) {
+                    lastContainer.innerHTML = contenidoOriginalR[lastSelectedResumen];
                 }
-                const resumenContainer = document.querySelector(`.paciente-container[data-idresumen="${selectedresumen}"] .contenido-resumen`);
-                const textContent = resumenContainer.querySelector('.texto-bloque')?.textContent;
+            }
+            const resumenContainers = document.querySelectorAll(`.paciente-container[data-idresumen="${selectedresumen}"] .contenido-resumen`);
+            const resumenContainer = resumenContainers[resumenContainers.length - 1];
+            const textContent = resumenContainer.querySelector('.texto-bloque')?.textContent;
 
-                if (!contenidoOriginalR[selectedresumen]) {
-                    contenidoOriginalR[selectedresumen] = resumenContainer.innerHTML;
-                }
+            if (!contenidoOriginalR[selectedresumen]) {
+                contenidoOriginalR[selectedresumen] = resumenContainer.innerHTML;
+            }
 
-                resumenContainer.innerHTML = `
+            resumenContainer.innerHTML = `
                 <div id="editorResumenSeleccionado2"></div>
                 <div class="botones-resumen mt-2">
                     <button class="btn btn-cancelar" id="btnCancelarEditarResumen" data-idresumen="${selectedresumen}">Cancelar</button>
                     <button class="btn btn-default" id="btnActualizarResumen" data-idresumen="${selectedresumen}">Actualizar</button>
                 </div>`;
 
-                quill3 = new Quill('#editorResumenSeleccionado2', {
-                    theme: 'snow',
-                    placeholder: 'Escribe tu resumen...',
-                });
-                quill3.root.innerHTML = textContent ?? '';
-                lastSelectedResumen = selectedresumen;
-            }
+            quill3 = new Quill('#editorResumenSeleccionado2', {
+                theme: 'snow',
+                placeholder: 'Escribe tu resumen...',
+            });
+            quill3.root.innerHTML = textContent ?? '';
+            lastSelectedResumen = selectedresumen;
         }
         if (e.target.closest('#btnVerResumenes')) {
             if (!resumenesCompletos) document.getElementById('editorResumen').style.display = '';
@@ -369,7 +369,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 resumenContainer.innerHTML = `
                 <div id="editorResumenSeleccionado"></div>
                 <div class="botones-resumen mt-2">
-                    <button class="btn" id="btnCancelarEditarResumen" data-idcita="${selectedcita}">Cancelar</button>
+                    <button class="btn btn-cancelar" id="btnCancelarEditarResumen" data-idcita="${selectedcita}">Cancelar</button>
                     <button class="btn btn-default" id="btnGuardarResumen" data-idcita="${selectedcita}">Guardar</button>
                 </div>`;
 

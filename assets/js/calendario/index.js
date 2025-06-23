@@ -1,7 +1,7 @@
 import api from '../utils/api.js';
 import { mostrarMensajeFlotante } from '../utils/utils.js';
 import { formatearHora12h, calcularEdad, buildDate } from '../utils/date.js';
-import { procesarYMostrarCitas } from '../utils/cita.js';
+import { obtenerCitasPaciente, procesarYMostrarCitas } from '../utils/cita.js';
 import { calendarUI, updateCalendarDateRange } from '../utils/calendar.js';
 import { calcularDisponibilidadPorEspecialista, actualizarDisponibilidadEspecialista } from '../utils/especialista.js';
 
@@ -17,6 +17,8 @@ let servicioSeleccionado = 'CONSULTA';
 let especialistaSeleccionado = '';
 let disponibilidadEspecialista = [];
 let events = [];
+let citasActuales = [];
+let selectedoption = '1';
 const cal = new calendarUI();
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -213,7 +215,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const idxExist = horariosSeleccionados.findIndex(h =>
             h.idespecialista === selectedespecialista &&
             h.fecha === fecha &&
-            h.horaInicioRaw === horaInicioRaw
+            h.horaInicioRaw === horaInicioRaw &&
+            h.horaFinRaw === horaFinRaw
         );
         if (idxExist >= 0) {
             eliminarHorario(idxExist);
@@ -262,7 +265,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 fecha <= d.fechafin
             );
 
-        // 4) Validar que [horaInicioRaw, horaFinRaw) quepa en alguno
+        // 4) Validar que [horaInicioRaw, horaFinRaw) quepa en alguno y no se solape con ninguna cita existente
         let disponible = false;
         candidatos.forEach(d => {
             const labIni = d.horainicio.slice(0, 5);
@@ -274,6 +277,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 horaInicioRaw >= labIni &&
                 horaFinRaw <= labFin &&
                 !(horaInicioRaw < refFin && horaFinRaw > refIni)
+                && !citasActuales.some(c => {
+                    console.log('horaInicioRaw < c.hora_fin', horaInicioRaw < c.hora_fin, 'horaFinRaw > c.hora_inicio', horaFinRaw > c.hora_inicio);
+                    return c.fecha === fecha && horaInicioRaw < c.hora_fin && horaFinRaw > c.hora_inicio
+                })
             ) {
                 disponible = true;
             }
@@ -527,6 +534,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 $('#subPacienteSeleccionado').show();
                 $('#pacienteSeleccionado').show();
                 $('#resultadoPacientes').css('display', 'none').empty();
+
+                if (selectedoption === '2') obtenerCitasPaciente(pacienteActual.idpaciente);
             });
         }
         if (e.target.closest('#btnPagar')) {
@@ -589,6 +598,18 @@ document.addEventListener('DOMContentLoaded', function () {
             const horario = e.target.closest(".horario-item").querySelector('span').dataset.time;
             document.getElementById('nuevoHorarioHora').value = horario;
             $('#resultadoHorarios').css('display', 'none');
+        }
+        if (e.target.closest('.modal-cita-header h2')) {
+            const option = e.target.closest('.modal-cita-header h2');
+            selectedoption = option.id;
+            if (option.id === '1') {
+                document.getElementById('modalNuevaCita').style.display = '';
+                document.getElementById('modalReprogramaciones').style.display = 'none';
+            }
+            if (option.id === '2') {
+                document.getElementById('modalNuevaCita').style.display = 'none';
+                document.getElementById('modalReprogramaciones').style.display = '';
+            }
         }
     });
 
@@ -750,8 +771,8 @@ document.addEventListener('DOMContentLoaded', function () {
         })
             .then(function (citas) {
                 events = procesarYMostrarCitas(cal, citas, selectedespecialista);
-                console.log(events);
                 events.forEach(event => calendar.addEvent(event));
+                citasActuales = citas;
             })
             .catch((e) => {
                 console.log(e);

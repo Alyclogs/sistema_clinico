@@ -30,6 +30,7 @@ class ResumenModel
         $sql = "SELECT DISTINCT rp.*,
         c.fecha AS cita_fecha,
         c.hora_inicio AS cita_hora_inicio,
+        u.idusuario AS especialista_id,
         u.nombres AS especialista_nombres,
         u.apellidos AS especialista_apellidos,
         u.foto AS especialista_foto,

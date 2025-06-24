@@ -1,7 +1,7 @@
 import api from '../utils/api.js';
 import { mostrarMensajeFlotante } from '../utils/utils.js';
 import { formatearHora12h, calcularEdad, buildDate } from '../utils/date.js';
-import { obtenerCitasPaciente, procesarYMostrarCitas } from '../utils/cita.js';
+import { crearCitaChip, obtenerCitasPaciente, procesarYMostrarCitas } from '../utils/cita.js';
 import { calendarUI, updateCalendarDateRange } from '../utils/calendar.js';
 import { calcularDisponibilidadPorEspecialista, actualizarDisponibilidadEspecialista } from '../utils/especialista.js';
 
@@ -19,6 +19,8 @@ let disponibilidadEspecialista = [];
 let events = [];
 let citasActuales = [];
 let selectedoption = '1';
+let reprogramandoState = false;
+let horarioReprogramando = {};
 const cal = new calendarUI();
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -211,30 +213,31 @@ document.addEventListener('DOMContentLoaded', function () {
             return `${pad(end.getHours())}:${pad(end.getMinutes())}`;
         })();
 
-        // 1) Si ya existe ese bloque, lo removemos:
-        const idxExist = horariosSeleccionados.findIndex(h =>
-            h.idespecialista === selectedespecialista &&
-            h.fecha === fecha &&
-            h.horaInicioRaw === horaInicioRaw &&
-            h.horaFinRaw === horaFinRaw
-        );
-        if (idxExist >= 0) {
-            eliminarHorario(idxExist);
+        if (reprogramandoState) {
+            horarioReprogramando.fecha = fecha;
+            horarioReprogramando.horaInicioRaw = horaInicioRaw;
+            horarioReprogramando.horaFinRaw = horaFinRaw;
+            horarioReprogramando.horaIni = formatearHora12h(horaInicioRaw);
+            horarioReprogramando.horaFin = formatearHora12h(horaFinRaw);
+
+            reprogramandoState = false;
+            actualizarHorarioReprogramando();
+            reprogramarCita();
             return;
         }
 
-        // 2) Validar que hay especialista
+        // 1) Validar que hay especialista
         if (!selectedespecialista) {
             mostrarMensajeFlotante('Debe seleccionar un especialista primero');
             return;
         }
 
-        // 3) Día de la semana y disponibilidad
+        // 2) Día de la semana y disponibilidad
         const diaSemana = startDate
             .toLocaleDateString('es-ES', { weekday: 'long' })
             .toLowerCase();
 
-        // 3.1) Bloqueos totales
+        // 2.1) Bloqueos totales
         if (disponibilidadEspecialista.some(d =>
             d.es_excepcion &&
             d.estado === 'sin disponibilidad' &&
@@ -246,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // 3.2) Excepciones de cambio
+        // 2.2) Excepciones de cambio
         const excepciones = disponibilidadEspecialista.filter(d =>
             d.es_excepcion &&
             d.estado === 'cambio de horario' &&
@@ -255,7 +258,19 @@ document.addEventListener('DOMContentLoaded', function () {
             fecha <= d.fechafin
         );
 
-        // 3.3) Candidatos (excepción o regular)
+        // 3) Si ya existe ese bloque, lo removemos:
+        const idxExist = horariosSeleccionados.findIndex(h =>
+            h.idespecialista === selectedespecialista &&
+            h.fecha === fecha &&
+            h.horaInicioRaw === horaInicioRaw &&
+            h.horaFinRaw === horaFinRaw
+        );
+        if (idxExist >= 0) {
+            eliminarHorario(idxExist);
+            return;
+        }
+
+        // 4) Candidatos (excepción o regular)
         const candidatos = excepciones.length
             ? excepciones
             : disponibilidadEspecialista.filter(d =>
@@ -265,7 +280,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 fecha <= d.fechafin
             );
 
-        // 4) Validar que [horaInicioRaw, horaFinRaw) quepa en alguno y no se solape con ninguna cita existente
+        // 5) Validar que [horaInicioRaw, horaFinRaw) quepa en alguno y no se solape con ninguna cita existente
         let disponible = false;
         candidatos.forEach(d => {
             const labIni = d.horainicio.slice(0, 5);
@@ -317,67 +332,7 @@ document.addEventListener('DOMContentLoaded', function () {
         cont.innerHTML = '';
         const diasAbrev = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'];
         horariosSeleccionados.forEach((h, idx) => {
-            const chip = document.createElement('div');
-            chip.className = 'horario-chip';
-            chip.dataset.idx = idx;
-            // Día abreviado y número
-            const fechaObj = new Date(h.fecha + 'T00:00:00');
-            const diaAbrev = diasAbrev[fechaObj.getDay()];
-            const diaNum = fechaObj.getDate();
-            chip.innerHTML = `<div class="cita-chip">
-  <div class="cita-chip-info">
-    <div class="cita-chip-dia">${diaAbrev} ${diaNum}</div>
-    <div class="cita-chip-detalle">
-      <strong>${h.especialistaSeleccionado}</strong>
-      <span>${h.horaIni} - ${h.horaFin}</span>
-    </div>
-  </div>
-   <div class="cita-chip-buttons">
-    <button class="btn-editar-horario${idxEditando === idx ? ' btn-editando' : ''}" id="btnEditarHorario" data-idx="${idx}">
-    
-    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="9px"
-	     height="8.99px" viewBox="0 0 9 8.99" style="overflow:visible;enable-background:new 0 0 9 8.99;" xml:space="preserve">
-    <style type="text/css">
-	    .st05{fill:#76869E;}
-    </style>
-    <defs>
-    </defs>
-    <g>
-	<path class="st05" d="M8.72,1.86L7.13,0.27c-0.37-0.37-0.97-0.37-1.34,0l-5.22,5.2C0.51,5.55,0.51,5.62,0.5,5.63L0,8.67
-		c-0.01,0.08,0.01,0.18,0.08,0.24C0.14,8.98,0.24,9,0.33,8.99L3.36,8.5c0.01,0,0.08-0.01,0.15-0.08l5.2-5.22
-		C9.1,2.83,9.1,2.23,8.72,1.86z M3.32,7.81L2.45,6.94l3.68-3.68L7,4.13L3.32,7.81z M2.04,6.54C2.01,6.52,1.11,5.62,1.17,5.67
-		l3.68-3.68l0.87,0.87L2.04,6.54z M0.62,8.37l0.34-2.11l1.76,1.76L0.62,8.37z M8.33,2.8L7.4,3.73L5.26,1.6l0.93-0.93
-		c0.14-0.14,0.39-0.14,0.55,0l1.59,1.59C8.48,2.41,8.48,2.65,8.33,2.8z"/>
-</g>
-</svg>
-    
-    </button>
-    <button class="btn-eliminar" onclick='eliminarHorario(${idx})'><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="7.87px" height="9px" viewBox="0 0 7.87 9" style="overflow: visible; enable-background: new 0 0 7.87 9" xml:space="preserve">
-    <style type="text/css">
-      .st007 {
-        fill: #76869e;
-      }
-    </style>
-    <defs></defs>
-    <g>
-      <g>
-        <path class="st007" d="M7.32,2.25H0.57c-0.08,0-0.15,0.03-0.2,0.09C0.31,2.39,0.28,2.47,0.29,2.54L0.54,8.2C0.56,8.65,0.93,9,1.38,9
-			H6.5c0.45,0,0.82-0.35,0.84-0.8L7.6,2.54c0-0.08-0.02-0.15-0.08-0.21C7.47,2.28,7.4,2.25,7.32,2.25L7.32,2.25z M6.78,8.17
-			C6.78,8.32,6.65,8.44,6.5,8.44H1.38c-0.15,0-0.27-0.12-0.28-0.27L0.86,2.81h6.16L6.78,8.17z"></path>
-        <path class="st007" d="M2.46,7.32c0,0,0.01,0,0.01,0c0.16-0.01,0.28-0.14,0.27-0.29L2.61,3.93C2.6,3.78,2.47,3.66,2.32,3.66
-			C2.16,3.67,2.04,3.8,2.05,3.96l0.13,3.09C2.19,7.2,2.31,7.32,2.46,7.32L2.46,7.32z"></path>
-        <path class="st007" d="M5.41,7.32c0,0,0.01,0,0.01,0c0.15,0,0.27-0.12,0.28-0.27l0.13-3.09C5.84,3.8,5.72,3.67,5.57,3.66
-			C5.42,3.66,5.28,3.78,5.28,3.93L5.14,7.03C5.14,7.18,5.26,7.31,5.41,7.32L5.41,7.32z"></path>
-        <path class="st007" d="M7.59,1.12H5.91V0.84C5.91,0.38,5.53,0,5.06,0H2.81C2.35,0,1.97,0.38,1.97,0.84v0.28l-1.69,0
-			c-0.12,0-0.23,0.08-0.27,0.19C-0.05,1.51,0.1,1.69,0.28,1.69h1.97h3.38l1.97,0c0.12,0,0.23-0.08,0.27-0.19
-			C7.92,1.3,7.78,1.12,7.59,1.12z M2.53,1.12V0.84c0-0.16,0.13-0.28,0.28-0.28h2.25c0.16,0,0.28,0.13,0.28,0.28v0.28H2.53z"></path>
-        <path class="st007" d="M4.22,7.03V3.95c0-0.14-0.11-0.27-0.25-0.29C3.8,3.65,3.66,3.78,3.66,3.94v3.09c0,0.17,0.14,0.3,0.31,0.28
-			C4.11,7.3,4.22,7.18,4.22,7.03z"></path>
-      </g>
-    </g>
-  </svg></button>
-  </div>
-</div>`;
+            const chip = crearCitaChip(h, idx, idxEditando === idx);
             cont.appendChild(chip);
         });
         // Mostrar/ocultar mensaje y body según cantidad de horarios
@@ -611,6 +566,37 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('modalReprogramaciones').style.display = '';
             }
         }
+        if (e.target.closest('.cita-content')) {
+            reprogramandoState = true;
+            const cita = e.target.closest('.cita-content');
+            const citaId = cita.dataset.id;
+            const citaEspecialista = cita.dataset.especialista;
+            const citaFecha = cita.dataset.fecha;
+            const citaHoraInicio = cita.dataset.horainicio;
+            const citaHoraFin = cita.dataset.horafin;
+            const citaServicio = cita.dataset.servicio;
+            const citaArea = cita.dataset.area;
+            const citaSubarea = cita.dataset.subarea;
+            const citaEstado = cita.dataset.estado;
+            const citaEspecialistaNombres = cita.querySelector('.cita-chip-detalle strong').textContent;
+
+            calendar.gotoDate(new Date(citaFecha));
+            horarioReprogramando = {
+                idcita: citaId,
+                fecha: citaFecha,
+                horaInicioRaw: citaHoraInicio,
+                horaFinRaw: citaHoraFin,
+                horaIni: formatearHora12h(citaHoraInicio),
+                horaFin: formatearHora12h(citaHoraFin),
+                idespecialista: citaEspecialista,
+                idservicio: citaServicio,
+                idarea: citaArea,
+                idsubarea: citaSubarea,
+                idestado: citaEstado,
+                especialistaSeleccionado: citaEspecialistaNombres,
+            };
+            actualizarHorarioReprogramando(true);
+        }
     });
 
     function agendarCita(idestado) {
@@ -646,6 +632,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     renderHorariosSeleccionados();
                     refrescarCitas();
                     actualizarEventosVisuales();
+                    mostrarMensajeFlotante("Cita agendada exitosamente", true);
                 } else {
                     mostrarMensajeFlotante('Error al agendar la cita: ' + response.error + '\n' + response.message);
                 }
@@ -655,6 +642,42 @@ document.addEventListener('DOMContentLoaded', function () {
                     mostrarMensajeFlotante('Error al agendar cita: ' + xhr.responseText);
                 });
         });
+    }
+
+    function reprogramarCita() {
+        const idUsuario = document.getElementById('idUsuario').value;
+        const idPaciente = document.getElementById('pacienteCita')?.dataset.id;
+
+        const data = {
+            idcita: horarioReprogramando.idcita,
+            idregistrador: idUsuario,
+            idpaciente: idPaciente,
+            idespecialista: horarioReprogramando.idespecialista,
+            hora_inicio: horarioReprogramando.horaInicioRaw,
+            hora_fin: horarioReprogramando.horaFinRaw,
+            fecha: horarioReprogramando.fecha,
+            idestado: horarioReprogramando.idestado,
+            idservicio: horarioReprogramando.idservicio,
+            idarea: horarioReprogramando.idarea,
+            idsubarea: horarioReprogramando.idsubarea
+        };
+
+        // Enviar los datos con $.post
+        $.post(baseurl + 'controllers/Citas/CitasController.php?action=update', { data: JSON.stringify(data) }, function (response) {
+            if (response.success) {
+                reprogramandoState = false;
+                horariosSeleccionados = [];
+                obtenerCitasPaciente(idPaciente);
+                cal.removeEvents('reprogramacion');
+                mostrarMensajeFlotante("Cita reprogramada exitosamente", true);
+            } else {
+                mostrarMensajeFlotante('Error al reprogramar la cita: ' + response.error + '\n' + response.message);
+            }
+        }, 'json')
+            .fail(function (xhr, status, error) {
+                console.log(error, xhr.responseText);
+                mostrarMensajeFlotante('Error al agendar cita');
+            });
     }
 
     $(document).on('click', '.btn-cancelar', function () {
@@ -740,10 +763,25 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    function actualizarHorarioReprogramando(preview = false) {
+        cal.removeEvents("reprogramacion");
+        cal.removeEvents('seleccionado');
+        cal.removeEvents('cita-existente');
+
+        calendar.addEvent({
+            title: `<span class="fc-slot-horario">${horarioReprogramando.horaIni} - ${horarioReprogramando.horaFin}</span>`,
+            start: `${horarioReprogramando.fecha}T${horarioReprogramando.horaInicioRaw}`,
+            end: `${horarioReprogramando.fecha}T${horarioReprogramando.horaFinRaw}`,
+            display: 'background',
+            classNames: ['fc-slot-custom-content', 'horario-seleccionado'],
+            extendedProps: { tipo: 'reprogramacion', preview }
+        });
+    }
+
     // ——— 2) actualizarEventosVisuales: usa horaInicioRaw / horaFinRaw ———
     function actualizarEventosVisuales(render = true) {
         // 1) Limpia sólo los eventos del tipo 'seleccionado'
-        cal.removeEvents('seleccionado');
+        cal.removeEvents('reprogramacion');
         if (!render) return;
 
         // 2) Añade cada bloque con su horaInicioRaw/horaFinRaw exacta
@@ -763,21 +801,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function refrescarCitas(idservicio, idespecialista, idarea, idsubarea) {
         // 2) Llamar con los cuatro parámetros en orden
-        api.obtenerCitas({
-            idservicio: (idespecialista || selectedespecialista ? null : idservicio ?? selectedservicio),
-            idespecialista: idespecialista ?? selectedespecialista,
-            idarea: (idespecialista || selectedespecialista ? null : idarea ?? selectedarea),
-            idsubarea: (idespecialista || selectedespecialista ? null : idsubarea ?? selectedsubarea)
-        })
-            .then(function (citas) {
-                events = procesarYMostrarCitas(cal, citas, selectedespecialista);
-                events.forEach(event => calendar.addEvent(event));
-                citasActuales = citas;
+        if (!reprogramandoState) {
+            api.obtenerCitas({
+                idservicio: (idespecialista || selectedespecialista ? null : idservicio ?? selectedservicio),
+                idespecialista: idespecialista ?? selectedespecialista,
+                idarea: (idespecialista || selectedespecialista ? null : idarea ?? selectedarea),
+                idsubarea: (idespecialista || selectedespecialista ? null : idsubarea ?? selectedsubarea)
             })
-            .catch((e) => {
-                console.log(e);
-                mostrarMensajeFlotante("Error al cargar citas");
-            });
+                .then(function (citas) {
+                    events = procesarYMostrarCitas(cal, citas, selectedespecialista);
+                    events.forEach(event => calendar.addEvent(event));
+                    citasActuales = citas;
+                })
+                .catch((e) => {
+                    console.log(e);
+                    mostrarMensajeFlotante("Error al cargar citas");
+                });
+        }
     }
 
     function obtenerIntervalos(calendar) {

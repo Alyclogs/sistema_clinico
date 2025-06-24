@@ -164,7 +164,7 @@ $idusuario = $_SESSION['idusuario'];
                                 </div>
                                 <input type="hidden" id="idUsuario" value=<?php echo $idusuario ?> />
                                 <div id="modalNuevaCita">
-                                    <div id="subCitasSeleccionadas" class="subtitulo" style="display: none;">CITAS SELECCIONADAS</div>
+                                    <div id="subCitasSeleccionadas" class="subtitulo">CITAS SELECCIONADAS</div>
                                     <div class="no-horarios-selected">No se han seleccionado citas.
                                         Seleccione sus citas en la agenda</div>
                                     <div class="modal-cita-body">
@@ -239,7 +239,8 @@ $idusuario = $_SESSION['idusuario'];
                                     </div>
                                 </div>
                                 <div id="modalReprogramaciones" style="display: none;">
-                                    <div class="citas-container"></div>
+                                    <div id="subCitasPaciente" class="subtitulo">CITAS DEL PACIENTE</div>
+                                    <div class="citas-container">Aquí se listarán las citas del paciente</div>
                                 </div>
                             </div>
                         </div>

@@ -114,6 +114,7 @@ class CitasModel
         u.apellidos AS especialista_apellidos,
         u.foto AS especialista_foto,
         a.area AS cita_area,
+        sa.subarea AS cita_subarea,
         s.servicio AS servicio,
         rp.idresumen AS resumen_id
         FROM citas c
@@ -121,6 +122,7 @@ class CitasModel
         INNER JOIN especialistas e ON c.idespecialista = e.idespecialista
         INNER JOIN usuarios u ON e.idespecialista = u.idusuario
         INNER JOIN areas a ON c.idarea = a.idarea
+        LEFT JOIN subareas sa ON c.idsubarea = sa.idsubarea
         INNER JOIN servicios s ON c.idservicio = s.idservicio
         LEFT JOIN resumenes_pacientes rp ON rp.idcita = c.idcita
         WHERE c.idpaciente = :idpaciente

@@ -5,7 +5,6 @@ import { mostrarMensajeFlotante } from '../utils/utils.js';
 const baseurl = "http://localhost/SistemaClinico/";
 let selectedcita = '';
 let ultimacitaId = '';
-let ultimoresumenId = '';
 let selectedresumen = '';
 let lastSelectedCita = '';
 let lastSelectedResumen = '';

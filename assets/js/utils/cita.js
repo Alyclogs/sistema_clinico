@@ -215,12 +215,7 @@ export async function obtenerCitasPaciente(idpaciente) {
         if (citas.length == 0) return;
 
         citas.forEach(cita => {
-            const citaElement = crearCitaContainer(cita);
-            if (cita.asistio == true) {
-                citaElement.classList.add('cita-asistio');
-            } else if (cita.asistio == false) {
-                citaElement.classList.add('cita-no-asistio');
-            }
+            const citaElement = crearCitaContainer2(cita);
             citasContainer.appendChild(citaElement);
         });
         //procesarYMostrarCitas(cal, citas, idespecialista);
@@ -251,6 +246,34 @@ export function crearCitaContainer(cita) {
     <div class="cita-estado">
         ${getSVGCita(asistio, 'big')}
     </div></div></div></div>`;
+    return citaElement;
+}
+
+export function crearCitaContainer2(cita) {
+    const estado = `cita-${estadosCita[cita.idestado]}`;
+    const citaElement = document.createElement('div');
+    citaElement.className = 'cita-container';
+
+    const contenido = `
+        <div class="cita-content ${estado}"
+        data-id="${cita.idcita}"
+        data-paciente="${cita.paciente_id}"
+        data-especialista="${cita.idespecialista}"
+        data-fecha="${cita.fecha}"
+        data-horainicio="${cita.hora_inicio}"
+        data-horafin="${cita.hora_fin}"
+        data-servicio="${cita.idservicio}"
+        data-estado="${cita.idestado}"
+        data-area="${cita.idarea}"
+        data-subarea="${cita.idsubarea}"
+        data-estado = "${cita.idestado}">
+        <div class="cita-chip">
+            ${crearCitaChipInfo(cita.fecha, `${cita.especialista_nombres} ${cita.especialista_apellidos}`, formatearHora12h(cita.hora_inicio), formatearHora12h(cita.hora_fin))}
+            <button id="btnReprogramarCita" class="btn btn-sm btn-danger rounded-circle"><i class="bi bi-box-arrow-in-down-left" style="color: white;"></i></button>
+        </div></div>
+    `;
+
+    citaElement.innerHTML = contenido.trim();
     return citaElement;
 }
 
@@ -287,11 +310,87 @@ function buildBotones(cita) {
     return botonesAsistio;
 }
 
+export function crearCitaChip(h, idx, editando) {
+    const chip = document.createElement('div');
+    chip.className = 'horario-chip';
+    chip.dataset.idx = idx;
+
+    const chipHTML = `
+        <div class="cita-chip">
+            ${crearCitaChipInfo(h.fecha, h.especialistaSeleccionado, h.horaIni, h.horaFin)}
+            <div class="cita-chip-buttons">
+                <button class="btn-editar-horario${editando ? ' btn-editando' : ''}" id="btnEditarHorario" data-idx="${idx}">
+                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="9px"
+	     height="8.99px" viewBox="0 0 9 8.99" style="overflow:visible;enable-background:new 0 0 9 8.99;" xml:space="preserve">
+    <style type="text/css">
+	    .st05{fill:#76869E;}
+    </style>
+    <defs>
+    </defs>
+    <g>
+	<path class="st05" d="M8.72,1.86L7.13,0.27c-0.37-0.37-0.97-0.37-1.34,0l-5.22,5.2C0.51,5.55,0.51,5.62,0.5,5.63L0,8.67
+		c-0.01,0.08,0.01,0.18,0.08,0.24C0.14,8.98,0.24,9,0.33,8.99L3.36,8.5c0.01,0,0.08-0.01,0.15-0.08l5.2-5.22
+		C9.1,2.83,9.1,2.23,8.72,1.86z M3.32,7.81L2.45,6.94l3.68-3.68L7,4.13L3.32,7.81z M2.04,6.54C2.01,6.52,1.11,5.62,1.17,5.67
+		l3.68-3.68l0.87,0.87L2.04,6.54z M0.62,8.37l0.34-2.11l1.76,1.76L0.62,8.37z M8.33,2.8L7.4,3.73L5.26,1.6l0.93-0.93
+		c0.14-0.14,0.39-0.14,0.55,0l1.59,1.59C8.48,2.41,8.48,2.65,8.33,2.8z"/>
+</g>
+</svg>
+                </button>
+                <button class="btn-eliminar" onclick='eliminarHorario(${idx})'>
+                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="7.87px" height="9px" viewBox="0 0 7.87 9" style="overflow: visible; enable-background: new 0 0 7.87 9" xml:space="preserve">
+    <style type="text/css">
+      .st007 {
+        fill: #76869e;
+      }
+    </style>
+    <defs></defs>
+    <g>
+      <g>
+        <path class="st007" d="M7.32,2.25H0.57c-0.08,0-0.15,0.03-0.2,0.09C0.31,2.39,0.28,2.47,0.29,2.54L0.54,8.2C0.56,8.65,0.93,9,1.38,9
+			H6.5c0.45,0,0.82-0.35,0.84-0.8L7.6,2.54c0-0.08-0.02-0.15-0.08-0.21C7.47,2.28,7.4,2.25,7.32,2.25L7.32,2.25z M6.78,8.17
+			C6.78,8.32,6.65,8.44,6.5,8.44H1.38c-0.15,0-0.27-0.12-0.28-0.27L0.86,2.81h6.16L6.78,8.17z"></path>
+        <path class="st007" d="M2.46,7.32c0,0,0.01,0,0.01,0c0.16-0.01,0.28-0.14,0.27-0.29L2.61,3.93C2.6,3.78,2.47,3.66,2.32,3.66
+			C2.16,3.67,2.04,3.8,2.05,3.96l0.13,3.09C2.19,7.2,2.31,7.32,2.46,7.32L2.46,7.32z"></path>
+        <path class="st007" d="M5.41,7.32c0,0,0.01,0,0.01,0c0.15,0,0.27-0.12,0.28-0.27l0.13-3.09C5.84,3.8,5.72,3.67,5.57,3.66
+			C5.42,3.66,5.28,3.78,5.28,3.93L5.14,7.03C5.14,7.18,5.26,7.31,5.41,7.32L5.41,7.32z"></path>
+        <path class="st007" d="M7.59,1.12H5.91V0.84C5.91,0.38,5.53,0,5.06,0H2.81C2.35,0,1.97,0.38,1.97,0.84v0.28l-1.69,0
+			c-0.12,0-0.23,0.08-0.27,0.19C-0.05,1.51,0.1,1.69,0.28,1.69h1.97h3.38l1.97,0c0.12,0,0.23-0.08,0.27-0.19
+			C7.92,1.3,7.78,1.12,7.59,1.12z M2.53,1.12V0.84c0-0.16,0.13-0.28,0.28-0.28h2.25c0.16,0,0.28,0.13,0.28,0.28v0.28H2.53z"></path>
+        <path class="st007" d="M4.22,7.03V3.95c0-0.14-0.11-0.27-0.25-0.29C3.8,3.65,3.66,3.78,3.66,3.94v3.09c0,0.17,0.14,0.3,0.31,0.28
+			C4.11,7.3,4.22,7.18,4.22,7.03z"></path>
+      </g>
+    </g>
+  </svg>
+                </button>
+            </div>
+        </div>
+    `;
+
+    chip.innerHTML = chipHTML;
+    return chip;
+}
+
+function crearCitaChipInfo(fecha, especialista, horaIni, horaFin) {
+    const diasAbrev = ["DOM", "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB"];
+    // Día abreviado y número
+    const fechaObj = new Date(fecha + "T00:00:00");
+    const diaAbrev = diasAbrev[fechaObj.getDay()];
+    const diaNum = fechaObj.getDate();
+    return `
+  <div class="cita-chip-info">
+    <div class="cita-chip-dia">${diaAbrev} ${diaNum}</div>
+    <div class="cita-chip-detalle">
+      <strong>${especialista}</strong>
+      <span>${horaIni} - ${horaFin}</span>
+    </div>
+  </div>`;
+}
+
 function getSVGPendiente(size = "small") {
     if (size === "small") return `
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="11.15px"
-     height="11.15px" viewBox="0 0 11.15 11.15" style="overflow:visible;enable-background:new 0 0 11.15 11.15;"
-     xml:space="preserve">
+        <svg version = "1.1" xmlns = "http://www.w3.org/2000/svg" xmlns: xlink = "http://www.w3.org/1999/xlink" x = "0px" y = "0px" width = "11.15px"
+    height = "11.15px" viewBox = "0 0 11.15 11.15" style = "overflow:visible;enable-background:new 0 0 11.15 11.15;"
+    xml: space = "preserve" >
 <style type="text/css">
     .st010{fill-rule:evenodd;clip-rule:evenodd;fill:#F07E0B;}
     .st011{fill:#FFFFFF;}
@@ -307,9 +406,9 @@ function getSVGPendiente(size = "small") {
         C8.04,8.3,7.93,8.35,7.82,8.34z"/>
 </g>
 </svg>
-`;
+        `;
 
-    else return `<svg id="agenda_especialista" data-name="agenda especialista" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21.88 21.88" style="width: 20px; height: 20px;">
+    else return `<svg id = "agenda_especialista" data - name="agenda especialista" xmlns = "http://www.w3.org/2000/svg" viewBox = "0 0 21.88 21.88" style = "width: 20px; height: 20px;" >
   <defs>
     <style>
       .cls-01 {
@@ -324,13 +423,13 @@ function getSVGPendiente(size = "small") {
   </defs>
   <path class="cls-02" d="M10.94,0c6.04,0,10.94,4.9,10.94,10.94s-4.9,10.94-10.94,10.94S0,16.98,0,10.94,4.9,0,10.94,0"/>
   <path class="cls-01" d="M15.34,16.37c-.22,0-.44-.09-.59-.24l-4.6-4.6c-.16-.16-.24-.37-.24-.59v-6.69c0-.46.37-.84.84-.84s.84.37.84.84v6.35l4.36,4.35c.33.33.33.85,0,1.18,0,0,0,0,0,0-.16.16-.37.24-.59.24Z"/>
-</svg>`
+</svg> `
 }
 
 function getSVGAnulado(size = 'small') {
     if (size === "small") return `
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="11.15px"
-     height="11.15px" viewBox="0 0 11.15 11.15" style="overflow:visible;enable-background:new 0 0 11.15 11.15;" xml:space="preserve">
+        <svg version = "1.1" xmlns = "http://www.w3.org/2000/svg" xmlns: xlink = "http://www.w3.org/1999/xlink" x = "0px" y = "0px" width = "11.15px"
+    height = "11.15px" viewBox = "0 0 11.15 11.15" style = "overflow:visible;enable-background:new 0 0 11.15 11.15;" xml: space = "preserve" >
 <style type="text/css">
     .st012{fill:none;stroke:#E5252A;stroke-linecap:round;stroke-miterlimit:10;}
 </style>
@@ -349,10 +448,10 @@ function getSVGAnulado(size = 'small') {
     </g>
 </g>
 </svg>
-`;
+        `;
 
     return `
-<svg id="AGENDA" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 11 11" style="width: 20px; height: 20px;">
+        <svg id = "AGENDA" xmlns = "http://www.w3.org/2000/svg" viewBox = "0 0 11 11" style = "width: 20px; height: 20px;" >
   <defs>
     <style>
       .cls-1 {
@@ -372,14 +471,14 @@ function getSVGAnulado(size = 'small') {
   <g id="g335">
     <path id="path337" class="cls-1" d="M6.8,6.8l-2.61-2.61"/>
   </g>
-</svg>`;
+</svg> `;
 }
 
 const getSVGcancelado = (size = "small") => {
     if (size === "small") return `
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="11.15px"
-     height="11.15px" viewBox="0 0 11.15 11.15" style="overflow:visible;enable-background:new 0 0 11.15 11.15;"
-     xml:space="preserve">
+        <svg version = "1.1" xmlns = "http://www.w3.org/2000/svg" xmlns: xlink = "http://www.w3.org/1999/xlink" x = "0px" y = "0px" width = "11.15px"
+    height = "11.15px" viewBox = "0 0 11.15 11.15" style = "overflow:visible;enable-background:new 0 0 11.15 11.15;"
+    xml: space = "preserve" >
 <style type="text/css">
     .st013{fill-rule:evenodd;clip-rule:evenodd;fill:#48B02C;}
     .st014{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
@@ -393,9 +492,9 @@ const getSVGcancelado = (size = "small") => {
         L3.81,8.29z"/>
 </g>
 </svg>
-`;
+        `;
     else return `
-<svg id="agenda_especialista" data-name="agenda especialista" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21.15 21.15" style="width: 20px; height: 20px;">
+        <svg id = "agenda_especialista" data - name="agenda especialista" xmlns = "http://www.w3.org/2000/svg" viewBox = "0 0 21.15 21.15" style = "width: 20px; height: 20px;" >
   <defs>
     <style>
       .cls-11 {
@@ -414,7 +513,7 @@ const getSVGcancelado = (size = "small") => {
   <path class="cls-11" d="M10.57,0c5.84,0,10.57,4.73,10.57,10.57s-4.73,10.57-10.57,10.57S0,16.41,0,10.57,4.73,0,10.57,0"/>
   <path class="cls-12" d="M7.23,15.73l-3.84-4.11c-.42-.45-.54-1.12-.24-1.65.49-.89,1.65-.98,2.28-.3l2.98,3.19,4.72-4.41s.09-.08.13-.11l2.19-2.05c.45-.42,1.12-.54,1.65-.24.89.49.98,1.65.3,2.28l-6.78,6.34h0s-2.35,2.18-2.35,2.18l-1.04-1.11Z"/>
 </svg>
-`;
+        `;
 }
 
 export const getSVGCita = (estado, size = 'small') => {
@@ -441,19 +540,19 @@ export function ocultarTooltip() {
 export function mostrarTooltipCita(cita, targetElement) {
     ocultarTooltip();
 
-    const pacienteNombre = `${cita.paciente_nombres} ${cita.paciente_apellidos}`;
+    const pacienteNombre = `${cita.paciente_nombres} ${cita.paciente_apellidos} `;
     const fechaNacimiento = cita.paciente_fecha_nacimiento;
     const edad = calcularEdad(fechaNacimiento);
-    const especialista = `${cita.especialista_nombre} ${cita.especialista_apellidos ?? ''}`;
-    const horario = `${formatearHora12h(cita.hora_inicio)} - ${formatearHora12h(cita.hora_fin)}`;
+    const especialista = `${cita.especialista_nombre} ${cita.especialista_apellidos ?? ''} `;
+    const horario = `${formatearHora12h(cita.hora_inicio)} - ${formatearHora12h(cita.hora_fin)} `;
     //const color = stringToColor(pacienteNombre);
     //const iniciales = getInitials(cita.paciente_nombres, cita.paciente_apellidos);
-    const svgEstado = getSVGCita(`cita-${estadosCita[cita.idestado]}`);
+    const svgEstado = getSVGCita(`cita - ${estadosCita[cita.idestado]} `);
 
     const tooltip = document.createElement('div');
     tooltip.className = 'custom-tooltip-cita';
     tooltip.innerHTML = `
-    <div class="mytooltip">
+        <div div class="mytooltip" >
     <div class="tooltip-content">
         <div class="tooltip-header">
             <img class="avatar-iniciales" src="${cita.paciente_foto}">
@@ -471,13 +570,13 @@ ${horario}</div>
         </div>
         </div>
         <button class="btn btn-light btn-ver-cita" onclick="window.location.href='${baseurl}views/Doctor/pacientes/pacienteDetalles.php?idpaciente=${cita.paciente_id}'">Ver cita</button>
-        </div>`;
+        </div > `;
 
     document.body.appendChild(tooltip);
 
     const rect = targetElement.getBoundingClientRect();
-    tooltip.style.top = `${rect.top + window.scrollY - tooltip.offsetHeight - 10}px`;
-    tooltip.style.left = `${rect.left + window.scrollX}px`;
+    tooltip.style.top = `${rect.top + window.scrollY - tooltip.offsetHeight - 10} px`;
+    tooltip.style.left = `${rect.left + window.scrollX} px`;
 
     targetElement._tooltip = tooltip;
 
@@ -501,7 +600,7 @@ function crearStackAvatares(citas, maxVisible = 4) {
     if (extraCount > 0) {
         const extra = document.createElement('div');
         extra.className = 'avatar extra';
-        extra.textContent = `+${extraCount}`;
+        extra.textContent = `+ ${extraCount} `;
         stack.appendChild(extra);
     }
     return stack;

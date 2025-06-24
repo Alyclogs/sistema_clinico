@@ -436,6 +436,7 @@ body {
   padding: 12px 0px;
   font-size: 14px;
   gap: 12px;
+  width: 100%;
 }
 
 .cita-chip-info {
@@ -1022,6 +1023,11 @@ a.fc-event.fc-slot-custom-content.multiples-citas-evento {
   font-weight: bold;
 }
 
+.citas-container {
+  max-height: 560px;
+  overflow-y: auto;
+}
+
 .cita-container.cita-asistio .cita-content {
   background-color: #48b02c10;
 }
@@ -1031,7 +1037,7 @@ a.fc-event.fc-slot-custom-content.multiples-citas-evento {
 }
 
 .cita-content.cita-cancelado {
-  border-left: 10px solid #48B02C;
+  border-left: 10px solid #48b02c;
 }
 
 .cita-content.cita-pendiente {

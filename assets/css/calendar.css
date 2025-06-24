@@ -350,14 +350,13 @@ body {
 }
 
 .modal-cita-header h2:hover {
-  font-weight: 700;
-  font-size: 20px;
-  margin-bottom: 24px;
   color: #e55a00;
   border-bottom: 1px solid #e55a00;
-  padding-bottom: 8px;
-  width: max-content;
-  cursor: pointer;
+}
+
+.modal-cita-header h2.active {
+  color: #e55a00;
+  border-bottom: 1px solid #e55a00;
 }
 
 .busqueda-paciente {
@@ -431,7 +430,6 @@ body {
 
 .cita-chip {
   display: flex;
-  align-items: center;
   justify-content: space-between;
   padding: 12px 0px;
   font-size: 14px;
@@ -447,13 +445,12 @@ body {
 }
 
 .cita-chip-dia {
-  background-color: transparent;
-  color: #76869e;
+  background-color: #76869e;
+  color: #fff;
   border-radius: 8px;
   padding: 12px 8px;
   font-weight: 600;
   font-size: 13px;
-  border: 1px solid #76869e;
   text-align: center;
   min-width: 50px;
 }

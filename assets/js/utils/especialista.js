@@ -1,22 +1,26 @@
 
 import api from './api.js';
-import { dayAfter, dateStrToDate, dateToDateStr, dayBefore, horaAHoraMinutos } from './date.js';
+import { dateStrToDate, dateToDateStr, recortarSegmento, horaAHoraMinutos } from './date.js';
 import { mostrarMensajeFlotante } from './utils.js';
 
 let disponibilidadEspecialista = [];
 
 // 1. Carga y normalización de la disponibilidad
-export function actualizarDisponibilidadEspecialista(calendar, idespecialista) {
+export function actualizarDisponibilidadEspecialista(calendar, idespecialista, clean = false) {
+    if (clean) {
+        actualizarBusinessHours(calendar, true);
+        disponibilidadEspecialista = [];
+        return;
+    }
     return api.obtenerDisponibilidadEspecialista(idespecialista)
         .then(data => {
-            console.log(idespecialista, data);
             disponibilidadEspecialista = data.map(d => ({
                 ...d,
                 es_excepcion: d.es_excepcion === '1',
                 estado: d.estado ? d.estado.trim().toLowerCase() : null,
                 dia: d.dia.toLowerCase()
             }));
-            actualizarBusinessHours(calendar);
+            actualizarBusinessHours(calendar, clean);
             if (!disponibilidadEspecialista.length) {
                 mostrarMensajeFlotante("Especialista sin disponibilidad");
             }
@@ -24,7 +28,11 @@ export function actualizarDisponibilidadEspecialista(calendar, idespecialista) {
         });
 }
 
-export function actualizarBusinessHours(calendar) {
+export function actualizarBusinessHours(calendar, clean = false) {
+    if (clean) {
+        calendar.setOption('businessHours', []);
+        return;
+    }
     const diasMap = {
         domingo: 0, lunes: 1, martes: 2, miércoles: 3,
         jueves: 4, viernes: 5, sábado: 6
@@ -89,22 +97,6 @@ export function actualizarBusinessHours(calendar) {
         endTime: '00:00'
     });
     resaltarBloqueoAlmuerzo(calendar);
-}
-
-// Función helper para recortar un segmento {start,end} con un intervalo [a,b]
-export function recortarSegmento(seg, a, b) {
-    if (seg.end < a || seg.start > b) {
-        // no solapan
-        return [seg];
-    }
-    const out = [];
-    if (seg.start < a) {
-        out.push({ start: seg.start, end: dayBefore(a) });
-    }
-    if (seg.end > b) {
-        out.push({ start: dayAfter(b), end: seg.end });
-    }
-    return out;
 }
 
 export function calcularDisponibilidadPorEspecialista(disponibilidades, citas) {

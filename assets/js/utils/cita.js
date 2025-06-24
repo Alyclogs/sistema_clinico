@@ -12,7 +12,7 @@ export function procesarYMostrarCitas(calendar, citas, idespecialista = '') {
     const citasAgrupadas = agruparCitasPorHorario(citas);
 
     // 3) Añadir citas segun vista
-    if (idespecialista === '') {
+    if (!idespecialista || idespecialista === '') {
         // 1) Añadir citas agrupadas
         Object.values(citasAgrupadas).forEach((grupo) => {
             if (grupo.length === 1) {
@@ -268,8 +268,8 @@ export function crearCitaContainer2(cita) {
         data-subarea="${cita.idsubarea}"
         data-estado = "${cita.idestado}">
         <div class="cita-chip">
-            ${crearCitaChipInfo(cita.fecha, `${cita.especialista_nombres} ${cita.especialista_apellidos}`, formatearHora12h(cita.hora_inicio), formatearHora12h(cita.hora_fin))}
-            <button id="btnReprogramarCita" class="btn btn-sm btn-danger rounded-circle"><i class="bi bi-box-arrow-in-down-left" style="color: white;"></i></button>
+            ${crearCitaChipInfo(cita.fecha, `${cita.especialista_nombres} ${cita.especialista_apellidos}`, cita.hora_inicio, cita.hora_fin)}
+            ${crearCitaChipButtons(null, { id: "btnReprogramarCita" }, { id: "btnEliminarCita" })}
         </div></div>
     `;
 
@@ -310,59 +310,15 @@ function buildBotones(cita) {
     return botonesAsistio;
 }
 
-export function crearCitaChip(h, idx, editando) {
+export function crearCitaChip(h, idx, btnEditar, btnEliminar) {
     const chip = document.createElement('div');
     chip.className = 'horario-chip';
     chip.dataset.idx = idx;
 
     const chipHTML = `
         <div class="cita-chip">
-            ${crearCitaChipInfo(h.fecha, h.especialistaSeleccionado, h.horaIni, h.horaFin)}
-            <div class="cita-chip-buttons">
-                <button class="btn-editar-horario${editando ? ' btn-editando' : ''}" id="btnEditarHorario" data-idx="${idx}">
-                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="9px"
-	     height="8.99px" viewBox="0 0 9 8.99" style="overflow:visible;enable-background:new 0 0 9 8.99;" xml:space="preserve">
-    <style type="text/css">
-	    .st05{fill:#76869E;}
-    </style>
-    <defs>
-    </defs>
-    <g>
-	<path class="st05" d="M8.72,1.86L7.13,0.27c-0.37-0.37-0.97-0.37-1.34,0l-5.22,5.2C0.51,5.55,0.51,5.62,0.5,5.63L0,8.67
-		c-0.01,0.08,0.01,0.18,0.08,0.24C0.14,8.98,0.24,9,0.33,8.99L3.36,8.5c0.01,0,0.08-0.01,0.15-0.08l5.2-5.22
-		C9.1,2.83,9.1,2.23,8.72,1.86z M3.32,7.81L2.45,6.94l3.68-3.68L7,4.13L3.32,7.81z M2.04,6.54C2.01,6.52,1.11,5.62,1.17,5.67
-		l3.68-3.68l0.87,0.87L2.04,6.54z M0.62,8.37l0.34-2.11l1.76,1.76L0.62,8.37z M8.33,2.8L7.4,3.73L5.26,1.6l0.93-0.93
-		c0.14-0.14,0.39-0.14,0.55,0l1.59,1.59C8.48,2.41,8.48,2.65,8.33,2.8z"/>
-</g>
-</svg>
-                </button>
-                <button class="btn-eliminar" onclick='eliminarHorario(${idx})'>
-                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="7.87px" height="9px" viewBox="0 0 7.87 9" style="overflow: visible; enable-background: new 0 0 7.87 9" xml:space="preserve">
-    <style type="text/css">
-      .st007 {
-        fill: #76869e;
-      }
-    </style>
-    <defs></defs>
-    <g>
-      <g>
-        <path class="st007" d="M7.32,2.25H0.57c-0.08,0-0.15,0.03-0.2,0.09C0.31,2.39,0.28,2.47,0.29,2.54L0.54,8.2C0.56,8.65,0.93,9,1.38,9
-			H6.5c0.45,0,0.82-0.35,0.84-0.8L7.6,2.54c0-0.08-0.02-0.15-0.08-0.21C7.47,2.28,7.4,2.25,7.32,2.25L7.32,2.25z M6.78,8.17
-			C6.78,8.32,6.65,8.44,6.5,8.44H1.38c-0.15,0-0.27-0.12-0.28-0.27L0.86,2.81h6.16L6.78,8.17z"></path>
-        <path class="st007" d="M2.46,7.32c0,0,0.01,0,0.01,0c0.16-0.01,0.28-0.14,0.27-0.29L2.61,3.93C2.6,3.78,2.47,3.66,2.32,3.66
-			C2.16,3.67,2.04,3.8,2.05,3.96l0.13,3.09C2.19,7.2,2.31,7.32,2.46,7.32L2.46,7.32z"></path>
-        <path class="st007" d="M5.41,7.32c0,0,0.01,0,0.01,0c0.15,0,0.27-0.12,0.28-0.27l0.13-3.09C5.84,3.8,5.72,3.67,5.57,3.66
-			C5.42,3.66,5.28,3.78,5.28,3.93L5.14,7.03C5.14,7.18,5.26,7.31,5.41,7.32L5.41,7.32z"></path>
-        <path class="st007" d="M7.59,1.12H5.91V0.84C5.91,0.38,5.53,0,5.06,0H2.81C2.35,0,1.97,0.38,1.97,0.84v0.28l-1.69,0
-			c-0.12,0-0.23,0.08-0.27,0.19C-0.05,1.51,0.1,1.69,0.28,1.69h1.97h3.38l1.97,0c0.12,0,0.23-0.08,0.27-0.19
-			C7.92,1.3,7.78,1.12,7.59,1.12z M2.53,1.12V0.84c0-0.16,0.13-0.28,0.28-0.28h2.25c0.16,0,0.28,0.13,0.28,0.28v0.28H2.53z"></path>
-        <path class="st007" d="M4.22,7.03V3.95c0-0.14-0.11-0.27-0.25-0.29C3.8,3.65,3.66,3.78,3.66,3.94v3.09c0,0.17,0.14,0.3,0.31,0.28
-			C4.11,7.3,4.22,7.18,4.22,7.03z"></path>
-      </g>
-    </g>
-  </svg>
-                </button>
-            </div>
+            ${crearCitaChipInfo(h.fecha, h.especialistaSeleccionado, h.horaInicioRaw, h.horaFinRaw)}
+            ${crearCitaChipButtons(idx, btnEditar, btnEliminar)}
         </div>
     `;
 
@@ -370,7 +326,18 @@ export function crearCitaChip(h, idx, editando) {
     return chip;
 }
 
-function crearCitaChipInfo(fecha, especialista, horaIni, horaFin) {
+export function crearCitaChipButtons(idx, btnEditar, btnEliminar) {
+    return `<div class="cita-chip-buttons">
+                <button class="btn-editar-horario${btnEditar.editando ? ' btn-editando' : ''}" id="${btnEditar.id}" ${idx ? `data-idx="${idx}"` : ''}>
+                    ${getSVGEditar()}
+                </button>
+                <button class="btn-eliminar" id="${btnEliminar.id}" onclick='${btnEliminar.onClick}'>
+                    ${getSVGEliminar()}
+                </button>
+            </div>`;
+}
+
+export function crearCitaChipInfo(fecha, especialista, horaIni, horaFin) {
     const diasAbrev = ["DOM", "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB"];
     // Día abreviado y número
     const fechaObj = new Date(fecha + "T00:00:00");
@@ -381,9 +348,41 @@ function crearCitaChipInfo(fecha, especialista, horaIni, horaFin) {
     <div class="cita-chip-dia">${diaAbrev} ${diaNum}</div>
     <div class="cita-chip-detalle">
       <strong>${especialista}</strong>
-      <span>${horaIni} - ${horaFin}</span>
+      <span>${formatearHora12h(horaIni)} - ${formatearHora12h(horaFin)}</span>
     </div>
   </div>`;
+}
+
+function getSVGEditar() {
+    return `
+<svg id="AGENDA" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 9 8.99" style="width: 12px; height: 12px;">
+  <defs>
+    <style>
+      .cls-18 {
+        fill: #76869e;
+      }
+    </style>
+  </defs>
+  <path class="cls-18" d="M8.72,1.86l-1.59-1.59c-.37-.37-.97-.37-1.34,0L.58,5.48c-.07.07-.07.14-.08.15L0,8.67c-.01.08.01.18.08.24.06.07.15.1.24.08l3.04-.49s.08-.01.15-.08l5.2-5.22c.38-.37.38-.97,0-1.34ZM3.32,7.81l-.87-.87,3.68-3.68.87.87-3.68,3.68ZM2.04,6.54s-.93-.93-.87-.87l3.68-3.68.87.87-3.68,3.68ZM.62,8.37l.34-2.11,1.76,1.76-2.09.35ZM8.33,2.8l-.93.93-2.14-2.14.93-.93c.14-.14.39-.14.55,0l1.59,1.59c.15.15.15.39,0,.55Z"/>
+</svg>`;
+}
+
+function getSVGEliminar() {
+    return `
+<svg id="AGENDA" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7.87 9" style="width: 12px; height: 12px;">
+  <defs>
+    <style>
+      .cls-19 {
+        fill: #76869e;
+      }
+    </style>
+  </defs>
+  <path class="cls-19" d="M7.32,2.25H.57c-.08,0-.15.03-.2.09-.05.06-.08.13-.08.21l.25,5.65c.02.45.39.8.84.8h5.12c.45,0,.82-.35.84-.8l.25-5.65c0-.08-.02-.15-.08-.21s-.13-.09-.2-.09h0ZM6.78,8.17c0,.15-.13.27-.28.27H1.38c-.15,0-.27-.12-.28-.27l-.24-5.36h6.16l-.24,5.36Z"/>
+  <path class="cls-19" d="M2.46,7.32s0,0,.01,0c.16,0,.28-.14.27-.29l-.13-3.09c0-.16-.14-.28-.29-.27-.16,0-.28.14-.27.29l.13,3.09c0,.15.13.27.28.27h0Z"/>
+  <path class="cls-19" d="M5.41,7.32s0,0,.01,0c.15,0,.27-.12.28-.27l.13-3.09c0-.16-.11-.29-.27-.29-.15,0-.29.11-.29.27l-.13,3.09c0,.16.11.29.27.29h0Z"/>
+  <path class="cls-19" d="M7.59,1.12h-1.69v-.28c0-.47-.38-.84-.84-.84h-2.25c-.47,0-.84.38-.84.84v.28H.28c-.12,0-.23.08-.27.19-.06.19.08.37.27.37h7.31c.12,0,.23-.08.27-.19.06-.19-.08-.37-.27-.37ZM2.53,1.12v-.28c0-.16.13-.28.28-.28h2.25c.16,0,.28.13.28.28v.28h-2.81Z"/>
+  <path class="cls-19" d="M4.22,7.03v-3.08c0-.14-.11-.27-.25-.29-.17-.02-.31.11-.31.28v3.09c0,.17.14.3.31.28.14-.02.25-.14.25-.29Z"/>
+</svg>`;
 }
 
 function getSVGPendiente(size = "small") {

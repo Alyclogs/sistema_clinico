@@ -18,6 +18,21 @@ export function sumarMinutos(hora, minutos) {
     return `${nh}:${nm}`;
 }
 
+export function diferenciaEnMinutos(horaInicio, horaFin) {
+    const aMinutos = (hora) => {
+        const partes = hora.split(':').map(Number);
+        const horas = partes[0] || 0;
+        const minutos = partes[1] || 0;
+        const segundos = partes[2] || 0;
+        return horas * 60 + minutos + segundos / 60;
+    };
+
+    const minutosInicio = aMinutos(horaInicio);
+    const minutosFin = aMinutos(horaFin);
+
+    return minutosFin - minutosInicio;
+}
+
 export function horaAHoraMinutos(hora) {
     const [h, m] = hora.split(':').map(Number);
     return h * 60 + m;
@@ -37,6 +52,22 @@ export function calcularEdad(fechaNacStr) {
         edad--;
     }
     return edad;
+}
+
+// Función helper para recortar un segmento {start,end} con un intervalo [a,b]
+export function recortarSegmento(seg, a, b) {
+    if (seg.end < a || seg.start > b) {
+        // no solapan
+        return [seg];
+    }
+    const out = [];
+    if (seg.start < a) {
+        out.push({ start: seg.start, end: dayBefore(a) });
+    }
+    if (seg.end > b) {
+        out.push({ start: dayAfter(b), end: seg.end });
+    }
+    return out;
 }
 
 // Helpers de fechas
